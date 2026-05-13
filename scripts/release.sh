@@ -175,6 +175,14 @@ esac
 cp "$TMP" "$YML"
 log_info "Released $RESOURCE/$ID (status=$STATUS, epic=$EPIC, section=$SECTION)"
 
+# GDI-728: if this session was isolated via worktree.sh, remind the operator
+# to clean it up. We can't know for sure here, but the hint is cheap and
+# easy to ignore when not applicable.
+if [ "$STATUS" = "shipped" ]; then
+  log_info "If this session used a worktree, remove it:"
+  log_info "  ./scripts/worktree.sh remove --repo-path <PRODUCT_REPO_PATH> --epic $EPIC"
+fi
+
 if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
   git_pull_rebase || log_warn "rebase skipped"
   git_commit_and_push "chore(release): $EPIC releases $RESOURCE/$ID as $STATUS" || {

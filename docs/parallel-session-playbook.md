@@ -15,8 +15,16 @@ For products whose SDLC platform profile sets `coordination.enabled: true`
 (UGC Platform is the first such opt-in, shipped 2026-05-13 via GDI-677),
 parallel sessions run automatically against this registry — there is nothing
 manual to do per ticket. The orchestrator's Phase 0.6 (Coordination Pre-flight)
-calls `conflict-check.sh` + `reserve.sh`, and Stage 10 (Close) calls
-`release.sh`. The Section Owner just runs `/sdlc` as usual.
+calls `conflict-check.sh` + `reserve.sh`, Stage 4 (Development) calls
+`worktree.sh add` to isolate the session, and Stage 10 (Close) calls
+`release.sh` + `worktree.sh remove`. The Section Owner just runs `/sdlc` as usual.
+
+**Worktree-per-session (GDI-728).** Resource-level claims (V-numbers, model
+surfaces, file paths) do not protect against same-user, same-clone working-tree
+contamination — branches disappear locally when another session runs
+`git checkout`. Stage 4 of every concurrent session is dispatched into a
+deterministic isolated worktree at `/tmp/aidlc-worktrees/<product>-<epic>`.
+Idempotent: a re-run with the same epic returns the existing path.
 
 ### End-to-end flow
 
@@ -129,13 +137,38 @@ GO
 
 Section A is already the holder; the check is idempotent.
 
-### Step 1.2 — Do the work in the product repo
+### Step 1.2 — Isolate the session in a worktree (GDI-728)
 
-Section A's session now switches to the UGC Platform repo and runs `/sdlc` against
+Before switching to the product repo, create a per-epic worktree so a parallel
+session (Section C in another Tab) cannot stomp on this checkout:
+
+```sh
+$ ./scripts/worktree.sh add \
+    --repo-path ~/Projects/ugc-platform \
+    --epic GDI-720 \
+    --branch feature/GDI-720-catalog-locale-translation
+[INFO]  Fetching origin in ~/Projects/ugc-platform...
+[INFO]  Creating new branch 'feature/GDI-720-catalog-locale-translation' from origin/dev in worktree /tmp/aidlc-worktrees/ugc-platform-GDI-720
+/tmp/aidlc-worktrees/ugc-platform-GDI-720
+
+$ cd /tmp/aidlc-worktrees/ugc-platform-GDI-720
+$ git status
+On branch feature/GDI-720-catalog-locale-translation
+Your branch is up to date with 'origin/dev'.
+nothing to commit, working tree clean
+```
+
+The worktree command is idempotent — re-running it for the same epic
+returns the existing path without recreating anything.
+
+### Step 1.3 — Do the work in the product repo
+
+Section A's session now operates in the worktree at
+`/tmp/aidlc-worktrees/ugc-platform-GDI-720` and runs `/sdlc` against
 GDI-720 (the Jira ticket for FR-A.1.9). The coordination repo is no longer touched
 until ship time.
 
-### Step 1.3 — Ship + release
+### Step 1.4 — Ship + release
 
 When the PR merges and `v0.28.0` is tagged:
 
@@ -153,6 +186,14 @@ $ ./scripts/release.sh --resource file-lock --section A \
     --epic section-A-FR-A.1.9-epic \
     --id services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt \
     --status released
+
+# Clean up the per-epic worktree (GDI-728).
+# Refuses if the worktree is dirty — commit/push first if so.
+$ ./scripts/worktree.sh remove \
+    --repo-path ~/Projects/ugc-platform \
+    --epic GDI-720
+[INFO]  Removing worktree /tmp/aidlc-worktrees/ugc-platform-GDI-720...
+[INFO]  Worktree removed: /tmp/aidlc-worktrees/ugc-platform-GDI-720
 ```
 
 After these run, the FR-A.1.9 anchor is `shipped` and the three blocked consumers

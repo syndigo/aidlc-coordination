@@ -32,11 +32,13 @@ different ticket, or escalate.
 - **`allocations/`** — one YAML per product. The UGC Platform registry (`ugc-platform.yml`)
   is seeded with the current real state as of 2026-05-12.
 - **`schemas/`** — the JSON Schema that validates allocation YAMLs. CI enforces it.
-- **`scripts/`** — three POSIX-bash scripts that read/write the YAML atomically:
+- **`scripts/`** — POSIX-bash scripts that read/write the YAML atomically:
   - `reserve.sh` — claim a shared resource (Flyway version, model registry surface, file lock, release tag)
   - `release.sh` — mark a claim shipped or freed
   - `conflict-check.sh` — read-only check; the right answer for "before I start working"
   - `status.sh` — human-readable dashboard of current holds
+  - `worktree.sh` — create/remove an isolated git worktree for the current session
+    (GDI-728: prevents shared-clone working-tree contamination during concurrent runs)
 - **`personas/`** — four markdown specs describing the roles that interact with the registry
 - **`docs/`** — playbook for running parallel sessions, architecture diagram, ADR log
 
@@ -65,13 +67,26 @@ git clone https://github.com/syndigo/aidlc-coordination ~/Projects/aidlc-coordin
 cd ~/Projects/aidlc-coordination
 ./scripts/conflict-check.sh --section C --fr C.1.18 --files-to-touch ModelRegistry.kt
 
-# 3. If GO, reserve the resources you need
+# 3. If GO, isolate the session in a worktree (concurrent-run safety, GDI-728)
+./scripts/worktree.sh add --repo-path ~/Projects/ugc-platform --epic GDI-700 \
+  --branch feature/GDI-700-add-locale-translation
+
+# 4. Reserve the resources you need
 ./scripts/reserve.sh --resource flyway --section C --epic GDI-700 --id V24 --ttl-hours 24
 
-# 4. Do the work in the product repo, then mark it shipped
+# 5. Do the work in the worktree, then mark it shipped
 ./scripts/release.sh --resource flyway --section C --epic GDI-700 --id V24 \
   --status shipped --release-tag v0.30.0
+
+# 6. Clean up the worktree
+./scripts/worktree.sh remove --repo-path ~/Projects/ugc-platform --epic GDI-700
 ```
+
+> **Why the worktree step?** Resource locks (V-numbers, surface names, file paths)
+> are tracked at the YAML-registry level. They do NOT protect against same-user,
+> same-clone working-tree mutations — branches disappear locally when another
+> session runs `git checkout`. GDI-728 codifies the worktree-per-epic convention
+> after Stage 4 of GDI-699 was contaminated by a concurrent run on the same clone.
 
 See [`docs/parallel-session-playbook.md`](docs/parallel-session-playbook.md) for a worked
 two-session example.
@@ -90,7 +105,8 @@ two-session example.
 │   ├── reserve.sh
 │   ├── release.sh
 │   ├── conflict-check.sh
-│   └── status.sh
+│   ├── status.sh
+│   └── worktree.sh             # GDI-728: isolate concurrent sessions
 ├── personas/
 │   ├── section-owner.md
 │   ├── release-coordinator.md

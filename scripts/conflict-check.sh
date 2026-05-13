@@ -185,6 +185,11 @@ fi
 
 if [ -z "$conflicts" ]; then
   log_info "GO — section $SECTION may proceed with $FR"
+  # GDI-728: resource locks don't protect against shared-clone working-tree
+  # contamination. Recommend the worktree helper for concurrent-run safety.
+  log_info "Recommended: isolate this session in a worktree to avoid shared-clone contamination:"
+  log_info "  ./scripts/worktree.sh add --repo-path <PRODUCT_REPO_PATH> --epic <GDI-XXX> \\"
+  log_info "    --branch feature/<GDI-XXX>-<slug> [--base-branch origin/dev]"
   if [ "$EMIT_JSON" = "1" ]; then
     emit_json "go" "section=$SECTION fr=$FR no conflicts"
   else
