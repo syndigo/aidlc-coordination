@@ -118,6 +118,11 @@ flyway:
       epic: GDI-660
       release_tag: v0.28.0
       shipped_at: "2026-05-13T15:11:11Z"
+    - version: V24
+      section: B
+      epic: GDI-708
+      release_tag: ""
+      shipped_at: "2026-05-13T16:49:37Z"
   reserved:
     - version: V20
       section: A
@@ -150,13 +155,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V24
-      section: B
-      epic: GDI-708
-      fr: FR-B.1.9
-      status: reserved
-      reserved_at: "2026-05-13T16:21:26Z"
-      expires_at: "2026-05-14T16:21:26Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
