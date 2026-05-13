@@ -94,3 +94,28 @@ jobs:
         run: |
           chmod +x scripts/*.sh
           ./scripts/status.sh --product ugc-platform || true
+
+      - name: --json round-trip smoke (GDI-669 retro #1)
+        run: |
+          # Every script that supports --json must emit parseable JSON on both
+          # GO and WAIT paths. This catches the yq --arg defect class at PR
+          # time, not at Stage 7. See .claude/pipeline-learnings.md GDI-669 #1.
+          set -e
+          echo "--- conflict-check.sh --json (GO path: Section A self-hold) ---"
+          ./scripts/conflict-check.sh --section A --fr A.1.9 \
+            --files-to-touch ModelRegistry.kt --json 2>/dev/null \
+            | python3 -m json.tool
+          echo "--- conflict-check.sh --json (WAIT path: Section C collision) ---"
+          ./scripts/conflict-check.sh --section C --fr C.1.11 \
+            --files-to-touch ModelRegistry.kt --json 2>/dev/null \
+            | python3 -m json.tool || {
+              echo "WAIT-path JSON must still be parseable (exit 1 is correct)"
+              # The script exits 1 on WAIT but JSON on stdout must parse.
+              ./scripts/conflict-check.sh --section C --fr C.1.11 \
+                --files-to-touch ModelRegistry.kt --json 2>/dev/null \
+                | python3 -c "import json, sys; json.loads(sys.stdin.read())"
+            }
+          echo "--- status.sh --json ---"
+          ./scripts/status.sh --product ugc-platform --json 2>/dev/null \
+            | python3 -m json.tool > /dev/null
+          echo "All --json round-trips parseable."
