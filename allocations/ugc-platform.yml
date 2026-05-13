@@ -213,17 +213,12 @@ model_registry:
       epic: GDI-645
       release_tag: v0.27.0
       shipped_at: 2026-05-13T04:01:54Z
-  pending:
     - surface: catalog-locale-translation
       section: A
-      epic: section-A-FR-A.1.9-epic
-      fr: FR-A.1.9
-      status: in_flight
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-14T22:00:00Z
-      note: |
-        Holds single_writer_lock on ModelRegistry.kt + Prompts.kt for the
-        duration of FR-A.1.9. See single_writer_files below.
+      epic: GDI-660
+      release_tag: v0.28.0
+      shipped_at: "2026-05-13T15:11:16Z"
+  pending: []
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
