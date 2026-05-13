@@ -239,9 +239,9 @@ single_writer_files:
   # held_by: none means the file is currently unlocked — sections may grab
   # a short-lived lock per edit.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt
-    held_by: GDI-NEW-C118
-    until: "2026-05-14T15:24:19Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-13T15:24:42Z"
+    reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
     held_by: GDI-NEW-C118
     until: "2026-05-14T15:24:20Z"
