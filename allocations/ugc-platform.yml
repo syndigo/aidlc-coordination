@@ -134,6 +134,11 @@ flyway:
       section: D
       epic: GDI-709
       shipped_at: "2026-05-13T17:02:21Z"
+    - version: V20
+      section: A
+      epic: GDI-699
+      release_tag: v0.29.0
+      shipped_at: "2026-05-13T18:20:59Z"
   reserved:
     - version: V21
       section: A
@@ -165,13 +170,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-13T15:54:49Z"
       expires_at: "2026-05-14T15:54:49Z"
-    - version: V20
-      section: A
-      epic: GDI-699
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-13T16:10:43Z"
-      expires_at: "2026-05-15T16:10:43Z"
     - version: V26
       section: D
       epic: GDI-709
