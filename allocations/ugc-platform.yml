@@ -175,7 +175,7 @@ flyway:
       note: Fuzzy dedup (re-keyed from section-A-FR-A.1.12-epic placeholder at initiation)
     - version: V22
       section: A
-      epic: section-A-FR-A.1.7-epic
+      epic: GDI-800
       fr: FR-A.1.7
       status: reserved
       reserved_at: 2026-05-13T22:00:00Z
@@ -211,14 +211,14 @@ flyway:
       expires_at: "2026-05-14T22:45:10Z"
     - version: V32
       section: A
-      epic: section-A-FR-A.1.7-epic
+      epic: GDI-800
       fr: FR-A.1.7
       status: reserved
       reserved_at: "2026-05-13T22:55:22Z"
       expires_at: "2026-05-15T22:55:22Z"
     - version: V932
       section: A
-      epic: section-A-FR-A.1.7-epic
+      epic: GDI-800
       fr: FR-A.1.7
       status: reserved
       reserved_at: "2026-05-13T22:55:23Z"
@@ -254,7 +254,7 @@ flyway:
       - {version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-14T22:00:00Z'}
       - {version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
       - {version: V922, section: A, epic: GDI-742, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
-      - {version: V923, section: A, epic: section-A-FR-A.1.7-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V923, section: A, epic: GDI-800, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
       - {version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
     next_free: V925
 model_registry:
@@ -335,17 +335,17 @@ single_writer_files:
   # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
   # coordination.touch_patterns[].file` updated in lockstep.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
-    held_by: section-A-FR-A.1.7-epic
+    held_by: GDI-800
     until: "2026-05-15T22:55:25Z"
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: section-A-FR-A.1.7-epic
+    held_by: GDI-800
     until: "2026-05-15T22:55:27Z"
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
-    held_by: section-A-FR-A.1.7-epic
+    held_by: GDI-800
     note: |
       ⚠ GDI-692 retro: ALSO load-bearing append-list conflict class. Test
       fixtures (e.g., `containsExactlyInAnyOrder(...)`, `hasSize(N)`, per-
