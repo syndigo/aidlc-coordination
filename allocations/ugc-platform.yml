@@ -297,7 +297,7 @@ single_writer_files:
     held_by: none
     note: Rarely touched. Lock per-edit; release on commit.
 releases:
-  current_main: v0.28.0
+  current_main: v0.30.0
   next_per_section:
     A: v0.28.x
     B: v0.29.x
