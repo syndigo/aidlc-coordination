@@ -338,6 +338,10 @@ single_writer_files:
   - file: .claude/CLAUDE.md
     held_by: none
     note: Rarely touched. Lock per-edit; release on commit.
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/service/EmailDispatchService.kt
+    held_by: GDI-752
+    until: "2026-05-14T20:16:45Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.30.0
   next_per_section:
