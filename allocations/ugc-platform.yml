@@ -24,7 +24,6 @@ product:
   sections: [A, B, C, D, E, F, G, H, I, J]
   # Section letter assignments are stable (see ugc-platform plan-document).
   # New sections require an ADR in docs/decisions.md.
-
 flyway:
   # Pre-AIDLC migrations: V1-V12 shipped before this registry existed. We
   # don't carry per-version epic tracking for them.
@@ -114,16 +113,12 @@ flyway:
       release_tag: v0.27.0
       shipped_at: 2026-05-13T04:01:54Z
       note: Catalog category findings (FR-A.1.11)
-
-  reserved:
     - version: V19
       section: A
-      epic: section-A-FR-A.1.9-epic
-      fr: FR-A.1.9
-      status: in_flight
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-14T22:00:00Z
-      note: Locale auto-translation (single-anchor surface)
+      epic: GDI-660
+      release_tag: v0.28.0
+      shipped_at: "2026-05-13T15:11:11Z"
+  reserved:
     - version: V20
       section: A
       epic: section-A-FR-A.1.8-epic
@@ -155,43 +150,40 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-
   next_free: V24
-
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
   test_fixture_range:
     shipped:
       # V900-V919: legacy test grants, pre-AIDLC.
-      - { version: V900, status: shipped, epic: pre-aidlc }
-      - { version: V901, status: shipped, epic: pre-aidlc }
-      - { version: V902, status: shipped, epic: pre-aidlc }
-      - { version: V903, status: shipped, epic: pre-aidlc }
-      - { version: V904, status: shipped, epic: pre-aidlc }
-      - { version: V905, status: shipped, epic: pre-aidlc }
-      - { version: V906, status: shipped, epic: pre-aidlc }
-      - { version: V907, status: shipped, epic: pre-aidlc }
-      - { version: V908, status: shipped, epic: pre-aidlc }
-      - { version: V909, status: shipped, epic: pre-aidlc }
-      - { version: V910, status: shipped, epic: pre-aidlc }
-      - { version: V911, status: shipped, epic: pre-aidlc }
-      - { version: V912, status: shipped, epic: pre-aidlc }
-      - { version: V913, status: shipped, epic: pre-aidlc }
-      - { version: V914, status: shipped, epic: pre-aidlc }
-      - { version: V915, status: shipped, epic: pre-aidlc }
-      - { version: V916, status: shipped, epic: pre-aidlc }
-      - { version: V917, status: shipped, epic: pre-aidlc }
-      - { version: V918, status: shipped, epic: pre-aidlc }
-      - { version: V919, status: shipped, epic: pre-aidlc }
+      - {version: V900, status: shipped, epic: pre-aidlc}
+      - {version: V901, status: shipped, epic: pre-aidlc}
+      - {version: V902, status: shipped, epic: pre-aidlc}
+      - {version: V903, status: shipped, epic: pre-aidlc}
+      - {version: V904, status: shipped, epic: pre-aidlc}
+      - {version: V905, status: shipped, epic: pre-aidlc}
+      - {version: V906, status: shipped, epic: pre-aidlc}
+      - {version: V907, status: shipped, epic: pre-aidlc}
+      - {version: V908, status: shipped, epic: pre-aidlc}
+      - {version: V909, status: shipped, epic: pre-aidlc}
+      - {version: V910, status: shipped, epic: pre-aidlc}
+      - {version: V911, status: shipped, epic: pre-aidlc}
+      - {version: V912, status: shipped, epic: pre-aidlc}
+      - {version: V913, status: shipped, epic: pre-aidlc}
+      - {version: V914, status: shipped, epic: pre-aidlc}
+      - {version: V915, status: shipped, epic: pre-aidlc}
+      - {version: V916, status: shipped, epic: pre-aidlc}
+      - {version: V917, status: shipped, epic: pre-aidlc}
+      - {version: V918, status: shipped, epic: pre-aidlc}
+      - {version: V919, status: shipped, epic: pre-aidlc}
     reserved:
       # V920-V924 are paired 1:1 with V19-V23 (Section A's upcoming work).
-      - { version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: 2026-05-13T22:00:00Z, expires_at: 2026-05-14T22:00:00Z }
-      - { version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: 2026-05-13T22:00:00Z, expires_at: 2026-05-15T22:00:00Z }
-      - { version: V922, section: A, epic: section-A-FR-A.1.12-epic, status: reserved, reserved_at: 2026-05-13T22:00:00Z, expires_at: 2026-05-15T22:00:00Z }
-      - { version: V923, section: A, epic: section-A-FR-A.1.7-epic, status: reserved, reserved_at: 2026-05-13T22:00:00Z, expires_at: 2026-05-15T22:00:00Z }
-      - { version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: 2026-05-13T22:00:00Z, expires_at: 2026-05-15T22:00:00Z }
+      - {version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-14T22:00:00Z'}
+      - {version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V922, section: A, epic: section-A-FR-A.1.12-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V923, section: A, epic: section-A-FR-A.1.7-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
     next_free: V925
-
 model_registry:
   # ModelRegistry.kt + Prompts.kt are the single-anchor surfaces. Edits to
   # them must be serialized — see single_writer_files below.
@@ -221,7 +213,6 @@ model_registry:
       epic: GDI-645
       release_tag: v0.27.0
       shipped_at: 2026-05-13T04:01:54Z
-
   pending:
     - surface: catalog-locale-translation
       section: A
@@ -233,7 +224,6 @@ model_registry:
       note: |
         Holds single_writer_lock on ModelRegistry.kt + Prompts.kt for the
         duration of FR-A.1.9. See single_writer_files below.
-
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
@@ -250,21 +240,17 @@ single_writer_files:
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries
-
   - file: docs/gameplan.md
     held_by: none
     note: Section-scoped headings; conflicts rare
-
   - file: .claude/pipeline-learnings.md
     held_by: none
     note: |
       Append-safe — each retro appends its own block at end-of-file. The
       Retro Aggregator (FOLLOW-UP) will dedup on a schedule.
-
   - file: .claude/CLAUDE.md
     held_by: none
     note: Rarely touched. Lock per-edit; release on commit.
-
 releases:
   current_main: v0.27.0
   next_per_section:
@@ -284,7 +270,6 @@ releases:
       proposed_tag: v0.28.0
       anchor_sha: pending
       note: Locale auto-translation (FR-A.1.9)
-
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
@@ -306,7 +291,6 @@ anchor_dependencies:
         section: J
         status: blocked_until_anchor_shipped
         note: Test harness needs the surface to render synthetic translations
-
   - anchor: FR-F.1.5.1
     description: AI-elevated product matching
     section: F
@@ -316,7 +300,6 @@ anchor_dependencies:
         section: A
         status: deferred
         note: Fuzzy dedup is downstream of elevated matching; defer A.1.12 if F.1.5.1 slips
-
 tfc_deploy_queue:
   # Day-1 stub. Section sessions do NOT write to this. They continue to merge
   # directly to dev as today. This field is populated by the future Coordinator
