@@ -1,0 +1,196 @@
+# Architecture Decision Records (ADR Log)
+
+This is the append-only ADR log for the AIDLC Coordination Service.
+
+Each ADR follows the format: **D-NNN — Title** (status, date, decider) followed by
+Context, Decision, Consequences. Append new entries at the bottom; never edit
+historical entries (correct via a new ADR that supersedes the old one).
+
+---
+
+## D-001 — File-based registry over HTTP service
+
+**Status:** Accepted
+**Date:** 2026-05-12
+**Decider:** VP DevOps (initial design)
+
+### Context
+
+We need a registry that allows multiple parallel SDLC sessions to coordinate on shared
+resources (Flyway versions, single-writer files, model registry surfaces, release
+tags) without stomping on each other. Three options:
+
+1. File-based YAML in a dedicated repo, edited via scripts, git as audit trail.
+2. HTTP service (small Flask/Express app, SQLite-backed).
+3. Postgres + Hasura GraphQL.
+
+### Decision
+
+Go with **option 1 (file-based)** for Day 1.
+
+### Consequences
+
+**Positive:**
+- Zero infrastructure to deploy
+- The entire state is visible in one file — invaluable during incidents
+- Git history IS the audit trail; no separate audit log to maintain
+- Trivial to validate via JSON Schema in CI
+- Recoverable from any clone
+
+**Negative:**
+- Write latency is ~5 seconds (yq edit + commit + push)
+- Concurrent writers serialize via git push contention (acceptable up to ~10/sec)
+- No ACL beyond GitHub repo permissions
+- No fine-grained query API; consumers must read the whole file
+
+**Revisit if:** write volume exceeds 10/sec, multiple products' YAMLs become a
+maintenance burden, or we need fine-grained ACLs (e.g. Section A can only edit its own
+row enforced server-side).
+
+---
+
+## D-002 — Single registry repo, one YAML per product
+
+**Status:** Accepted
+**Date:** 2026-05-12
+**Decider:** VP DevOps (initial design)
+
+### Context
+
+Should each product have its own coordination repo, or share one?
+
+### Decision
+
+**One repo (`syndigo/aidlc-coordination`), one YAML per product** under `allocations/`.
+
+### Consequences
+
+**Positive:**
+- Shared schema, shared scripts, shared CI
+- Cross-product anchor dependencies become possible later (single source of truth)
+- Operator clones one repo, gets coordination for everything
+
+**Negative:**
+- A burst of writes on Product A's YAML serializes with writes on Product B's YAML
+  (same git push contention)
+- Mitigation: it's unlikely we'll have parallel sessions on two products at the same
+  minute on Day 1; revisit if it becomes a real bottleneck
+
+---
+
+## D-003 — Scripts are POSIX-bash, processed via mikefarah/yq v4
+
+**Status:** Accepted
+**Date:** 2026-05-12
+**Decider:** VP DevOps (initial design)
+
+### Context
+
+What language for the read/write scripts? Bash, Python, Node?
+
+### Decision
+
+POSIX-bash (bash 3.2 compatible — macOS default) using **mikefarah/yq v4** as the YAML
+processor.
+
+### Consequences
+
+**Positive:**
+- No runtime to install on operator machines (bash + yq + git is universal)
+- Easy to read; easy to fork into one-off operations during incidents
+- `shellcheck --severity=warning` keeps quality high
+- yq v4 is well-known, well-maintained, and idiomatic for this use case
+
+**Negative:**
+- Bash is hard to test (no unit-test ergonomics like pytest)
+- POSIX-portability constraints (no `[[`, no `${var,,}`, no associative arrays) are
+  occasional sources of friction
+
+**Test strategy:** integration tests via shell scripts that exercise reserve → conflict
+→ release flows against a temp YAML. Unit-test-equivalent coverage via `shellcheck`
++ schema validation in CI + the bootstrap-log smoke test.
+
+---
+
+## D-004 — Day-1 scripts edit `main` directly (not via PR)
+
+**Status:** Accepted
+**Date:** 2026-05-12
+**Decider:** Stage 4 development run
+
+### Context
+
+Should `reserve.sh` / `release.sh` open a PR per edit and rely on auto-merge, or push
+directly to `main`?
+
+### Decision
+
+**Push directly to `main`** on Day 1, with `git pull --rebase` retry on push-rejected.
+
+### Consequences
+
+**Positive:**
+- Faster (single push, not PR-creation + auto-merge wait)
+- Simpler to reason about; the audit trail is the linear commit history
+- No dependency on GitHub auto-merge plumbing for the bootstrap
+- The `main` branch's branch-protection setting allows admin push by Section Owner
+  identities on Day 1
+
+**Negative:**
+- Bypasses any future Compliance Reviewer gate that watches PRs (but the gate is
+  deferred — see `personas/compliance-reviewer.md`)
+- A bad script edit lands on `main` immediately; recovery is `git revert`
+
+**Revisit:** once the Compliance Reviewer goes live (Phase 2), the scripts should
+graduate to "branch + PR + auto-merge" so the gate has something to evaluate.
+
+---
+
+## D-005 — Branch protection on `main` starts permissive
+
+**Status:** Accepted
+**Date:** 2026-05-12
+**Decider:** Stage 4 development run
+
+### Context
+
+What branch protection should we enable on day 1 of a brand-new solo-author repo?
+
+### Decision
+
+- `required_approving_review_count = 0` (raise to 1 once a second human is on the repo)
+- `required_status_checks = null` (add named checks once the CI workflow has produced
+  them; today the workflow has never run)
+- `allow_force_pushes = false`
+- `allow_deletions = false`
+- `enforce_admins = false`
+
+### Consequences
+
+**Positive:**
+- Solo-bootstrap PR can land without artificial friction
+- Forbidding force-push and deletion preserves the audit trail
+
+**Negative:**
+- A solo author can land changes without review; mitigated by the small number of
+  contributors today
+
+**Tightening plan:** after this PR lands and CI is green, add the 5 named checks
+(yamllint, shellcheck, schema-validate, markdown-structure, yq-smoke) as required, and
+raise approval count to 1 once a second engineer is on the repo.
+
+---
+
+## How to add an ADR
+
+```sh
+# Append a new section to docs/decisions.md, never edit existing ones.
+# Then commit:
+git add docs/decisions.md
+git commit -m "docs(adr): D-006 — <title>"
+git push
+```
+
+Single-writer-files entry for `decisions.md` is `held_by: none` because the file is
+append-safe at the section boundary. If two sections add ADR-006 simultaneously, the
+second push gets rejected and the operator runs `git pull --rebase` + renumbers.
