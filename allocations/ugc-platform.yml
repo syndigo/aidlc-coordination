@@ -154,6 +154,11 @@ flyway:
       epic: GDI-709
       release_tag: v0.32.0
       shipped_at: "2026-05-13T20:27:36Z"
+    - version: V27
+      section: C
+      epic: GDI-C-1-7
+      release_tag: v0.33.0
+      shipped_at: "2026-05-13T21:22:48Z"
   reserved:
     - version: V21
       section: A
@@ -178,13 +183,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V27
-      section: C
-      epic: GDI-C-1-7
-      fr: FR-C.1.7
-      status: reserved
-      reserved_at: "2026-05-13T18:59:37Z"
-      expires_at: "2026-05-14T18:59:37Z"
     - version: V28
       section: B
       epic: GDI-752
