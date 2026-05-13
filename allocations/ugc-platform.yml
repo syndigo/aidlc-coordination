@@ -266,14 +266,12 @@ model_registry:
       epic: GDI-692
       release_tag: v0.30.0
       shipped_at: "2026-05-13T18:29:18Z"
-  pending:
     - surface: email-template-gen
       section: B
       epic: GDI-708
-      fr: FR-B.1.9
-      status: reserved
-      reserved_at: "2026-05-13T18:05:18Z"
-      expires_at: "2026-05-14T18:05:18Z"
+      release_tag: v0.31.0
+      shipped_at: "2026-05-13T19:47:25Z"
+  pending: []
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
