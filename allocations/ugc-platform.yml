@@ -373,6 +373,10 @@ single_writer_files:
     held_by: none
     until: "2026-05-13T22:27:16Z"
     reason: released via release.sh
+  - file: services/ugc-api/src/main/resources/application-dev.yml
+    held_by: GDI-786
+    until: "2026-05-14T03:53:10Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.33.0
   next_per_section:
