@@ -243,9 +243,9 @@ single_writer_files:
     until: "2026-05-13T15:24:42Z"
     reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
-    held_by: GDI-NEW-C118
-    until: "2026-05-14T15:24:20Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-13T15:24:44Z"
+    reason: released via release.sh
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries
