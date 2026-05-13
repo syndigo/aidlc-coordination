@@ -1,0 +1,232 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/syndigo/aidlc-coordination/schemas/allocation.yml.schema.json",
+  "title": "AIDLC Allocation Registry",
+  "description": "Schema for per-product allocation YAMLs under allocations/. One file per product (e.g. ugc-platform.yml). See README.md for usage.",
+  "type": "object",
+  "required": [
+    "product",
+    "flyway",
+    "model_registry",
+    "single_writer_files",
+    "releases",
+    "anchor_dependencies",
+    "tfc_deploy_queue"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "sectionLetter": {
+      "type": "string",
+      "pattern": "^[A-J]$"
+    },
+    "flywayVersion": {
+      "type": "string",
+      "pattern": "^V\\d+$"
+    },
+    "semverTag": {
+      "type": "string",
+      "pattern": "^(v\\d+\\.\\d+\\.\\d+(-[a-zA-Z0-9-]+)?|v\\d+\\.\\d+\\.x|pre-aidlc)$"
+    },
+    "isoTimestamp": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "shipped",
+        "in_flight",
+        "reserved",
+        "free",
+        "not_started",
+        "deferred",
+        "blocked_until_anchor_shipped",
+        "released"
+      ]
+    },
+    "shippedFlyway": {
+      "type": "object",
+      "required": ["version", "epic"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "$ref": "#/definitions/flywayVersion" },
+        "section": { "$ref": "#/definitions/sectionLetter" },
+        "epic": { "type": "string" },
+        "release_tag": { "$ref": "#/definitions/semverTag" },
+        "shipped_at": { "$ref": "#/definitions/isoTimestamp" },
+        "note": { "type": "string" },
+        "status": { "$ref": "#/definitions/status" }
+      }
+    },
+    "reservedFlyway": {
+      "type": "object",
+      "required": ["version", "section", "epic"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "$ref": "#/definitions/flywayVersion" },
+        "section": { "$ref": "#/definitions/sectionLetter" },
+        "epic": { "type": "string" },
+        "fr": { "type": "string" },
+        "status": { "$ref": "#/definitions/status" },
+        "reserved_at": { "$ref": "#/definitions/isoTimestamp" },
+        "expires_at": { "$ref": "#/definitions/isoTimestamp" },
+        "note": { "type": "string" }
+      }
+    },
+    "shippedModelSurface": {
+      "type": "object",
+      "required": ["surface", "section", "epic"],
+      "additionalProperties": false,
+      "properties": {
+        "surface": { "type": "string" },
+        "section": { "$ref": "#/definitions/sectionLetter" },
+        "epic": { "type": "string" },
+        "release_tag": { "$ref": "#/definitions/semverTag" },
+        "shipped_at": { "$ref": "#/definitions/isoTimestamp" }
+      }
+    },
+    "pendingModelSurface": {
+      "type": "object",
+      "required": ["surface", "section", "epic", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "surface": { "type": "string" },
+        "section": { "$ref": "#/definitions/sectionLetter" },
+        "epic": { "type": "string" },
+        "fr": { "type": "string" },
+        "status": { "$ref": "#/definitions/status" },
+        "reserved_at": { "$ref": "#/definitions/isoTimestamp" },
+        "expires_at": { "$ref": "#/definitions/isoTimestamp" },
+        "note": { "type": "string" }
+      }
+    },
+    "singleWriterFile": {
+      "type": "object",
+      "required": ["file", "held_by"],
+      "additionalProperties": false,
+      "properties": {
+        "file": { "type": "string" },
+        "held_by": { "type": "string" },
+        "until": { "$ref": "#/definitions/isoTimestamp" },
+        "reason": { "type": "string" },
+        "note": { "type": "string" }
+      }
+    },
+    "anchorConsumer": {
+      "type": "object",
+      "required": ["fr", "section", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "fr": { "type": "string" },
+        "section": { "$ref": "#/definitions/sectionLetter" },
+        "status": { "$ref": "#/definitions/status" },
+        "note": { "type": "string" }
+      }
+    }
+  },
+  "properties": {
+    "product": {
+      "type": "object",
+      "required": ["name", "repo", "sections"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "repo": { "type": "string", "pattern": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$" },
+        "sections": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/sectionLetter" },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "flyway": {
+      "type": "object",
+      "required": ["shipped", "reserved", "next_free"],
+      "additionalProperties": false,
+      "properties": {
+        "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedFlyway" } },
+        "reserved": { "type": "array", "items": { "$ref": "#/definitions/reservedFlyway" } },
+        "next_free": { "$ref": "#/definitions/flywayVersion" },
+        "test_fixture_range": {
+          "type": "object",
+          "required": ["shipped", "reserved", "next_free"],
+          "additionalProperties": false,
+          "properties": {
+            "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedFlyway" } },
+            "reserved": { "type": "array", "items": { "$ref": "#/definitions/reservedFlyway" } },
+            "next_free": { "$ref": "#/definitions/flywayVersion" }
+          }
+        }
+      }
+    },
+    "model_registry": {
+      "type": "object",
+      "required": ["shipped", "pending"],
+      "additionalProperties": false,
+      "properties": {
+        "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedModelSurface" } },
+        "pending": { "type": "array", "items": { "$ref": "#/definitions/pendingModelSurface" } }
+      }
+    },
+    "single_writer_files": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/singleWriterFile" },
+      "minItems": 1
+    },
+    "releases": {
+      "type": "object",
+      "required": ["current_main", "next_per_section"],
+      "additionalProperties": false,
+      "properties": {
+        "current_main": { "$ref": "#/definitions/semverTag" },
+        "next_per_section": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/definitions/semverTag" }
+        },
+        "in_flight": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section", "epic"],
+            "additionalProperties": false,
+            "properties": {
+              "section": { "$ref": "#/definitions/sectionLetter" },
+              "epic": { "type": "string" },
+              "proposed_tag": { "$ref": "#/definitions/semverTag" },
+              "anchor_sha": { "type": "string" },
+              "note": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "anchor_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["anchor", "section", "status", "consumers"],
+        "additionalProperties": false,
+        "properties": {
+          "anchor": { "type": "string" },
+          "description": { "type": "string" },
+          "section": { "$ref": "#/definitions/sectionLetter" },
+          "status": { "$ref": "#/definitions/status" },
+          "consumers": { "type": "array", "items": { "$ref": "#/definitions/anchorConsumer" } }
+        }
+      }
+    },
+    "tfc_deploy_queue": {
+      "type": "object",
+      "required": ["current_deployed_sha", "current_desired_sha", "pending_pushes"],
+      "additionalProperties": false,
+      "properties": {
+        "current_deployed_sha": { "type": "string" },
+        "current_desired_sha": { "type": "string" },
+        "pending_pushes": { "type": "array" },
+        "next_batch_window": { "type": ["string", "null"] },
+        "note": { "type": "string" }
+      }
+    }
+  }
+}
