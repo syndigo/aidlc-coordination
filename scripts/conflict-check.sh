@@ -108,85 +108,77 @@ $1"
   fi
 }
 
-# Helper: iterate a CSV.
-csv_each() {
-  csv="$1"
-  # Replace commas with newlines, iterate.
-  printf '%s' "$csv" | tr ',' '\n'
+# Helper: iterate a CSV via positional params (works for both bash and POSIX sh).
+# Sets the global $@ in the caller's scope when used via `set -- $(csv_split "$x")`.
+csv_split() {
+  printf '%s' "$1" | tr ',' ' '
 }
 
 # --- check files-to-touch against single_writer_files
 if [ -n "$FILES" ]; then
-  csv_each "$FILES" | while IFS= read -r f; do
+  oldIFS="$IFS"
+  IFS=','
+  # shellcheck disable=SC2086
+  set -- $FILES
+  IFS="$oldIFS"
+  for f in "$@"; do
     [ -z "$f" ] && continue
     # Match either full path or just the basename (basename is the common form).
     held="$(yq -r ".single_writer_files[] | select(.file == \"$f\" or (.file | test(\"/$f\$\"))) | .held_by // \"\"" "$YML")"
     if [ -n "$held" ] && [ "$held" != "none" ] && [ "$held" != "null" ]; then
       # Check whether this section already owns it (via the epic prefix).
       if printf '%s' "$held" | grep -q "section-${SECTION}-"; then
-        printf 'GO file=%s held_by_self=%s\n' "$f" "$held" >&2
+        log_info "self-hold OK: file=$f held_by_self=$held"
       else
         until_ts="$(yq -r ".single_writer_files[] | select(.file == \"$f\" or (.file | test(\"/$f\$\"))) | .until // \"\"" "$YML")"
-        printf 'WAIT file=%s held_by=%s until=%s\n' "$f" "$held" "$until_ts" >> /tmp/conflict-check.$$.txt
+        add_conflict "WAIT file=$f held_by=$held until=$until_ts"
       fi
     fi
   done
-  if [ -s "/tmp/conflict-check.$$.txt" ]; then
-    while IFS= read -r line; do
-      add_conflict "$line"
-    done < /tmp/conflict-check.$$.txt
-    rm -f "/tmp/conflict-check.$$.txt"
-  fi
 fi
 
 # --- check Flyway versions
 if [ -n "$FLYWAY_VERSIONS" ]; then
-  csv_each "$FLYWAY_VERSIONS" | while IFS= read -r v; do
+  oldIFS="$IFS"
+  IFS=','
+  # shellcheck disable=SC2086
+  set -- $FLYWAY_VERSIONS
+  IFS="$oldIFS"
+  for v in "$@"; do
     [ -z "$v" ] && continue
     held="$(yq -r ".flyway.reserved[] | select(.version == \"$v\") | .epic // \"\"" "$YML")"
     if [ -n "$held" ] && [ "$held" != "null" ]; then
       held_section="$(yq -r ".flyway.reserved[] | select(.version == \"$v\") | .section // \"\"" "$YML")"
       if [ "$held_section" != "$SECTION" ]; then
-        printf 'WAIT flyway=%s held_by=%s section=%s\n' "$v" "$held" "$held_section" >> /tmp/conflict-check.$$.txt
+        add_conflict "WAIT flyway=$v held_by=$held section=$held_section"
       fi
     fi
   done
-  if [ -s "/tmp/conflict-check.$$.txt" ]; then
-    while IFS= read -r line; do
-      add_conflict "$line"
-    done < /tmp/conflict-check.$$.txt
-    rm -f "/tmp/conflict-check.$$.txt"
-  fi
 fi
 
 # --- check model surfaces (against pending)
 if [ -n "$MODEL_SURFACES" ]; then
-  csv_each "$MODEL_SURFACES" | while IFS= read -r s; do
+  oldIFS="$IFS"
+  IFS=','
+  # shellcheck disable=SC2086
+  set -- $MODEL_SURFACES
+  IFS="$oldIFS"
+  for s in "$@"; do
     [ -z "$s" ] && continue
     held="$(yq -r ".model_registry.pending[] | select(.surface == \"$s\") | .epic // \"\"" "$YML")"
     if [ -n "$held" ] && [ "$held" != "null" ]; then
       held_section="$(yq -r ".model_registry.pending[] | select(.surface == \"$s\") | .section // \"\"" "$YML")"
       if [ "$held_section" != "$SECTION" ]; then
-        printf 'WAIT model-surface=%s held_by=%s section=%s\n' "$s" "$held" "$held_section" >> /tmp/conflict-check.$$.txt
+        add_conflict "WAIT model-surface=$s held_by=$held section=$held_section"
       fi
     fi
   done
-  if [ -s "/tmp/conflict-check.$$.txt" ]; then
-    while IFS= read -r line; do
-      add_conflict "$line"
-    done < /tmp/conflict-check.$$.txt
-    rm -f "/tmp/conflict-check.$$.txt"
-  fi
 fi
 
 # --- check anchor dependencies (is THIS fr blocked by a not-yet-shipped anchor?)
-anchor_block="$(yq -r ".anchor_dependencies[] | .consumers[] | select(.fr == \"$FR\" and .status == \"blocked_until_anchor_shipped\") | parent | parent | .anchor + \" (status=\" + .status + \")\"" "$YML" 2>/dev/null || true)"
+anchor_block="$(yq -r ".anchor_dependencies[] | select(.status != \"shipped\" and (.consumers[] | select(.fr == \"$FR\" and .status == \"blocked_until_anchor_shipped\"))) | \"WAIT anchor=\" + .anchor + \" status=\" + .status" "$YML" 2>/dev/null || true)"
 if [ -n "$anchor_block" ] && [ "$anchor_block" != "null" ]; then
-  # The above yq expression isn't quite right with parent twice; use a simpler form.
-  anchor_block_simple="$(yq -r ".anchor_dependencies[] | select(.status != \"shipped\") | . as \$a | .consumers[] | select(.fr == \"$FR\" and .status == \"blocked_until_anchor_shipped\") | \"WAIT anchor=\" + \$a.anchor + \" status=\" + \$a.status" "$YML" 2>/dev/null)"
-  if [ -n "$anchor_block_simple" ] && [ "$anchor_block_simple" != "null" ]; then
-    add_conflict "$anchor_block_simple"
-  fi
+  add_conflict "$anchor_block"
 fi
 
 # ----- emit result ----------------------------------------------------------
@@ -201,21 +193,33 @@ if [ -z "$conflicts" ]; then
   if [ "$CLAIM" = "1" ]; then
     log_info "[--claim] chaining to reserve.sh for detected needs..."
     if [ -n "$FILES" ]; then
-      csv_each "$FILES" | while IFS= read -r f; do
+      oldIFS="$IFS"; IFS=','
+      # shellcheck disable=SC2086
+      set -- $FILES
+      IFS="$oldIFS"
+      for f in "$@"; do
         [ -z "$f" ] && continue
         "$(dirname "$0")/reserve.sh" --resource file-lock --section "$SECTION" \
           --epic "$EPIC" --id "$f" --fr "$FR" --product "$PRODUCT" || true
       done
     fi
     if [ -n "$FLYWAY_VERSIONS" ]; then
-      csv_each "$FLYWAY_VERSIONS" | while IFS= read -r v; do
+      oldIFS="$IFS"; IFS=','
+      # shellcheck disable=SC2086
+      set -- $FLYWAY_VERSIONS
+      IFS="$oldIFS"
+      for v in "$@"; do
         [ -z "$v" ] && continue
         "$(dirname "$0")/reserve.sh" --resource flyway --section "$SECTION" \
           --epic "$EPIC" --id "$v" --fr "$FR" --product "$PRODUCT" || true
       done
     fi
     if [ -n "$MODEL_SURFACES" ]; then
-      csv_each "$MODEL_SURFACES" | while IFS= read -r s; do
+      oldIFS="$IFS"; IFS=','
+      # shellcheck disable=SC2086
+      set -- $MODEL_SURFACES
+      IFS="$oldIFS"
+      for s in "$@"; do
         [ -z "$s" ] && continue
         "$(dirname "$0")/reserve.sh" --resource model-registry --section "$SECTION" \
           --epic "$EPIC" --id "$s" --fr "$FR" --product "$PRODUCT" || true

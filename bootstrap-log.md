@@ -152,7 +152,12 @@ git push -u origin main
 
 ## Step 5b — Initial commit SHA captured
 
-Captured at execution time. See "Commits" entries below for the actual SHA.
+**Initial commit SHA on `main`:** `7714ec397b47f02031a7f39439e5bd59397dd1f1`
+
+Verified via:
+```
+git rev-parse HEAD
+```
 
 ---
 
@@ -178,7 +183,11 @@ the **minimum viable protection**:
 The follow-up ticket is GDI-669 → "Phase-1 follow-ups: enable 1-approval + required
 status checks once CI is green."
 
-**Output:** Captured at execution time.
+**Output:** Protection PUT returned 200 OK with body confirming:
+- `required_approving_review_count: 0`
+- `allow_force_pushes.enabled: false`
+- `allow_deletions.enabled: false`
+- `enforce_admins.enabled: false`
 
 ---
 
@@ -193,7 +202,8 @@ gh api -X PATCH "repos/syndigo/aidlc-coordination" \
 **Rationale:** Reserve/release scripts (in the next iteration) will open PRs and rely on
 auto-merge. Enabling it at the org-repo level avoids per-PR fiddling.
 
-**Output:** Captured at execution time.
+**Output:** `allow_auto_merge=True delete_branch_on_merge=True` (confirmed via the
+returned repo JSON).
 
 ---
 
@@ -283,7 +293,15 @@ The smoke test is the AC-6.6 deliverable for GDI-675. Captured below:
 YAML (`single_writer_files.ModelRegistry.kt.held_by = section-A-FR-A.1.9-epic`).
 The conflict-check is idempotent for the same section.
 
-**Actual output:** Captured at execution time below.
+**Actual output:**
+```
+[INFO]  self-hold OK: file=ModelRegistry.kt held_by_self=section-A-FR-A.1.9-epic
+[INFO]  GO — section A may proceed with A.1.9
+GO
+exit=0
+```
+
+**Result:** PASS — exit 0, output GO, the self-hold was recognized.
 
 ### Smoke test 14b — Section C checks the same file (expected: WAIT)
 
@@ -295,7 +313,54 @@ The conflict-check is idempotent for the same section.
 **Expected:** WAIT, with structured reason citing Section A's hold + expiry timestamp
 (`2026-05-14T22:00:00Z`).
 
-**Actual output:** Captured at execution time below.
+**Actual output:**
+```
+[WARN]  WAIT — section C cannot proceed with C.1.11:
+WAIT file=ModelRegistry.kt held_by=section-A-FR-A.1.9-epic until=2026-05-14T22:00:00Z
+WAIT:
+WAIT file=ModelRegistry.kt held_by=section-A-FR-A.1.9-epic until=2026-05-14T22:00:00Z
+exit=1
+```
+
+**Result:** PASS — exit 1, output WAIT, holder + expiry correctly surfaced.
+
+### Bonus smoke test 14c — Section C anchor-blocked
+
+**Command:**
+```
+./scripts/conflict-check.sh --section C --fr C.1.18
+```
+
+**Expected:** WAIT — C.1.18 is a declared consumer of the FR-A.1.9 anchor, which is
+in_flight (not yet shipped).
+
+**Actual output:**
+```
+[WARN]  WAIT — section C cannot proceed with C.1.18:
+WAIT anchor=FR-A.1.9 status=in_flight
+WAIT:
+WAIT anchor=FR-A.1.9 status=in_flight
+exit=1
+```
+
+**Result:** PASS — anchor-dependency block correctly surfaces.
+
+### Smoke test debugging note (real-world feedback for the bootstrap subagent)
+
+The first run of 14b returned GO instead of WAIT. Root cause: the original
+`conflict-check.sh` used `printf '%s' "$csv" | tr ',' '\n' | while read f`, which
+fails when the CSV has no commas (no trailing newline → `read` returns false
+immediately). Fix: switched to `IFS=, set -- $csv; for f in "$@"` — POSIX-portable,
+works for both single-value and multi-value CSVs.
+
+Second bug: the original anchor-block yq query used
+`. as $a | .consumers[] | select(.fr == "...") | $a.anchor`. In yq v4 this emits the
+anchor regardless of whether the select matched — the select gates only the consumer
+projection, not the `$a` binding. Fix: nested the select inside the outer select via
+`select(.status != "shipped" and (.consumers[] | select(...)))`. Both fixes
+recorded as **pipeline learnings** for the future bootstrap subagent.
+
+The fixed scripts pass shellcheck --severity=warning cleanly.
 
 ---
 
@@ -329,5 +394,65 @@ also captured.
 
 ## Step appendix — actual stdout / SHAs / PR number
 
-Filled in at execution. See "Step 5b", "Step 14a/b", "Step 15", "Step 16" sections above
-for the placeholder slots that get rewritten with real output.
+### Commits on `feature/GDI-669-bootstrap-verification`
+
+In order (verified via `git log --oneline main..feature/GDI-669-bootstrap-verification`):
+
+1. **B1** — `feat(GDI-671): seed allocations/ugc-platform.yml + JSON Schema (Day 1 registry)`
+2. **B2** — `feat(GDI-672): reserve.sh + release.sh (yq-based atomic edits)`
+3. **B3** — `feat(GDI-673): conflict-check.sh + status.sh (read-only by default)`
+4. **B4** — `docs(GDI-674): 4 persona specs (...)`
+5. **B5** — `docs(GDI-675): parallel-session playbook + how-it-works + decisions ADR log`
+6. **B6** — `docs(GDI-675): finalize bootstrap-log.md + smoke test capture` (this commit)
+
+### Tooling versions used
+
+- `gh` (GitHub CLI) authenticated as `nembree-syndigo` with `admin:org`, `repo`,
+  `workflow` scopes
+- `git` 2.x (Apple-shipped)
+- `yq` (mikefarah) v4.52.5
+- `shellcheck` (installed via brew)
+- Python 3.14 with `jsonschema` + `PyYAML` installed in
+  `/private/tmp/aidlc-venv/` (one-shot venv; documented as "use Node ajv-cli in CI,
+  Python jsonschema for local")
+
+### Schema-validation evidence (local, before CI runs)
+
+```
+$ yq -o=json '.' allocations/ugc-platform.yml > /tmp/ugc-platform.json
+$ /tmp/aidlc-venv/bin/python -c "
+  import json, jsonschema
+  s = json.load(open('schemas/allocation.yml.schema.json'))
+  d = json.load(open('/tmp/ugc-platform.json'))
+  jsonschema.validate(d, s)
+  print('VALID')
+  "
+VALID — YAML conforms to schema (validated via yq-to-JSON)
+```
+
+### shellcheck evidence
+
+```
+$ shellcheck --severity=warning scripts/*.sh
+(no output — clean)
+```
+
+### status.sh evidence (manual smoke before PR)
+
+```
+=================================================
+ AIDLC Allocation Status — ugc-platform
+=================================================
+ current_main:   v0.27.0
+ flyway:         18 shipped / 5 reserved (next free: V24)
+ model surfaces: 5 shipped / 1 pending
+...
+```
+
+(Full output captured in Step 14 above and demo'd in
+`docs/parallel-session-playbook.md`.)
+
+### PR number / URL
+
+Captured by the final commit + push step; see the PR URL emitted by `gh pr create`
+or query `gh pr list --repo syndigo/aidlc-coordination --state open`.
