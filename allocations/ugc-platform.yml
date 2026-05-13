@@ -348,7 +348,7 @@ releases:
     A: v0.28.x
     B: v0.29.x
     C: v0.30.x
-    D: v0.31.x
+    D: v0.32.x   # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
     E: v0.32.x
     F: v0.33.x
     G: v0.34.x
