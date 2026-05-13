@@ -194,6 +194,10 @@
         },
         "note": {
           "type": "string"
+        },
+        "append_list_conflict_class": {
+          "type": "boolean",
+          "description": "GDI-692 retro: file LOOKS append-safe (each session appends an enum value or list entry at end-of-section) but git auto-merge FAILS when two parallel sessions add to adjacent lines. Lock is LOAD-BEARING -- do not release as false-positive mitigation."
         }
       }
     },
@@ -326,13 +330,7 @@
     "single_writer_files": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/singleWriterFile",
-        "properties": {
-          "append_list_conflict_class": {
-            "type": "boolean",
-            "description": "GDI-692 retro: file LOOKS append-safe but is NOT under parallel editing. Lock is load-bearing."
-          }
-        }
+        "$ref": "#/definitions/singleWriterFile"
       },
       "minItems": 1
     },
