@@ -288,6 +288,73 @@ ADR log.
 
 ---
 
+## D-013 (2026-05-13) — `release.sh` rejects `--status=released` for flyway and model-registry
+
+**Status:** Accepted
+**Date:** 2026-05-13
+**Decider:** Repo maintainer (CI-failure remediation)
+
+### Context
+
+CI on `main` failed repeatedly with `schema-validate` errors of the form:
+
+```
+instancePath: '/flyway/shipped/19/release_tag',
+message: 'must match pattern "^(v\d+\.\d+\.\d+(-[a-zA-Z0-9-]+)?|v\d+\.\d+\.x|pre-aidlc)$"'
+```
+
+Root cause: `scripts/release.sh` required `--release-tag` only when
+`--status=shipped`, but unconditionally wrote `release_tag: "$RELEASE_TAG"`
+into the appended row regardless of resource. Calls of the form
+`release.sh --resource flyway --status released` (and the model-registry
+equivalent) therefore produced rows with `release_tag: ""`, which the
+`semverTag` definition in `schemas/allocation.yml.schema.json` rejects.
+
+Four such rows landed on `main` before the failure was investigated:
+flyway V20/V24/V25 and model_registry `review-summary-locale`.
+
+### Decision
+
+1. `release.sh` rejects `--status=released` when `--resource` is `flyway`
+   or `model-registry`. Those resources must use `--status=shipped` with
+   a real `--release-tag`.
+2. `--status=released` remains valid for `file-lock` (clears `held_by`)
+   and `release-tag` (sets `current_main`) — those code paths never
+   write a `release_tag` field, so they are unaffected.
+3. The four bad rows on `main` were fixed by deleting the
+   `release_tag: ""` line (the field is optional on `shippedFlyway`
+   and `shippedModelSurface`). Tags can be backfilled later once the
+   real release is cut.
+
+### Rationale
+
+- Schema rejection is the load-bearing invariant — preserving it at the
+  script boundary is cheaper than fixing every downstream consumer that
+  might trust the YAML.
+- Tightening the script (rather than loosening the schema) keeps the
+  audit trail honest: a `shipped` row without a tag is a meaningful
+  signal that the row is provisional.
+- `--status=released` is preserved for the two resources where it has
+  legitimate semantics, so the playbook's existing file-lock release
+  example continues to work.
+
+### Consequences
+
+- Operators who previously ran `release.sh --resource flyway --status released`
+  by habit will now get a clear error pointing them at
+  `--status=shipped --release-tag vX.Y.Z`.
+- The four V20/V24/V25 and review-summary-locale rows currently have no
+  `release_tag`. When those migrations are tied to a real release, an
+  operator must backfill the field manually (or via a follow-up script).
+
+### References
+
+- Failing CI runs on `main` 2026-05-13 (search "schema-validate")
+- `scripts/release.sh` guards added under `--status` validation
+- `docs/parallel-session-playbook.md` § "Step 1.3 — Ship + release" caution block
+
+---
+
 ## How to add an ADR
 
 ```sh

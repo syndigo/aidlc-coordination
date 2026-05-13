@@ -11,6 +11,18 @@
 #   release.sh --help
 #   release.sh --version
 #
+# Status semantics:
+#   --status=shipped    Used for flyway and model-registry resources.
+#                       --release-tag is REQUIRED so the appended row
+#                       carries a valid semver tag.
+#   --status=released   Used for file-lock (clears held_by) and
+#                       release-tag (sets current_main). Rejected for
+#                       flyway and model-registry — those resources
+#                       must use --status=shipped with --release-tag,
+#                       otherwise the appended row has an empty
+#                       release_tag and fails schema validation.
+#                       See D-013.
+#
 # Exit codes:
 #   0  released successfully (or idempotent no-op)
 #   1  generic error
@@ -45,6 +57,11 @@ Optional:
   --product <name>            Default: ugc-platform
   --json
   --help, --version
+
+Notes:
+  --status=released is valid for file-lock and release-tag only.
+  Using it with flyway or model-registry is rejected (use
+  --status=shipped --release-tag vX.Y.Z instead). See D-013.
 USAGE
 }
 
@@ -89,6 +106,21 @@ case "$RESOURCE" in
   flyway|model-registry|file-lock|release-tag) ;;
   *) log_err "Invalid --resource: $RESOURCE"; exit 2 ;;
 esac
+
+# For flyway and model-registry, the only meaningful terminal status is
+# "shipped" (with a real release_tag). "released" on those resources
+# would append a row with an empty release_tag, which fails schema
+# validation (semverTag rejects empty string). file-lock and release-tag
+# legitimately use --status=released. See docs/decisions.md (D-013).
+if [ "$STATUS" = "released" ]; then
+  case "$RESOURCE" in
+    file-lock|release-tag) ;;
+    flyway|model-registry)
+      log_err "--status=released is not valid for --resource=$RESOURCE (use --status=shipped with --release-tag)"
+      exit 2
+      ;;
+  esac
+fi
 
 validate_section "$SECTION"
 

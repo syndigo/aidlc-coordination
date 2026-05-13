@@ -118,20 +118,21 @@ flyway:
       epic: GDI-660
       release_tag: v0.28.0
       shipped_at: "2026-05-13T15:11:11Z"
+    # release_tag omitted on V24/V20/V25 below: these rows were appended
+    # via release.sh --status=released, which is a no-op for flyway and
+    # left release_tag empty (schema rejects ""). The field is optional;
+    # backfill once the migration ships with a tagged release. See D-013.
     - version: V24
       section: C
       epic: GDI-NEW-C118
-      release_tag: ""
       shipped_at: "2026-05-13T15:54:46Z"
     - version: V20
       section: A
       epic: section-A-FR-A.1.8-epic
-      release_tag: ""
       shipped_at: "2026-05-13T16:10:42Z"
     - version: V25
       section: D
       epic: GDI-709
-      release_tag: ""
       shipped_at: "2026-05-13T17:02:21Z"
   reserved:
     - version: V21
@@ -253,10 +254,11 @@ model_registry:
       epic: GDI-660
       release_tag: v0.28.0
       shipped_at: "2026-05-13T15:11:16Z"
+    # release_tag omitted: appended via release.sh --status=released which
+    # left it empty (schema rejects ""). Backfill once tagged. See D-013.
     - surface: review-summary-locale
       section: C
       epic: GDI-NEW-C118
-      release_tag: ""
       shipped_at: "2026-05-13T15:54:48Z"
   pending:
     - surface: review-summary-locale
