@@ -247,7 +247,7 @@ single_writer_files:
     held_by: none
     note: Rarely touched. Lock per-edit; release on commit.
 releases:
-  current_main: v0.27.0
+  current_main: v0.28.0
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -272,20 +272,22 @@ anchor_dependencies:
   - anchor: FR-A.1.9
     description: Translation single-anchor surface
     section: A
-    status: in_flight
+    status: shipped
     consumers:
       - fr: C.1.18
         section: C
-        status: blocked_until_anchor_shipped
+        status: available
         note: Reviews translation pass uses the translation surface
       - fr: B.1.9
         section: B
-        status: blocked_until_anchor_shipped
+        status: available
         note: Edge SDK preview-translate consumes the surface
       - fr: J.5.4
         section: J
-        status: blocked_until_anchor_shipped
+        status: available
         note: Test harness needs the surface to render synthetic translations
+    shipped_at: "2026-05-13T14:52:03Z"
+    shipped_release: v0.28.0
   - anchor: FR-F.1.5.1
     description: AI-elevated product matching
     section: F
