@@ -144,6 +144,11 @@ flyway:
       epic: GDI-692
       release_tag: v0.30.0
       shipped_at: "2026-05-13T18:29:15Z"
+    - version: V25
+      section: B
+      epic: GDI-708
+      release_tag: v0.31.0
+      shipped_at: "2026-05-13T19:47:22Z"
   reserved:
     - version: V21
       section: A
@@ -175,13 +180,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-13T17:02:29Z"
       expires_at: "2026-05-14T17:02:29Z"
-    - version: V25
-      section: B
-      epic: GDI-708
-      fr: FR-B.1.9
-      status: reserved
-      reserved_at: "2026-05-13T18:05:13Z"
-      expires_at: "2026-05-14T18:05:13Z"
     - version: V27
       section: C
       epic: GDI-C-1-7
@@ -306,7 +304,7 @@ single_writer_files:
     held_by: GDI-708
     until: "2026-05-14T18:05:17Z"
     reason: reserved via reserve.sh
-    append_list_conflict_class: true  # GDI-692 retro: locks are LOAD-BEARING here
+    append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
     held_by: GDI-708
     until: "2026-05-14T18:05:15Z"
