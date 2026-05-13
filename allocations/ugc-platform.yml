@@ -182,6 +182,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-13T18:05:13Z"
       expires_at: "2026-05-14T18:05:13Z"
+    - version: V27
+      section: C
+      epic: GDI-C-1-7
+      fr: FR-C.1.7
+      status: reserved
+      reserved_at: "2026-05-13T18:59:37Z"
+      expires_at: "2026-05-14T18:59:37Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -292,12 +299,12 @@ single_writer_files:
     held_by: GDI-708
     until: "2026-05-14T18:05:17Z"
     reason: reserved via reserve.sh
-    append_list_conflict_class: true  # GDI-692 retro: locks are LOAD-BEARING here
+    append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
     held_by: GDI-708
     until: "2026-05-14T18:05:15Z"
     reason: reserved via reserve.sh
-    append_list_conflict_class: true  # GDI-692 retro: locks are LOAD-BEARING here
+    append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
     held_by: none
     note: |
