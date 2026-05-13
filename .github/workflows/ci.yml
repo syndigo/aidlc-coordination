@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yamllint
+        run: pip install yamllint==1.35.1
+      - name: Lint YAML
+        run: |
+          yamllint -d "{extends: relaxed, rules: {line-length: {max: 200}}}" \
+            allocations/ .github/workflows/
+
+  shellcheck:
+    name: shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run shellcheck
+        run: shellcheck --severity=warning scripts/*.sh
+
+  schema-validate:
+    name: schema-validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install ajv-cli + yaml converter
+        run: npm install -g ajv-cli@5 ajv-formats@3 js-yaml@4
+      - name: Convert YAML to JSON for ajv
+        run: |
+          for f in allocations/*.yml; do
+            node -e "const yaml=require('js-yaml');const fs=require('fs');fs.writeFileSync('$f.json', JSON.stringify(yaml.load(fs.readFileSync('$f','utf8')),null,2));"
+          done
+      - name: Validate against schema
+        run: |
+          for f in allocations/*.yml.json; do
+            ajv validate -s schemas/allocation.yml.schema.json -d "$f" --all-errors -c ajv-formats
+          done
+
+  markdown-structure:
+    name: markdown-structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required docs exist
+        run: |
+          set -e
+          for f in README.md bootstrap-log.md \
+                   docs/parallel-session-playbook.md \
+                   docs/how-it-works.md \
+                   docs/decisions.md \
+                   personas/section-owner.md \
+                   personas/release-coordinator.md \
+                   personas/compliance-reviewer.md \
+                   personas/retro-aggregator.md; do
+            test -f "$f" || { echo "MISSING: $f"; exit 1; }
+          done
+          echo "All required docs present."
+
+  yq-smoke:
+    name: yq-smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install yq v4
+        run: |
+          sudo wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+      - name: Run status.sh
+        run: |
+          chmod +x scripts/*.sh
+          ./scripts/status.sh --product ugc-platform || true

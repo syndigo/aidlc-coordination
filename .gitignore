@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Local tool state
+node_modules/
+.python-version
+__pycache__/
+*.pyc
+.venv/
+
+# Local script scratch
+scratch/
+tmp/
+*.local.yml
+*.local.yaml
+
+# Lockfiles for transient tooling (we don't ship Node/Python source)
+package-lock.json
+yarn.lock
+poetry.lock
