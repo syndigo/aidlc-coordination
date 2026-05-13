@@ -347,6 +347,10 @@ releases:
       proposed_tag: v0.28.0
       anchor_sha: pending
       note: Locale auto-translation (FR-A.1.9)
+    - section: C
+      epic: GDI-C-1-7
+      proposed_tag: v0.31.0
+      anchor_sha: pending
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
