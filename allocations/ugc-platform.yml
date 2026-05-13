@@ -139,6 +139,11 @@ flyway:
       epic: GDI-699
       release_tag: v0.29.0
       shipped_at: "2026-05-13T18:20:59Z"
+    - version: V24
+      section: C
+      epic: GDI-692
+      release_tag: v0.30.0
+      shipped_at: "2026-05-13T18:29:15Z"
   reserved:
     - version: V21
       section: A
@@ -163,13 +168,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V24
-      section: C
-      epic: GDI-692
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-13T15:54:49Z"
-      expires_at: "2026-05-14T15:54:49Z"
     - version: V26
       section: D
       epic: GDI-709
