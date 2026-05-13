@@ -230,9 +230,9 @@ single_writer_files:
   # held_by: none means the file is currently unlocked — sections may grab
   # a short-lived lock per edit.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt
-    held_by: section-A-FR-A.1.9-epic
-    until: 2026-05-14T22:00:00Z
-    reason: catalog-locale-translation surface registration
+    held_by: none
+    until: "2026-05-13T15:11:13Z"
+    reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
     held_by: section-A-FR-A.1.9-epic
     until: 2026-05-14T22:00:00Z
