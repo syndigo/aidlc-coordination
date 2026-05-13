@@ -251,6 +251,43 @@ zero behavior change). Ad-hoc force-on via `--coordinate` flag.
 
 ---
 
+## Pending — D-007 through D-012 (input from GDI-708 run, 2026-05-13)
+
+The parallel-run experience of `/sdlc --profile ugc-platform GDI-708` (Section B FR-B.1.9
+shipped against the live registry) surfaced six concrete gaps in the Day-1 design.
+Full write-up is in `docs/lessons-from-GDI-708.md`. Summary of proposed ADRs:
+
+- **D-007** — `conflict-check.sh --verify-against <ref>` for the Flyway resource family,
+  closing the gap where an agent fabricated a precondition (`V24__review_summaries.sql`
+  that didn't exist) and the registry trusted the claim.
+- **D-008** — Worktree-aware reservation. Same workstation + multiple `/sdlc` tabs +
+  one shared clone = filesystem-level stomping the registry cannot see. Prescribe
+  per-tab `git worktree add`; add `worktree:` field to reservations.
+- **D-009** — Optional `--quality-gate-evidence` on `release.sh --status shipped`.
+  CI green is not the same as local green — observed CI/local divergence on
+  GDI-708 PR #110 (Mockk + Kotlin sealed-when behavior diff or stale Gradle cache).
+- **D-010** — Flyway-sequence-gap warnings in `status.sh`. GDI-708 swap left V24
+  empty between V20 (Section A reserved) and V25 (Section B reserved).
+- **D-011** — `release.sh --resource anchor-consumer --consumer-verified=<symbol>`.
+  Refuse to mark an anchor consumer as `shipped` if the named code-symbol isn't
+  grep-able from the release-tag SHA. Observed: GDI-714 implementation skipped the
+  FR-A.1.9 anchor call entirely while the registry would have happily marked it as
+  consumed.
+- **D-012** — `--ignore-self <epic>` on `conflict-check.sh` so an orchestrator can
+  ask "would I conflict with anyone other than myself?"
+
+Each will become its own ADR once an operator has time to draft and commit them.
+This pending block exists so future readers find the lessons file from the canonical
+ADR log.
+
+### References
+
+- `docs/lessons-from-GDI-708.md` — full diagnostic write-up with severity + effort
+- GDI-708 epic: https://syndigo.atlassian.net/browse/GDI-708
+- GDI-708 child stories: GDI-710..GDI-716
+
+---
+
 ## How to add an ADR
 
 ```sh
