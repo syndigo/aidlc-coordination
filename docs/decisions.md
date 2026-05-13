@@ -181,6 +181,76 @@ raise approval count to 1 once a second engineer is on the repo.
 
 ---
 
+## D-006 (2026-05-13) — Integration model: orchestrator hooks vs wrapper skill
+
+**Status:** Accepted
+**Date:** 2026-05-13
+**Decider:** GDI-677 (Stage 3 Design)
+
+> Note: The companion ADD originally specified this entry as D-004, but D-001..D-005
+> were already taken when D-019 seeded the decisions log. Renumbered to D-006 to
+> preserve append-only ordering. Cross-references in the ADR/ADD now resolve here.
+
+### Context
+
+GDI-669 shipped `scripts/reserve.sh`, `scripts/release.sh`, `scripts/conflict-check.sh`
+as a Day-1 file-based state machine. The integration question for GDI-677: how should
+`/sdlc` consume these scripts so parallel sessions get coordination automatically?
+
+### Options considered
+
+1. **Extend `/sdlc` itself** with Phase 0.6 + Stage 10 hooks (chosen).
+2. **Create a `/sdlc-coordinated` wrapper skill** that calls `/sdlc` internally
+   (rejected).
+3. **Pre-commit git hook in the target repo** (rejected — bypassable with
+   `--no-verify`, wrong timing).
+
+### Decision
+
+Extend `/sdlc` directly. The new Phase 0.6 phase + Stage 10 sub-step are the
+orchestrator hooks. Opt-in via `profile.coordination.enabled` (default false →
+zero behavior change). Ad-hoc force-on via `--coordinate` flag.
+
+### Rationale
+
+- **Single source of truth.** One `SKILL.md`, one canonical orchestration flow.
+- **Propagation via existing `./install.sh`.** No new install path; updates to
+  the skill ride the same well-trodden mechanism.
+- **Profile-driven opt-in scales to new products.** Adding `coordination:` to a
+  product's profile is the activation gesture; no changes to the skill required.
+- **Preserves all existing /sdlc behavior.** Products without `coordination:` see
+  no change.
+
+### Rejected alternatives
+
+- **Wrapper skill.** Two skills to maintain. Propagation drift inevitable. Harder
+  to make opt-in because the wrapper would need its own profile-detection logic.
+- **Pre-commit hook.** Wrong timing — fires at commit, not at dispatch. Bypassable
+  with `--no-verify`. Doesn't catch reservations needed BEFORE writing code.
+
+### Consequences
+
+**Positive:**
+- Parallel sessions get coordination for free once their product's profile opts in.
+- Stage 10 release.sh closes the loop without any operator action.
+- Manual mode (running the scripts by hand) remains the same — fallback path is
+  unchanged.
+
+**Negative:**
+- `SKILL.md` grows by ~120 lines. Mitigated by the new section being clearly
+  scoped to Phase 0.6 and Stage 10 (no scattered changes).
+- Per-product opt-in means profiles must individually enable the feature. The
+  first product (UGC Platform) opts in via the GDI-677 PR; others follow per
+  their own schedule.
+
+### References
+
+- ADR-GDI-677: https://syndigo.atlassian.net/wiki/spaces/ARCH/pages/4581097480
+- ADD-GDI-677: https://syndigo.atlassian.net/wiki/spaces/ARCH/pages/4580868116
+- Sibling: GDI-669 (Day-1 file-based coordination service)
+
+---
+
 ## How to add an ADR
 
 ```sh

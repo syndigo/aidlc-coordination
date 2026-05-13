@@ -31,7 +31,82 @@ belong to their section. They cooperate with other Section Owners via this regis
 - Release tag cutting (that's the Release Coordinator's job)
 - The TFC deploy queue (Day-1: not used; deferred)
 
-## Lifecycle: a typical day
+## Integrated mode (post-GDI-677 — default)
+
+As of GDI-677 (May 2026), `/sdlc --profile ugc-platform` invokes the coordination
+scripts automatically. Section Owners no longer call `conflict-check.sh` / `reserve.sh`
+/ `release.sh` by hand for the standard flow — the orchestrator does it at Phase 0.6
+(before Stage 1) and Stage 10 (after Close). The Section Owner only needs to:
+
+1. Make sure the epic carries a `section-A`..`section-J` label (the orchestrator reads
+   the section letter from there). If the label is missing or ambiguous, the
+   orchestrator will ask once and lock in the answer.
+2. Run `/sdlc --profile ugc-platform` against the ticket as usual.
+3. Watch the orchestrator's user-visible status line for `🔒 Coordination check…`,
+   `✅ GO — N resources reserved`, and at Stage 10 `📤 Releasing coordination
+   reservations…` / `✅ Released N resources`.
+
+### Example terminal session (integrated mode)
+
+```text
+$ /sdlc GDI-720
+🚀 SDLC orchestrator starting…
+   Loading profile: ugc-platform
+   Run size: M (3 size signals: schema_change, new_api, files_estimated=8)
+
+🔒 Coordination check (--coordinate) starting…
+   Repo:    ~/.aidlc-coordination/  (clean checkout)
+   Section: A          (from epic label section-A)
+   FR:      FR-A.1.9   (from epic problem statement)
+   Files-to-touch (computed from touch_patterns):
+     - services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt
+     - services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
+     - services/ugc-api/src/main/resources/db/migration/V19__*.sql
+   conflict-check.sh → GO
+   reserve.sh × 3    → held until 2026-05-14T22:00Z
+✅ GO — 3 resources reserved
+
+… Phase 0.7 intent validation …
+… Stages 1–9 …
+
+▶ Stage 10: Close
+📤 Releasing coordination reservations…
+   release.sh × 3 → status=shipped, release_tag=v0.28.0
+✅ Released 3 resources
+
+#### FINAL REPORT
+…
+#### Coordination (Phase 0.6 ran)
+| Resource        | ID                              | Reserved at         | Released at         | Status   |
+|-----------------|---------------------------------|---------------------|---------------------|----------|
+| flyway          | V19                             | 2026-05-13T18:02Z   | 2026-05-13T21:48Z   | shipped  |
+| model-registry  | catalog-locale-translation      | 2026-05-13T18:02Z   | 2026-05-13T21:48Z   | shipped  |
+| file-lock       | ModelRegistry.kt                | 2026-05-13T18:02Z   | 2026-05-13T21:48Z   | shipped  |
+```
+
+If `conflict-check.sh` returns `WAIT`, the orchestrator BLOCKS before Stage 1 with a
+structured message naming the section/epic holding the lock and the expiry timestamp.
+The Section Owner can wait, swap tickets, or coordinate with the holding section.
+
+### When to fall back to manual mode
+
+- Profile does not have `coordination.enabled: true` (i.e. product hasn't opted in yet).
+- Running outside `/sdlc` entirely (ad-hoc registry inspection, retro queries, manual
+  reservation extension on a long-running ticket).
+- Debugging an orchestrator-level issue with the coordination check (use the scripts
+  directly to confirm registry state matches expectations).
+
+Use `/sdlc --coordinate` to force-on the integrated coordination check for a profile
+that hasn't opted in. Use `--files-to-touch f1,f2,...` to override the regex-computed
+file list when it misses or over-matches.
+
+---
+
+## Manual mode (fallback)
+
+The manual-mode lifecycle below is preserved for the cases listed above. The flow is
+identical to what `/sdlc --profile ugc-platform` now performs at Phase 0.6 and
+Stage 10 — these are the same scripts.
 
 A Section Owner session usually goes through five phases. The registry-touching steps
 are highlighted.
