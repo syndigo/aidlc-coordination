@@ -123,15 +123,12 @@ flyway:
       epic: GDI-NEW-C118
       release_tag: ""
       shipped_at: "2026-05-13T15:54:46Z"
-  reserved:
     - version: V20
       section: A
       epic: section-A-FR-A.1.8-epic
-      fr: FR-A.1.8
-      status: reserved
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-15T22:00:00Z
-      note: Family / variant clustering
+      release_tag: ""
+      shipped_at: "2026-05-13T16:10:42Z"
+  reserved:
     - version: V21
       section: A
       epic: section-A-FR-A.1.12-epic
