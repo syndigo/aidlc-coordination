@@ -1,0 +1,28 @@
+[
+  {
+    "ticket": "GDI-669",
+    "profile": "generic",
+    "repo": "syndigo/aidlc-coordination",
+    "date": "2026-05-13",
+    "size": "S",
+    "verdict": "SHIPPED",
+    "duration_s": 4200,
+    "coverage_pct": null,
+    "stages_pass_first_attempt": 9,
+    "stages_total": 10,
+    "stage_blocks": [
+      "Stage 7 \u2014 --json mode broken (yq --arg unsupported in v4), remediated in 1 commit"
+    ],
+    "pentest_criticals": 0,
+    "pentest_skip_reason": "No deployed HTTP service",
+    "regression_failures": 0,
+    "observe_gaps": 0,
+    "release_tag": "v0.1.0",
+    "pr_url": "https://github.com/syndigo/aidlc-coordination/pull/1",
+    "retro_pr_url": "https://github.com/syndigo/aidlc-coordination/pull/2",
+    "retro_followup_tickets": [
+      "GDI-676"
+    ],
+    "session_doc": "docs/aidlc-session-GDI-669-bootstrap.md"
+  }
+]
