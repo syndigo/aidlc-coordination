@@ -149,6 +149,11 @@ flyway:
       epic: GDI-708
       release_tag: v0.31.0
       shipped_at: "2026-05-13T19:47:22Z"
+    - version: V26
+      section: D
+      epic: GDI-709
+      release_tag: v0.32.0
+      shipped_at: "2026-05-13T20:27:36Z"
   reserved:
     - version: V21
       section: A
@@ -173,13 +178,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V26
-      section: D
-      epic: GDI-709
-      fr: FR-D.1
-      status: reserved
-      reserved_at: "2026-05-13T17:02:29Z"
-      expires_at: "2026-05-14T17:02:29Z"
     - version: V27
       section: C
       epic: GDI-C-1-7
@@ -348,7 +346,7 @@ releases:
     A: v0.28.x
     B: v0.29.x
     C: v0.30.x
-    D: v0.32.x   # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
+    D: v0.32.x # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
     E: v0.32.x
     F: v0.33.x
     G: v0.34.x
