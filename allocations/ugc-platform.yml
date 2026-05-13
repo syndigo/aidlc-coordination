@@ -276,15 +276,15 @@ anchor_dependencies:
     consumers:
       - fr: C.1.18
         section: C
-        status: available
+        status: not_started
         note: Reviews translation pass uses the translation surface
       - fr: B.1.9
         section: B
-        status: available
+        status: not_started
         note: Edge SDK preview-translate consumes the surface
       - fr: J.5.4
         section: J
-        status: available
+        status: not_started
         note: Test harness needs the surface to render synthetic translations
     shipped_at: "2026-05-13T14:52:03Z"
     shipped_release: v0.28.0

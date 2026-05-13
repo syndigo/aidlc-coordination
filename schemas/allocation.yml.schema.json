@@ -46,95 +46,204 @@
     },
     "shippedFlyway": {
       "type": "object",
-      "required": ["version", "epic"],
+      "required": [
+        "version",
+        "epic"
+      ],
       "additionalProperties": false,
       "properties": {
-        "version": { "$ref": "#/definitions/flywayVersion" },
-        "section": { "$ref": "#/definitions/sectionLetter" },
-        "epic": { "type": "string" },
-        "release_tag": { "$ref": "#/definitions/semverTag" },
-        "shipped_at": { "$ref": "#/definitions/isoTimestamp" },
-        "note": { "type": "string" },
-        "status": { "$ref": "#/definitions/status" }
+        "version": {
+          "$ref": "#/definitions/flywayVersion"
+        },
+        "section": {
+          "$ref": "#/definitions/sectionLetter"
+        },
+        "epic": {
+          "type": "string"
+        },
+        "release_tag": {
+          "$ref": "#/definitions/semverTag"
+        },
+        "shipped_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "note": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/status"
+        }
       }
     },
     "reservedFlyway": {
       "type": "object",
-      "required": ["version", "section", "epic"],
+      "required": [
+        "version",
+        "section",
+        "epic"
+      ],
       "additionalProperties": false,
       "properties": {
-        "version": { "$ref": "#/definitions/flywayVersion" },
-        "section": { "$ref": "#/definitions/sectionLetter" },
-        "epic": { "type": "string" },
-        "fr": { "type": "string" },
-        "status": { "$ref": "#/definitions/status" },
-        "reserved_at": { "$ref": "#/definitions/isoTimestamp" },
-        "expires_at": { "$ref": "#/definitions/isoTimestamp" },
-        "note": { "type": "string" }
+        "version": {
+          "$ref": "#/definitions/flywayVersion"
+        },
+        "section": {
+          "$ref": "#/definitions/sectionLetter"
+        },
+        "epic": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/status"
+        },
+        "reserved_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "expires_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     },
     "shippedModelSurface": {
       "type": "object",
-      "required": ["surface", "section", "epic"],
+      "required": [
+        "surface",
+        "section",
+        "epic"
+      ],
       "additionalProperties": false,
       "properties": {
-        "surface": { "type": "string" },
-        "section": { "$ref": "#/definitions/sectionLetter" },
-        "epic": { "type": "string" },
-        "release_tag": { "$ref": "#/definitions/semverTag" },
-        "shipped_at": { "$ref": "#/definitions/isoTimestamp" }
+        "surface": {
+          "type": "string"
+        },
+        "section": {
+          "$ref": "#/definitions/sectionLetter"
+        },
+        "epic": {
+          "type": "string"
+        },
+        "release_tag": {
+          "$ref": "#/definitions/semverTag"
+        },
+        "shipped_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        }
       }
     },
     "pendingModelSurface": {
       "type": "object",
-      "required": ["surface", "section", "epic", "status"],
+      "required": [
+        "surface",
+        "section",
+        "epic",
+        "status"
+      ],
       "additionalProperties": false,
       "properties": {
-        "surface": { "type": "string" },
-        "section": { "$ref": "#/definitions/sectionLetter" },
-        "epic": { "type": "string" },
-        "fr": { "type": "string" },
-        "status": { "$ref": "#/definitions/status" },
-        "reserved_at": { "$ref": "#/definitions/isoTimestamp" },
-        "expires_at": { "$ref": "#/definitions/isoTimestamp" },
-        "note": { "type": "string" }
+        "surface": {
+          "type": "string"
+        },
+        "section": {
+          "$ref": "#/definitions/sectionLetter"
+        },
+        "epic": {
+          "type": "string"
+        },
+        "fr": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/definitions/status"
+        },
+        "reserved_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "expires_at": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     },
     "singleWriterFile": {
       "type": "object",
-      "required": ["file", "held_by"],
+      "required": [
+        "file",
+        "held_by"
+      ],
       "additionalProperties": false,
       "properties": {
-        "file": { "type": "string" },
-        "held_by": { "type": "string" },
-        "until": { "$ref": "#/definitions/isoTimestamp" },
-        "reason": { "type": "string" },
-        "note": { "type": "string" }
+        "file": {
+          "type": "string"
+        },
+        "held_by": {
+          "type": "string"
+        },
+        "until": {
+          "$ref": "#/definitions/isoTimestamp"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     },
     "anchorConsumer": {
       "type": "object",
-      "required": ["fr", "section", "status"],
+      "required": [
+        "fr",
+        "section",
+        "status"
+      ],
       "additionalProperties": false,
       "properties": {
-        "fr": { "type": "string" },
-        "section": { "$ref": "#/definitions/sectionLetter" },
-        "status": { "$ref": "#/definitions/status" },
-        "note": { "type": "string" }
+        "fr": {
+          "type": "string"
+        },
+        "section": {
+          "$ref": "#/definitions/sectionLetter"
+        },
+        "status": {
+          "$ref": "#/definitions/status"
+        },
+        "note": {
+          "type": "string"
+        }
       }
     }
   },
   "properties": {
     "product": {
       "type": "object",
-      "required": ["name", "repo", "sections"],
+      "required": [
+        "name",
+        "repo",
+        "sections"
+      ],
       "additionalProperties": false,
       "properties": {
-        "name": { "type": "string", "minLength": 1 },
-        "repo": { "type": "string", "pattern": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$" },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "repo": {
+          "type": "string",
+          "pattern": "^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$"
+        },
         "sections": {
           "type": "array",
-          "items": { "$ref": "#/definitions/sectionLetter" },
+          "items": {
+            "$ref": "#/definitions/sectionLetter"
+          },
           "minItems": 1,
           "uniqueItems": true
         }
@@ -142,60 +251,127 @@
     },
     "flyway": {
       "type": "object",
-      "required": ["shipped", "reserved", "next_free"],
+      "required": [
+        "shipped",
+        "reserved",
+        "next_free"
+      ],
       "additionalProperties": false,
       "properties": {
-        "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedFlyway" } },
-        "reserved": { "type": "array", "items": { "$ref": "#/definitions/reservedFlyway" } },
-        "next_free": { "$ref": "#/definitions/flywayVersion" },
+        "shipped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/shippedFlyway"
+          }
+        },
+        "reserved": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/reservedFlyway"
+          }
+        },
+        "next_free": {
+          "$ref": "#/definitions/flywayVersion"
+        },
         "test_fixture_range": {
           "type": "object",
-          "required": ["shipped", "reserved", "next_free"],
+          "required": [
+            "shipped",
+            "reserved",
+            "next_free"
+          ],
           "additionalProperties": false,
           "properties": {
-            "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedFlyway" } },
-            "reserved": { "type": "array", "items": { "$ref": "#/definitions/reservedFlyway" } },
-            "next_free": { "$ref": "#/definitions/flywayVersion" }
+            "shipped": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/shippedFlyway"
+              }
+            },
+            "reserved": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/reservedFlyway"
+              }
+            },
+            "next_free": {
+              "$ref": "#/definitions/flywayVersion"
+            }
           }
         }
       }
     },
     "model_registry": {
       "type": "object",
-      "required": ["shipped", "pending"],
+      "required": [
+        "shipped",
+        "pending"
+      ],
       "additionalProperties": false,
       "properties": {
-        "shipped": { "type": "array", "items": { "$ref": "#/definitions/shippedModelSurface" } },
-        "pending": { "type": "array", "items": { "$ref": "#/definitions/pendingModelSurface" } }
+        "shipped": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/shippedModelSurface"
+          }
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/pendingModelSurface"
+          }
+        }
       }
     },
     "single_writer_files": {
       "type": "array",
-      "items": { "$ref": "#/definitions/singleWriterFile" },
+      "items": {
+        "$ref": "#/definitions/singleWriterFile"
+      },
       "minItems": 1
     },
     "releases": {
       "type": "object",
-      "required": ["current_main", "next_per_section"],
+      "required": [
+        "current_main",
+        "next_per_section"
+      ],
       "additionalProperties": false,
       "properties": {
-        "current_main": { "$ref": "#/definitions/semverTag" },
+        "current_main": {
+          "$ref": "#/definitions/semverTag"
+        },
         "next_per_section": {
           "type": "object",
-          "additionalProperties": { "$ref": "#/definitions/semverTag" }
+          "additionalProperties": {
+            "$ref": "#/definitions/semverTag"
+          }
         },
         "in_flight": {
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["section", "epic"],
+            "required": [
+              "section",
+              "epic"
+            ],
             "additionalProperties": false,
             "properties": {
-              "section": { "$ref": "#/definitions/sectionLetter" },
-              "epic": { "type": "string" },
-              "proposed_tag": { "$ref": "#/definitions/semverTag" },
-              "anchor_sha": { "type": "string" },
-              "note": { "type": "string" }
+              "section": {
+                "$ref": "#/definitions/sectionLetter"
+              },
+              "epic": {
+                "type": "string"
+              },
+              "proposed_tag": {
+                "$ref": "#/definitions/semverTag"
+              },
+              "anchor_sha": {
+                "type": "string"
+              },
+              "note": {
+                "type": "string"
+              }
             }
           }
         }
@@ -205,27 +381,70 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["anchor", "section", "status", "consumers"],
+        "required": [
+          "anchor",
+          "section",
+          "status",
+          "consumers"
+        ],
         "additionalProperties": false,
         "properties": {
-          "anchor": { "type": "string" },
-          "description": { "type": "string" },
-          "section": { "$ref": "#/definitions/sectionLetter" },
-          "status": { "$ref": "#/definitions/status" },
-          "consumers": { "type": "array", "items": { "$ref": "#/definitions/anchorConsumer" } }
+          "anchor": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "section": {
+            "$ref": "#/definitions/sectionLetter"
+          },
+          "status": {
+            "$ref": "#/definitions/status"
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/anchorConsumer"
+            }
+          },
+          "shipped_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "shipped_release": {
+            "type": "string",
+            "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+"
+          }
         }
       }
     },
     "tfc_deploy_queue": {
       "type": "object",
-      "required": ["current_deployed_sha", "current_desired_sha", "pending_pushes"],
+      "required": [
+        "current_deployed_sha",
+        "current_desired_sha",
+        "pending_pushes"
+      ],
       "additionalProperties": false,
       "properties": {
-        "current_deployed_sha": { "type": "string" },
-        "current_desired_sha": { "type": "string" },
-        "pending_pushes": { "type": "array" },
-        "next_batch_window": { "type": ["string", "null"] },
-        "note": { "type": "string" }
+        "current_deployed_sha": {
+          "type": "string"
+        },
+        "current_desired_sha": {
+          "type": "string"
+        },
+        "pending_pushes": {
+          "type": "array"
+        },
+        "next_batch_window": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "note": {
+          "type": "string"
+        }
       }
     }
   }
