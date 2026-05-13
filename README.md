@@ -123,3 +123,8 @@ two-session example.
 **Day 1 — bootstrap.** This repo was greenfield-created on 2026-05-12 under epic
 [GDI-669](https://syndigo.atlassian.net/browse/GDI-669) and its 6 child stories.
 See [`bootstrap-log.md`](bootstrap-log.md) for the full creation trail (D-019 format).
+
+**Integration shipped (GDI-677):** `/sdlc --profile ugc-platform` now auto-invokes
+Phase 0.6 coordination check + Stage 10 release. See
+[docs/parallel-session-playbook.md](docs/parallel-session-playbook.md) integrated
+mode for the default workflow. Manual mode remains documented as fallback.
