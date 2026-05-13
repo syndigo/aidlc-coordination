@@ -159,6 +159,12 @@ After these run, the FR-A.1.9 anchor is `shipped` and the three blocked consumer
 (C.1.18, B.1.9, J.5.4) move to `free`. The Release Coordinator then pings the
 unblocked sections.
 
+> **Caution — flyway and model-registry must use `--status=shipped` with a real
+> `--release-tag`.** `release.sh` rejects `--status=released` for those resources
+> because it would append a row with an empty `release_tag`, which fails schema
+> validation (`semverTag` rejects `""`). `--status=released` remains valid for
+> `file-lock` (clears `held_by`) and `release-tag` (sets `current_main`). See D-013.
+
 ---
 
 ## Session 2 — Section C (attempted parallel start)
