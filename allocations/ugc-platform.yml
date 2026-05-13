@@ -223,14 +223,12 @@ model_registry:
       epic: GDI-660
       release_tag: v0.28.0
       shipped_at: "2026-05-13T15:11:16Z"
-  pending:
     - surface: review-summary-locale
       section: C
       epic: GDI-NEW-C118
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-13T15:24:22Z"
-      expires_at: "2026-05-14T15:24:22Z"
+      release_tag: ""
+      shipped_at: "2026-05-13T15:54:48Z"
+  pending: []
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
