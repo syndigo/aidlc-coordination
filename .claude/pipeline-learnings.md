@@ -5,6 +5,87 @@
 
 ---
 
+## GDI-677 (/sdlc Coordination integration — Phase 0.6 + Stage 10 hooks) — 2026-05-13
+
+### 1. Branch protection vs solo-operator pipelines — Stage 8 friction
+
+**Symptom:** `gh pr merge 77` against `syndigo/aidlc` failed with "the base branch policy prohibits the merge". Branch protection requires 1 approving review and we ran with a single operator. Used `--admin` override to merge. All required CI checks (`lint`, `test`, `sca`, `secrets`) had PASSED cleanly.
+
+**Root cause:** The aidlc repo's branch protection was authored for multi-operator workflows. Solo-operator `/sdlc` runs have no second human reviewer. The current policy forces every solo run to either (a) override with `--admin`, (b) ask a teammate to LGTM, or (c) wait for an automated reviewer that doesn't exist yet.
+
+**Generalize — pipeline-learning GDI-677 #1:**
+
+> The `/sdlc` orchestrator currently assumes the operator can merge their own PRs. Repos with `required_approving_review_count >= 1` on `main` will trip Stage 8 unless the operator has admin rights. Three options for solo-operator-friendly policy:
+> 1. Reduce `required_approving_review_count` to 0 on tooling/internal repos (matches the aidlc-coordination repo).
+> 2. Configure a bot reviewer (e.g., a dedicated GitHub App that auto-approves on green CI + DoD evidence).
+> 3. Document `--admin` as the official solo-operator path with audit logging.
+
+**Codify — orchestrator update (future epic):** `/sdlc` Stage 8 should detect `required_pull_request_reviews.required_approving_review_count > 0` upfront and explicitly tell the operator: "This repo requires N approvals. Continuing will use --admin override. Authorize?" — before any merge attempt. Prevents the surprise mid-pipeline.
+
+**Codify — repo configuration follow-up:** For each repo in scope of `/sdlc`, decide explicitly which policy applies. Document in the platform profile under a new `branch_protection_policy:` field. Filed as follow-up.
+
+### 2. CodeQL summary check stays "pending" indefinitely — Stage 5 noise
+
+**Symptom:** PR #77's `gh pr checks` output showed `CodeQL pending 0` indefinitely. All sub-jobs (`Analyze (actions)`, `Analyze (javascript-typescript)`, `Analyze (python)`) had PASSED individually. CodeQL is NOT in `required_status_checks.contexts` so it didn't block merge.
+
+**Root cause:** GitHub Apps quirk — the `CodeQL` summary check is reported separately from its sub-jobs and never finalizes when run via the recommended `github/codeql-action` workflow pattern. The sub-jobs (which actually do the analysis) finish cleanly but the "summary" line in the gh CLI output stays "pending".
+
+**Generalize — pipeline-learning GDI-677 #2:**
+
+> When Stage 5 sees a CI check in "pending" state, verify whether it's in `required_status_checks.contexts` before treating as a blocker. Use:
+> ```bash
+> gh api repos/<owner>/<repo>/branches/main/protection --jq '.required_status_checks.contexts'
+> ```
+> Pending non-required checks are noise, not blockers.
+
+**Codify — Stage 5 dispatch prompt update:** Before BLOCKing on a pending check, the agent should query branch protection to confirm whether the pending check is required. If not required, mark as INFORMATIONAL and proceed.
+
+### 3. ADR-specified decision number was already taken — Stage 4 auto-renumber
+
+**Symptom:** ADD-GDI-677 specified that `decisions.md` should get a new "D-004" entry. Stage 4 agent found that D-001 through D-005 already existed in the file (seeded during GDI-669 bootstrap). The agent correctly renumbered to D-006 to preserve the append-only ordering rule.
+
+**Root cause:** ADD authoring happens before Stage 4 reads the actual decisions.md file. The numbering collision was knowable from Stage 3 if the agent had read decisions.md, but the ADD just specified "D-004" by default.
+
+**Generalize — pipeline-learning GDI-677 #3:**
+
+> When an ADD specifies a new entry in an append-only numbered log (decisions.md, ADR registry, RFC index), Stage 3 OR Stage 4 MUST read the current file head to determine the actual next free number. Don't trust the ADD's number — it was written before the file was inspected.
+
+**Codify — Stage 3 design rule:** When the ADD specifies a numbered append-only log entry, the ADD MUST cite the current head number (e.g., "D-005 is current head; this run adds D-006") rather than guess. Stage 3 agent should read the file as part of design.
+
+**Codify — Stage 4 development rule:** If the ADD specifies a numbered append-only entry and Stage 4 finds the number is taken, renumber to the next free + call it out in the PR body. This run's Stage 4 agent did exactly this correctly.
+
+### 4. M-sized ADD with exact line numbers eliminated Stage 4 discovery time
+
+**Symptom (positive):** Stage 3 ADD identified exact SKILL.md line numbers for Phase 0.6 insertion (~451), Stage 10 sub-step (~1204), state tracker block (~136), and FINAL REPORT section (~1292). Stage 4 went straight to editing — zero exploration time.
+
+**Generalize — pipeline-learning GDI-677 #4:**
+
+> For multi-file orchestrator-prompt or large-config edits, Stage 3 should include line numbers (or robust section anchors) for every insertion point. Cost: ~30 sec of grep during Stage 3. Benefit: Stage 4 avoids 5-15 min of file-discovery time per edit target.
+
+**Codify — Stage 3 design rule:** When ADD specifies edits to a file >500 lines OR with multiple distinct insertion points, the ADD MUST include line numbers for each target. Use `grep -n` output verbatim. Stage 4 verifies the numbers haven't drifted (re-greps before editing).
+
+### 5. ~/.aidlc-coordination/ auto-clone works exactly as designed — first live test
+
+**Symptom (positive):** Stage 8 smoke test scenario started with `~/.aidlc-coordination/` not present on the workstation. The Phase 0.6 protocol's auto-clone step was exercised live for the first time. Cloned cleanly, all scripts ran, all three scenarios (GO, WAIT file-lock, WAIT anchor-dep) produced correct exit codes and parseable JSON.
+
+**Generalize — pipeline-learning GDI-677 #5:**
+
+> The Day-1 design choice in GDI-669 (file-based state machine + git as audit trail) holds up under integration with `/sdlc`. The auto-clone path is now load-bearing — a future regression in script behavior would be caught at Phase 0.6 against any product's registry. No tighter binding needed.
+
+**Codify:** No action — this is informational confirmation that the GDI-669 design works. Reaffirm the file-based approach in any future "should we move to a hosted service?" discussion.
+
+### 6. Profile validation doesn't yet cover the new `coordination:` field
+
+**Symptom:** aidlc's `validate-profiles` CI job passed on PR #77, but the job's underlying schema does NOT yet validate the shape of the `coordination:` block. A malformed `coordination:` field (wrong type for `enabled`, missing `repo_path`, bad regex in `touch_patterns`) would slip through.
+
+**Generalize — pipeline-learning GDI-677 #6:**
+
+> When a `/sdlc` epic adds a new top-level field to the platform profile YAML, the same epic SHOULD update the profile validation schema to cover the new field. Catches malformed profile edits at PR time instead of at Phase 0.6 runtime.
+
+**Codify — Stage 4 development rule:** When `shared/profiles/<product>.yml` gains a new top-level key, Stage 4 MUST also update `scripts/validate-profiles.py` (or wherever the validation lives) to assert the shape of the new key. Filed as a follow-up ticket since it was out of scope for this run.
+
+---
+
 ## GDI-669 (Bootstrap — registry + scripts + personas) — 2026-05-13
 
 ### 1. yq v4 does NOT support `--arg` (jq's variable-binding flag) — Stage 7 catch
