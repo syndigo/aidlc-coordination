@@ -31,17 +31,49 @@ log_err() {
   printf '[ERROR] %s\n' "$1" >&2
 }
 
+# JSON-escape a string for inclusion as a JSON string value.
+# Handles: backslash, double-quote, control chars (newline, carriage return,
+# tab, backspace, form-feed) per RFC 8259. Other control chars (<0x20) are
+# emitted as \u00XX escapes.
+#
+# Pure-bash (no jq/yq) because emit_json is on the hot path of every script
+# call and the surrounding scripts are POSIX-portable. mikefarah/yq v4 does
+# NOT support jq's --arg flag, so we cannot delegate quoting to yq.
+json_escape() {
+  s="$1"
+  # Order matters: backslash MUST be escaped first, otherwise we double-escape
+  # the backslashes we introduce for other replacements.
+  s="$(printf '%s' "$s" | sed \
+    -e 's/\\/\\\\/g' \
+    -e 's/"/\\"/g' \
+    -e 's/	/\\t/g')"
+  # Newlines: convert literal LF to the two-character sequence \n.
+  # Using awk because sed handling of embedded newlines is non-portable.
+  s="$(printf '%s' "$s" | awk 'BEGIN{ORS=""} {if (NR>1) printf "\\n"; printf "%s", $0}')"
+  # Carriage returns -> \r (rare, but be defensive).
+  s="$(printf '%s' "$s" | sed -e 's/\r/\\r/g')"
+  printf '%s' "$s"
+}
+
 # Emit a structured JSON line on stdout when --json is set.
 # Args: $1 = "go|wait|reserved|released|error", $2 = "reason text"
+#
+# Shape: {"status": "...", "reason": "...", "at": "ISO-8601 UTC"}
+#
+# Why pure bash: mikefarah/yq v4 does not implement jq's variable-binding
+# flag, and a yq -n '{...}' with shell-interpolated strings is fragile
+# against quotes and newlines in $reason (conflict-check.sh emits multi-line
+# conflict lists). The output shape is small and fixed, so hand-rolled JSON
+# is simpler than depending on a YAML processor for serialization.
 emit_json() {
   status="$1"
   reason="$2"
-  # Use yq to assemble JSON safely (handles quoting).
-  yq -o=json -n \
-    --arg status "$status" \
-    --arg reason "$reason" \
-    --arg ts "$(iso_now)" \
-    '{status: $status, reason: $reason, at: $ts}'
+  ts="$(iso_now)"
+  esc_status="$(json_escape "$status")"
+  esc_reason="$(json_escape "$reason")"
+  esc_ts="$(json_escape "$ts")"
+  printf '{"status":"%s","reason":"%s","at":"%s"}\n' \
+    "$esc_status" "$esc_reason" "$esc_ts"
 }
 
 iso_now() {

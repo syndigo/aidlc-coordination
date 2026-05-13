@@ -54,10 +54,10 @@ if [ "$EMIT_JSON" = "1" ]; then
         "pending_count": (.model_registry.pending | length)
       },
       "single_writer_locks": [
-        .single_writer_files[] | select(.held_by != "none") | {file: .file, held_by: .held_by, until: .until}
+        .single_writer_files[] | select(.held_by != "none") | {"file": .file, "held_by": .held_by, "until": .until}
       ],
       "anchors_in_flight": [
-        .anchor_dependencies[] | select(.status == "in_flight") | {anchor: .anchor, section: .section}
+        .anchor_dependencies[] | select(.status == "in_flight") | {"anchor": .anchor, "section": .section}
       ]
     }
   ' "$YML"
