@@ -346,7 +346,7 @@ single_writer_files:
     until: "2026-05-14T20:16:45Z"
     reason: reserved via reserve.sh
 releases:
-  current_main: v0.31.0
+  current_main: v0.33.0
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -364,10 +364,6 @@ releases:
       proposed_tag: v0.28.0
       anchor_sha: pending
       note: Locale auto-translation (FR-A.1.9)
-    - section: C
-      epic: GDI-731
-      proposed_tag: v0.33.0
-      anchor_sha: pending
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
