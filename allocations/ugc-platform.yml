@@ -274,14 +274,39 @@ single_writer_files:
   # epic key (matches model_registry.pending or flyway.reserved entries).
   # held_by: none means the file is currently unlocked — sections may grab
   # a short-lived lock per edit.
+  #
+  # ⚠ GDI-692 retro (2026-05-13): the locks on ModelRegistry.kt + Prompts.kt
+  # + ModelRegistryTest.kt are LOAD-BEARING. They look "append-safe" because
+  # each new AI surface adds an entry at end-of-section, but git auto-merge
+  # FAILS when two parallel sessions append in the same adjacent line region
+  # (the when-clause body, the enum entry list, the test fixture block, the
+  # `containsExactlyInAnyOrder(...)` argument list). Both Section A's GDI-699
+  # and Section C's GDI-692 hit this exact conflict on 2026-05-13.
+  #
+  # DO NOT release these locks as a "false-positive mitigation." The WAIT
+  # they trigger when another section is editing is the correct behavior —
+  # it forces serialization on a real conflict surface. The lock holds the
+  # ENTIRE file for the duration of the edit, even though only ~3 lines
+  # within it change.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt
     held_by: GDI-708
     until: "2026-05-14T18:05:17Z"
     reason: reserved via reserve.sh
+    append_list_conflict_class: true  # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
     held_by: GDI-708
     until: "2026-05-14T18:05:15Z"
     reason: reserved via reserve.sh
+    append_list_conflict_class: true  # GDI-692 retro: locks are LOAD-BEARING here
+  - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
+    held_by: none
+    note: |
+      ⚠ GDI-692 retro: ALSO load-bearing append-list conflict class. Test
+      fixtures (e.g., `containsExactlyInAnyOrder(...)`, `hasSize(N)`, per-
+      surface stubs in `stubAllPrompts()`) collide on the same lines when
+      two sessions add surfaces concurrently. Any reservation against
+      ModelRegistry.kt SHOULD also reserve this file (paired lock).
+    append_list_conflict_class: true
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries

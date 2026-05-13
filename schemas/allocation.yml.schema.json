@@ -326,7 +326,13 @@
     "single_writer_files": {
       "type": "array",
       "items": {
-        "$ref": "#/definitions/singleWriterFile"
+        "$ref": "#/definitions/singleWriterFile",
+        "properties": {
+          "append_list_conflict_class": {
+            "type": "boolean",
+            "description": "GDI-692 retro: file LOOKS append-safe but is NOT under parallel editing. Lock is load-bearing."
+          }
+        }
       },
       "minItems": 1
     },

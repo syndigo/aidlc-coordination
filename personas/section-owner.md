@@ -196,6 +196,38 @@ Append a retro block to the product repo's `.claude/pipeline-learnings.md`. This
 listed as `held_by: none` in the registry's `single_writer_files` because it's
 append-safe at the block level. The Retro Aggregator (FOLLOW-UP) will eventually dedupe.
 
+### ⚠ Append-list-conflict-class files (GDI-692 retro, 2026-05-13)
+
+Some single-writer files LOOK append-safe (every change adds a new entry at the end of
+a list or enum) but are NOT actually append-safe under parallel editing. When two
+sections both add a new entry, git's auto-merge fails because the additions land on
+adjacent lines or in the same `when {}` / `enum class { ... }` / `containsExactlyInAnyOrder(...)`
+block.
+
+Files in this class for `ugc-platform` are marked `append_list_conflict_class: true` in
+the registry:
+
+- `services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt`
+- `services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt`
+- `services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt`
+
+**Rules for these files:**
+
+1. **Always reserve the lock via `reserve.sh --resource file-lock`** before touching them.
+   Do NOT skip "because it's just an enum entry."
+2. **Reserve them as a TRIPLE** — if you reserve `ModelRegistry.kt`, also reserve
+   `Prompts.kt` AND `ModelRegistryTest.kt`. They co-vary: every AI surface adds entries
+   to all three.
+3. **DO NOT release these locks as a "false-positive mitigation."** The WAIT they trigger
+   when another section is editing is the correct behavior. GDI-692 made this mistake
+   and paid for it with a 3-file merge-conflict cleanup at Stage 8.
+4. The lock is for the WHOLE FILE for the WHOLE epic duration. There's no finer-grained
+   "lock the enum entry section" mechanism — and shouldn't be, because git operates at
+   the line level.
+
+When in doubt: the cost of a 24h WAIT for another section to finish is much less than
+the cost of a 3-file merge-conflict resolution mid-Stage-8.
+
 ## Concrete example: Section A claims FR-A.1.9 (locale translation)
 
 This is the live example seeded in `allocations/ugc-platform.yml`. Section A is in
