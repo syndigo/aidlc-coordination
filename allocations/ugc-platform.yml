@@ -234,9 +234,9 @@ single_writer_files:
     until: "2026-05-13T15:11:13Z"
     reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/Prompts.kt
-    held_by: section-A-FR-A.1.9-epic
-    until: 2026-05-14T22:00:00Z
-    reason: locale-translation prompt template + few-shot examples
+    held_by: none
+    until: "2026-05-13T15:11:15Z"
+    reason: released via release.sh
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries
