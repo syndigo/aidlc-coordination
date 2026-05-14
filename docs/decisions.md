@@ -1158,6 +1158,115 @@ machine consumption.
 
 ---
 
+## D-025 (2026-05-14) — `bootstrap-pillar-prompt.sh` — render the first-message handoff for fresh pillar tabs
+
+### Status
+
+Accepted. Closes the "every new tab needs the same paragraphs of context"
+toil that the Phase 4/5 work surfaced.
+
+### Context
+
+The orchestration tier model (D-016) lets a Portfolio Orchestrator spawn
+a Pillar Orchestrator, which in turn spawns Section Owners. Each spawn
+is a fresh Claude tab with no prior context. The user (acting as
+Portfolio in practice) was hand-pasting the same 100+ line prompt for
+every new pillar tab — required reading list, coordination substrate
+intro, /sdlc dispatch instructions, the pillar's current state, what
+sibling tabs are holding. By the time the prompt was pasted, the live
+state ("which locks are held right now," "what just shipped") was 30
+minutes stale.
+
+The same prompt is renderable from registry data. Boilerplate writes
+itself.
+
+### Decision
+
+Add `scripts/bootstrap-pillar-prompt.sh --product <name> --letter <X>`.
+Reads:
+
+- `allocations/<product>.yml` for `pillars[<letter>]` live state
+  (backlog, in_flight_frs, shipped_frs count) plus `single_writer_files`
+  active holds, last 5 `flyway.shipped` entries, and
+  `anchor_dependencies` relevant to this pillar
+- `profiles/<product>.yml` for `product.repo`, `pillars[].name/scope/fr_prefix`
+- `profiles/<product>.bootstrap-template.md` for the prose template
+
+Renders the rendered markdown to stdout. Pipe into a fresh Claude tab as
+the first message before `/sdlc` is dispatched.
+
+`--with-drift-check` flag (off by default; recommended when an
+orchestrator persona is doing the spawn) runs `audit-registry-drift.sh`
+(D-024) and embeds the result so the new tab knows whether the registry
+is currently honest. Adds ~5s and 1+ gh API calls.
+
+The strategic FR pick stays human (or stays with the spawning
+orchestrator) — the renderer can list backlog but cannot replace
+pillar-strategy reasoning. The template carries an
+`<!-- ORCHESTRATOR NOTE: -->` comment marking that spot.
+
+### Alternatives considered
+
+- **Hardcode the prompt prose in the script.** Rejected — different
+  products need different reading lists and conventions. Template per
+  product is the right level.
+- **Bake into the /sdlc skill.** Rejected — /sdlc is the FR-level
+  pipeline, not the pillar-level entry. The pillar tab needs context
+  before /sdlc is even dispatched.
+- **Per-pillar static templates.** Rejected — pillar state changes
+  hourly; static templates would lie about what's in flight or what
+  locks are held.
+
+### Consequences
+
+- New tabs start with the same boilerplate every time, all live data
+  fresh as of `iso_now`.
+- The strategic FR-pick reasoning stays human, marked clearly in the
+  rendered output.
+- One product-specific template per product
+  (`profiles/<product>.bootstrap-template.md`); the renderer is
+  product-agnostic.
+- The portfolio-orchestrator persona doc now requires the spawning
+  message to be the rendered prompt; the pillar-orchestrator persona
+  doc requires the receiving session to confirm it received one.
+- `--with-drift-check` adds ~5s; off by default so ad-hoc human
+  invocations don't pay the cost.
+
+### Implementation notes
+
+- awk substitution with explicit `&` escaping (otherwise pillar names
+  like "Sampling & Creator Programs" or "Questions & Answers" get
+  mangled because awk treats `&` in the gsub replacement as the matched
+  text).
+- `|| true` guards on every yq subshell so a missing optional field
+  (e.g., no `anchor_dependencies` for a fresh product) doesn't kill
+  the script under `set -e`.
+- yq v4 lacks jq's `if/then/else` and `last`; use `// "fallback"` and
+  `[-1:]` slice instead.
+
+### Follow-ups
+
+- A `scripts/spawn-pillar.sh <product> <letter>` wrapper that runs the
+  renderer + opens a new terminal tab + pastes the prompt would close
+  the loop. Skipped for now — terminal-management UX work that varies
+  by operator OS / terminal.
+- Section Owner spawn doesn't use this template; /sdlc's Phase 0.6
+  integrated mode already does its own bootstrapping. Could unify if
+  worth it.
+- Other products that adopt the substrate need to author their own
+  `<product>.bootstrap-template.md`. Document this in the new-product
+  onboarding flow (referenced from `bootstrap-from-profile.sh` D-022).
+
+### References
+
+- `scripts/bootstrap-pillar-prompt.sh`
+- `profiles/ugc-platform.bootstrap-template.md`
+- `personas/portfolio-orchestrator.md` "Hand-off contract: Portfolio -> Pillar"
+- `personas/pillar-orchestrator.md` "Session entry"
+- Sibling: D-016 (the tier model this script supports), D-024 (drift check the renderer optionally embeds).
+
+---
+
 ## How to add an ADR
 
 ```sh

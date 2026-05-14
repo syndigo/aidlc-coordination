@@ -51,6 +51,14 @@ parallel with one another, coordinated by the Portfolio Orchestrator above them.
 
 ## Decision loop
 
+**Session entry (the very first message you receive):** the Portfolio Orchestrator (or
+the human operator spawning you) should hand you the rendered output of
+`./scripts/bootstrap-pillar-prompt.sh --letter <X> --product <name>` (D-025) as your
+first message. That prompt carries the required reading list, the coordination
+substrate intro, your pillar's live state, what sibling tabs are doing, and a "wait
+for approval before /sdlc" gate. If you DIDN'T receive that — pause, ask the operator
+to render and paste it — your situational awareness is incomplete without it.
+
 **Phase 0 (every tick, before anything else): isolate in a worktree.** The Pillar
 Orchestrator MUST run from a per-epic worktree, never the main clone. The status
 scripts will warn if you forget; they don't refuse, but ignoring the warning means

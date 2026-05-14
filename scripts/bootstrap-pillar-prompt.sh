@@ -43,6 +43,11 @@ PRODUCT="$DEFAULT_PRODUCT"
 LETTER=""
 LOCAL_REPO_PATH=""
 TEMPLATE_PATH=""
+# D-025 follow-up: --with-drift-check runs audit-registry-drift.sh and embeds
+# the result into the rendered prompt so the new tab knows whether the
+# registry is currently honest. Off by default — drift check makes 1+ gh API
+# calls and takes ~5s.
+WITH_DRIFT_CHECK=0
 
 print_help() {
   cat <<'USAGE'
@@ -59,6 +64,14 @@ Optional:
                                 rendered prompt for the operator to fill.
   --template <path>             Path to the bootstrap template. Defaults to
                                 profiles/<product>.bootstrap-template.md.
+  --with-drift-check            Run audit-registry-drift.sh and embed the
+                                result into the prompt. Adds ~5s and 1+ gh
+                                API calls; the new tab gets immediate
+                                visibility into whether the registry is
+                                currently honest. Off by default; recommended
+                                when an orchestrator persona is doing the
+                                spawn (so the new tab doesn't act on stale
+                                state).
   --help, --version
 
 Output: the rendered prompt to stdout. Pipe into a fresh Claude tab as the
@@ -89,6 +102,7 @@ while [ $# -gt 0 ]; do
     --product)          PRODUCT="$2"; shift 2 ;;
     --local-repo-path)  LOCAL_REPO_PATH="$2"; shift 2 ;;
     --template)         TEMPLATE_PATH="$2"; shift 2 ;;
+    --with-drift-check) WITH_DRIFT_CHECK=1; shift ;;
     --help|-h)          print_help; exit 0 ;;
     --version)          print_version; exit 0 ;;
     *) log_err "Unknown argument: $1"; print_help; exit 2 ;;
@@ -223,6 +237,26 @@ $recent_ships
 EOF
 fi
 
+# Drift check block: if --with-drift-check, run audit-registry-drift.sh and
+# embed a summary of findings. The orchestrator persona's tick already calls
+# the drift check separately; this is a fast-path so a freshly spawned tab
+# doesn't have to ask "is the registry currently honest?" before it starts.
+DRIFT_CHECK_BLOCK=""
+if [ "$WITH_DRIFT_CHECK" = "1" ]; then
+  drift_repo_path="$LOCAL_REPO_PATH"
+  if [ "$drift_repo_path" = "<set-via---local-repo-path>" ] || [ ! -d "$drift_repo_path" ]; then
+    DRIFT_CHECK_BLOCK="**Registry-vs-reality drift check**: skipped (no valid product repo path; pass --local-repo-path to enable)."
+  else
+    drift_out="$("$REPO_ROOT/scripts/audit-registry-drift.sh" --product "$PRODUCT" --product-repo-path "$drift_repo_path" 2>&1 || true)"
+    drift_count="$(printf '%s' "$drift_out" | grep -c '^❌\|^⚠️\|^ℹ️ ' || true)"
+    if [ "$drift_count" = "0" ]; then
+      DRIFT_CHECK_BLOCK="**Registry-vs-reality drift check**: ✅ zero findings. The registry matches the UGC repo and GitHub releases right now."
+    else
+      DRIFT_CHECK_BLOCK="**Registry-vs-reality drift check**: ⚠️ $drift_count finding(s). Review BEFORE making decisions — the registry may be stale. Run \`./scripts/audit-registry-drift.sh --product $PRODUCT --product-repo-path $drift_repo_path\` for details."
+    fi
+  fi
+fi
+
 # Anchor relevance block: anchors where this pillar is producer (.section == LETTER)
 # OR consumer (.consumers[].section == LETTER). Skip entirely if none relevant.
 # || true so a missing anchor_dependencies block doesn't kill the script under set -e.
@@ -258,6 +292,7 @@ export R_PARALLEL_PILLARS="$PARALLEL_PILLARS"
 export R_ACTIVE_LOCKS_BLOCK="$ACTIVE_LOCKS_BLOCK"
 export R_RECENT_SHIPS_BLOCK="$RECENT_SHIPS_BLOCK"
 export R_ANCHOR_RELEVANCE_BLOCK="$ANCHOR_RELEVANCE_BLOCK"
+export R_DRIFT_CHECK_BLOCK="$DRIFT_CHECK_BLOCK"
 
 awk '
   # Escape special chars (& and \) in the replacement string so awk gsub
@@ -286,6 +321,7 @@ awk '
     e_active_locks_block    = esc(ENVIRON["R_ACTIVE_LOCKS_BLOCK"])
     e_recent_ships_block    = esc(ENVIRON["R_RECENT_SHIPS_BLOCK"])
     e_anchor_relevance_block = esc(ENVIRON["R_ANCHOR_RELEVANCE_BLOCK"])
+    e_drift_check_block      = esc(ENVIRON["R_DRIFT_CHECK_BLOCK"])
   }
   {
     line = $0
@@ -304,6 +340,7 @@ awk '
     gsub(/\{\{ACTIVE_LOCKS_BLOCK\}\}/,     e_active_locks_block,    line)
     gsub(/\{\{RECENT_SHIPS_BLOCK\}\}/,     e_recent_ships_block,    line)
     gsub(/\{\{ANCHOR_RELEVANCE_BLOCK\}\}/, e_anchor_relevance_block, line)
+    gsub(/\{\{DRIFT_CHECK_BLOCK\}\}/,      e_drift_check_block,      line)
     print line
   }
 ' "$TEMPLATE_PATH"

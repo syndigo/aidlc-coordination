@@ -78,6 +78,8 @@ Current state per the coordination registry:
 
 {{ANCHOR_RELEVANCE_BLOCK}}
 
+{{DRIFT_CHECK_BLOCK}}
+
 See the spec at `ugc-platform-functional-spec-final (1).md` (in the project planning home) and
 §10's {{PILLAR_LETTER}} subsection in gameplan.md for the full FR table.
 

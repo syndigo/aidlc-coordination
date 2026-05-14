@@ -109,14 +109,30 @@ Then on each tick:
 
 ## Hand-off contract: Portfolio -> Pillar Orchestrator
 
-When the Portfolio Orchestrator wakes a Pillar Orchestrator, the message MUST include:
+When the Portfolio Orchestrator wakes a Pillar Orchestrator (typically as a fresh
+Claude tab), the FIRST message to that tab MUST be the rendered output of:
 
-- Pillar letter
-- The reason (cross-pillar anchor shipped, ship-window opened, manual nudge from operator)
-- Any portfolio-level constraints in force (e.g. "B and C are serial_with each other —
-  ship one at a time this week")
-- A pointer to `pillar-status.sh <letter>` and `portfolio-status.sh` so the Pillar
-  Orchestrator can read fresh state on entry
+```sh
+./scripts/bootstrap-pillar-prompt.sh --letter <X> --product <name> --with-drift-check
+```
+
+That script (D-025) reads the pillar's live state from the registry, the active
+single-writer locks across the product, the last 5 ships, the cross-pillar anchor
+relevance for this pillar, and (with `--with-drift-check`) a one-line registry-vs-
+reality drift summary. It renders all of that into a structured handoff prompt that
+includes:
+
+- Required reading list (global + project + gameplan + decisions docs)
+- The coordination substrate intro (status / pillar-status / portfolio-status / reserve / release / worktree)
+- /sdlc dispatch instructions
+- This pillar's backlog, in_flight FRs, shipped count
+- What sibling tabs are doing right now (locks held, recent ships)
+- Cross-pillar anchor relevance (PRODUCES / CONSUMES with status)
+- A "wait for approval before /sdlc" gate for the strategic FR pick
+
+The strategic FR pick stays human (or stays with you, the Portfolio tier) — the
+template includes an `<!-- ORCHESTRATOR NOTE: -->` comment marking where to insert
+your one-paragraph rationale before the pillar tab dispatches /sdlc.
 
 The Pillar Orchestrator is autonomous after that. The Portfolio Orchestrator does NOT
 re-enter unless the next tick or an external signal says so.
