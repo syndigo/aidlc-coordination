@@ -54,13 +54,21 @@ Optional:
                                 whether the registry is currently honest).
                                 Adds ~5s.
   --local-repo-path <path>      Forwarded to bootstrap-pillar-prompt.sh.
-  --terminal <iterm2|terminal>  Force a specific terminal. Default: detect
-                                via TERM_PROGRAM (iTerm.app -> iterm2,
-                                Apple_Terminal -> terminal). Falls back to
-                                iterm2 if unset.
+  --terminal <iterm2|terminal>  Where the new pillar tab opens. Default:
+                                iterm2 — the designated home for pillar-
+                                orchestrator sessions (D-026). It does NOT
+                                matter where you INVOKE this script from
+                                (VS Code integrated terminal, an SSH
+                                session, iTerm2 itself) — the new tab
+                                always lands in iTerm2 unless you pass
+                                --terminal terminal. The one exception:
+                                if you invoke from Apple Terminal, it
+                                honors that (TERM_PROGRAM=Apple_Terminal).
   --no-open                     Render + copy to clipboard but do NOT open
-                                a new terminal tab. Useful when the operator
-                                wants to switch to an existing tab manually.
+                                a new terminal tab. Use this when invoking
+                                from VS Code if you'd rather open the new
+                                tab yourself, or to recover a clobbered
+                                clipboard without spawning another tab.
   --no-clipboard                Render + open terminal but do NOT copy to
                                 clipboard. The rendered prompt is printed
                                 to stdout — operator can pipe it elsewhere.
@@ -70,17 +78,29 @@ What this does:
   1. Calls bootstrap-pillar-prompt.sh with the same args (renders the
      handoff prompt against current registry state).
   2. Copies the rendered prompt to the system clipboard via pbcopy.
-  3. Opens a new terminal tab via osascript (iTerm2 or Apple Terminal).
-  4. Prints next-step instructions: "Switch to the new tab, launch claude,
-     paste with ⌘V."
+  3. Opens a new iTerm2 tab (or Apple Terminal tab with --terminal terminal)
+     and selects it so it has focus.
+  4. Prints next-step instructions.
+
+Then in the new tab, YOU do three things (the script does not automate
+these — by design; see D-025 approach (a)):
+  1. Launch Claude.
+  2. ⌘V to paste the bootstrap prompt as the first message. (It is on
+     your clipboard from step 2 above. If you copied something else in
+     between, re-run with --no-open to re-copy without opening another
+     tab.)
+  3. Hit Enter.
 
 The strategic FR pick stays human — the rendered prompt has an
 ORCHESTRATOR NOTE comment marking where to insert your one-paragraph
 rationale before the new tab dispatches /sdlc.
 
-macOS only (depends on osascript + pbcopy). For Linux / WSL / VS Code
-integrated terminal, run bootstrap-pillar-prompt.sh by hand and paste
-into the target tab.
+Pillar sessions live in iTerm2; code editing lives in VS Code. Keeping
+them in separate apps keeps both uncluttered — one iTerm2 window shows
+all your pillar tabs at a glance.
+
+macOS only (depends on osascript + pbcopy). On Linux / WSL, run
+bootstrap-pillar-prompt.sh by hand and paste into your target tab.
 USAGE
 }
 
@@ -121,15 +141,23 @@ fi
 # ----- terminal detection ---------------------------------------------------
 
 if [ -z "$TERMINAL" ]; then
+  # iTerm2 is the designated home for pillar-orchestrator tabs (D-026).
+  # The operator may *invoke* this script from anywhere — VS Code's
+  # integrated terminal, Apple Terminal, an SSH session — but the new
+  # pillar tab always lands in iTerm2 unless --terminal terminal is
+  # explicitly passed. This is deliberate: pillar sessions live in
+  # iTerm2 (one window, all pillars visible, split panes); code editing
+  # lives in VS Code. Separating them keeps both uncluttered.
   case "${TERM_PROGRAM:-}" in
-    iTerm.app)        TERMINAL="iterm2" ;;
-    Apple_Terminal)   TERMINAL="terminal" ;;
+    Apple_Terminal)
+      # The operator is in Apple Terminal — honor it; they probably want
+      # the new tab in the same app.
+      TERMINAL="terminal"
+      ;;
     *)
-      # Fall back to iTerm2 (the better-scriptable target with split-pane
-      # and per-pillar profile support). If the operator is on Apple Terminal
-      # or another terminal, pass --terminal terminal explicitly.
+      # iTerm.app, vscode, ssh, unset — all route to iTerm2. No warning:
+      # this is the intended behavior, not a fallback.
       TERMINAL="iterm2"
-      log_warn "TERM_PROGRAM=${TERM_PROGRAM:-<unset>}; defaulting to --terminal iterm2. Pass --terminal terminal if you're on Apple Terminal."
       ;;
   esac
 fi
@@ -207,13 +235,18 @@ case "$TERMINAL" in
     # iTerm2 scripting reference: https://iterm2.com/documentation-scripting.html
     # Cold-start safe: if iTerm2 was just launched and has no windows, the
     # "current window" reference would fail; create a window instead.
+    # `select` on the new tab guarantees it grabs focus so the operator's
+    # very next keystroke (or ⌘V) lands in the right place.
     osascript <<'APPLESCRIPT' 2>&1
 tell application "iTerm"
   activate
   if (count of windows) is 0 then
     create window with default profile
   else
-    tell current window to create tab with default profile
+    tell current window
+      set newTab to (create tab with default profile)
+      select newTab
+    end tell
   end if
 end tell
 APPLESCRIPT

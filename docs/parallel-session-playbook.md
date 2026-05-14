@@ -119,6 +119,39 @@ For a single pillar's view (what the Pillar Orchestrator reads on its tick):
 #        forecast for files this pillar's backlog touches.
 ```
 
+### Spawning a pillar tab (D-025 / D-026)
+
+To start a new pillar tab, render its bootstrap prompt and open a tab in
+one command:
+
+```sh
+./scripts/spawn-pillar.sh --letter C --with-drift-check
+```
+
+This (1) renders the Pillar C handoff prompt against current registry
+state, (2) copies it to the clipboard, (3) opens a new **iTerm2** tab and
+selects it. Pillar-orchestrator sessions live in iTerm2 regardless of
+where you invoke the script from — VS Code's integrated terminal, an SSH
+session, iTerm2 itself. The one exception: invoke from Apple Terminal and
+it honors that. Pass `--terminal terminal` to force Apple Terminal.
+
+Then **in the new tab**, you do three things by hand (the script does NOT
+automate these — D-025 approach (a), deliberately, so it doesn't fight
+the Claude CLI's input handling):
+
+1. Launch Claude.
+2. ⌘V to paste the bootstrap prompt as the first message.
+3. Hit Enter.
+
+The clipboard rule: run `spawn-pillar.sh` → switch to the new tab → ⌘V
+**immediately**. If you copy anything else in between (a path, a summary),
+the prompt is gone — recover with `./scripts/spawn-pillar.sh --letter C
+--no-open`, which re-renders and re-copies without opening another tab.
+
+`--no-open` is also the right flag when invoking from VS Code if you'd
+rather open the new pane yourself: the script just renders + copies, you
+⌃⇧\` and ⌘V.
+
 See [orchestration-tiers.md](./orchestration-tiers.md) for the full 3-tier
 model, hand-off contracts, and authority limits per persona.
 

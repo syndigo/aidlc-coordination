@@ -1267,6 +1267,98 @@ pillar-strategy reasoning. The template carries an
 
 ---
 
+## D-026 (2026-05-14) — `spawn-pillar.sh` targets iTerm2 for pillar tabs, regardless of invocation context
+
+### Status
+
+Accepted. Refines `spawn-pillar.sh` (the D-025 follow-up script) after
+first-contact friction.
+
+### Context
+
+`spawn-pillar.sh` (approach (a): render + clipboard + open tab) shipped
+with a `TERM_PROGRAM`-based auto-detect: iTerm.app -> iterm2,
+Apple_Terminal -> terminal, anything else -> iterm2 with a WARN.
+
+In practice the operator runs Claude Code inside VS Code's integrated
+terminal, so `TERM_PROGRAM=vscode`. The auto-detect logged a warning
+("TERM_PROGRAM=vscode; defaulting to --terminal iterm2. Pass --terminal
+terminal if you're on Apple Terminal.") that read like an error — it
+made the operator think the script was misconfigured when it was
+behaving correctly. Worse, it implied a symmetry that doesn't exist: the
+script can drive iTerm2 and Apple Terminal via AppleScript, but it
+*cannot* open a tab in VS Code's integrated terminal (no AppleScript
+surface for that).
+
+The operator was asked to choose: keep pillar tabs in iTerm2, or stay
+in VS Code. They chose iTerm2. (iTerm2 already installed via
+`brew install --cask iterm2` during the D-025 follow-up work.)
+
+### Decision
+
+iTerm2 is the **designated home** for pillar-orchestrator tabs. The
+script's job is to open the new tab there, full stop — it does NOT
+matter where the operator *invokes* the script from. Invocation context
+(VS Code integrated terminal, SSH session, iTerm2 itself, unset
+`TERM_PROGRAM`) all route the new tab to iTerm2.
+
+The single exception: invoking from Apple Terminal
+(`TERM_PROGRAM=Apple_Terminal`) honors Apple Terminal — the operator is
+clearly already living there and probably wants the new tab in the same
+app.
+
+`--terminal {iterm2,terminal}` remains as an explicit override. The
+misleading WARN is removed; the `*)` case now routes to iterm2 silently
+because that is the intended behavior, not a fallback.
+
+Two smaller changes in the same edit:
+- The iTerm2 AppleScript now `select`s the newly created tab so it has
+  focus — the operator's ⌘V lands in the right place without an extra
+  click.
+- `--help` rewritten to state the iTerm2-is-home model explicitly, to
+  spell out the three manual steps in the new tab (launch Claude, ⌘V,
+  Enter), and to document the clipboard-clobber recovery
+  (`--no-open` re-renders + re-copies).
+
+### Why iTerm2 over Apple Terminal as the designated home
+
+- First-class AppleScript: `create tab with default profile` + `select`,
+  vs Apple Terminal's System Events ⌘T keystroke hack.
+- Split panes — multiple pillar tabs visible in one window.
+- Per-pillar profiles possible (color, startup cd) — future nicety.
+- Separating "pillar sessions" (iTerm2) from "code editing" (VS Code)
+  keeps both uncluttered.
+
+### Alternatives considered
+
+- **Add a `--terminal vscode` mode.** Rejected. VS Code's CLI can open a
+  new integrated terminal but cannot launch Claude into it or paste —
+  the mode would do strictly less than the iTerm2 path while adding
+  code. The operator chose iTerm2 anyway.
+- **Keep the auto-detect symmetric, just soften the warning.** Rejected.
+  The asymmetry is real (can't drive VS Code's terminal); pretending
+  otherwise in the UX is the actual bug.
+
+### Consequences
+
+- Running `spawn-pillar.sh` from VS Code's terminal now silently opens
+  the pillar tab in iTerm2 — no confusing warning.
+- The operator's mental model is simple: code in VS Code, pillars in
+  iTerm2.
+- Apple Terminal users are unaffected (still honored when they invoke
+  from it).
+- Linux / WSL operators still get the documented fallback: run
+  `bootstrap-pillar-prompt.sh` by hand, paste into their target tab.
+
+### References
+
+- `scripts/spawn-pillar.sh` (terminal-detection block, iTerm2 AppleScript)
+- `docs/parallel-session-playbook.md` "Spawning a pillar tab"
+- Sibling: D-025 (the script this refines), D-021 / GDI-728 (the
+  worktree-per-session discipline pillar tabs still follow).
+
+---
+
 ## How to add an ADR
 
 ```sh
