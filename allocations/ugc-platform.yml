@@ -560,7 +560,7 @@ releases:
   #   - v0.18.1 (2026-05-11T20:52:49Z) — / harness UI hot-fix — render product metadata
   #   - v0.20.0 (2026-05-11T23:12:32Z) — B widget — first real ugc-review-summary widget
   #   - v0.20.1 (2026-05-11T23:52:08Z) — C / FR-C.1.1+FR-C.2.4 — Schema.org JSON-LD on widget
-  current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
+  current_main: v0.43.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -573,11 +573,6 @@ releases:
     I: v0.36.x
     J: v0.37.x
   in_flight:
-    - section: B
-      epic: GDI-917
-      proposed_tag: v0.43.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: G
       epic: GDI-926
       proposed_tag: v0.43.0
