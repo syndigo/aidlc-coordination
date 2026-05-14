@@ -74,13 +74,30 @@ cd ~/Projects/aidlc-coordination
 # 4. Reserve the resources you need
 ./scripts/reserve.sh --resource flyway --section C --epic GDI-700 --id V24 --ttl-hours 24
 
-# 5. Do the work in the worktree, then mark it shipped
-./scripts/release.sh --resource flyway --section C --epic GDI-700 --id V24 \
-  --status shipped --release-tag v0.30.0
+# 4b. (Recommended) Reserve a release-band, NOT a specific tag (GDI-778)
+./scripts/reserve.sh --resource release-band --section C --epic GDI-700 --id "v0.3x" --ttl-hours 24
 
-# 6. Clean up the worktree
+# 5. Do the work in the worktree, then at Stage 9 compute the next free tag
+NEXT_TAG="$(./scripts/next-tag.sh --section C)"  # → e.g. v0.43.0
+gh release create "$NEXT_TAG" --target <merge-sha> --title "..."
+
+# 6. Mark resources shipped
+./scripts/release.sh --resource flyway --section C --epic GDI-700 --id V24 \
+  --status shipped --release-tag "$NEXT_TAG"
+./scripts/release.sh --resource release-band --section C --epic GDI-700 --id "v0.3x" \
+  --status released --release-tag "$NEXT_TAG"
+
+# 7. Clean up the worktree
 ./scripts/worktree.sh remove --repo-path ~/Projects/ugc-platform --epic GDI-700
 ```
+
+> **Why release-band (GDI-778)?** Pre-reserving a specific release tag at Phase 0.6
+> is racy across parallel /sdlc sessions — `gh release create` doesn't consult the
+> registry, and the reservation gets stolen by whichever section reaches Stage 9
+> first. Four consecutive Section C runs (GDI-731 / GDI-779 / GDI-830 / GDI-893)
+> paid a ~2-3 min Stage 9 re-allocation tax. The fix is to record band-intent at
+> intake (sections own bands, not specific tags) and compute the concrete tag at
+> create-time via `next-tag.sh` reading `gh release list`.
 
 > **Why the worktree step?** Resource locks (V-numbers, surface names, file paths)
 > are tracked at the YAML-registry level. They do NOT protect against same-user,
@@ -102,8 +119,9 @@ two-session example.
 ├── schemas/
 │   └── allocation.yml.schema.json
 ├── scripts/
-│   ├── reserve.sh
-│   ├── release.sh
+│   ├── reserve.sh              # claim a resource; --resource release-band added GDI-778
+│   ├── release.sh              # mark shipped/released; --resource release-band added GDI-778
+│   ├── next-tag.sh             # GDI-778: compute next free tag at Stage 9 from gh release list
 │   ├── conflict-check.sh
 │   ├── status.sh
 │   └── worktree.sh             # GDI-728: isolate concurrent sessions

@@ -7,11 +7,17 @@
 # trail is the linear commit history on main (ADR-D-004).
 #
 # Usage:
-#   reserve.sh --resource <flyway|model-registry|file-lock|release-tag> \
-#              --section <A..J> --epic <GDI-XXX> --id <V19|surface-id|filename|vX.Y.Z> \
+#   reserve.sh --resource <flyway|model-registry|file-lock|release-tag|release-band> \
+#              --section <A..J> --epic <GDI-XXX> --id <V19|surface-id|filename|vX.Y.Z|vX.Y.x> \
 #              [--product <name>] [--fr <FR-X.Y.Z>] [--ttl-hours N] [--json] [--dry-run]
 #   reserve.sh --help
 #   reserve.sh --version
+#
+# GDI-778 (2026-05-14): release-band added. Prefer over release-tag for new
+# epics — bands record intent; concrete tags computed at Stage 9 via
+# next-tag.sh from `gh release list`. Avoids the advisory-reservation race
+# that bit GDI-731 / GDI-779 / GDI-830 / GDI-893 (4 consecutive Section C
+# runs paid a 2-3 min Stage 9 re-allocation tax).
 #
 # Exit codes:
 #   0  reserved successfully (or idempotent no-op — already held by same epic)
@@ -41,10 +47,11 @@ print_help() {
 reserve.sh — claim a shared resource in the AIDLC allocation registry.
 
 Required:
-  --resource <flyway|model-registry|file-lock|release-tag>
+  --resource <flyway|model-registry|file-lock|release-tag|release-band>
   --section <A..J>
   --epic <GDI-XXX>            Jira key OR a section-local epic identifier
-  --id <id>                   Flyway version, surface name, file path, or semver tag
+  --id <id>                   Flyway version, surface name, file path, semver
+                              tag (release-tag), or band shape vN.M.x (release-band)
 
 Optional:
   --product <name>            Default: ugc-platform
@@ -96,7 +103,7 @@ for var_name in RESOURCE SECTION EPIC ID; do
 done
 
 case "$RESOURCE" in
-  flyway|model-registry|file-lock|release-tag) ;;
+  flyway|model-registry|file-lock|release-tag|release-band) ;;
   *) log_err "Invalid --resource: $RESOURCE"; exit 2 ;;
 esac
 
@@ -105,6 +112,7 @@ validate_section "$SECTION"
 case "$RESOURCE" in
   flyway)        validate_flyway_version "$ID" ;;
   release-tag)   validate_semver_tag "$ID" ;;
+  release-band)  validate_semver_tag "$ID" ;;  # GDI-778: band shape is vN.M.x — semver validator accepts it
 esac
 
 YML="$(resolve_yml_path "$PRODUCT")"
@@ -170,6 +178,11 @@ already_held_same_epic() {
     release-tag)
       held_epic="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$ID\") | .epic // \"\"" "$YML")"
       ;;
+    release-band)
+      # GDI-778: a band intent is identified by (section, band, epic). Same
+      # epic + same band = already recorded (idempotent).
+      held_epic="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$ID\" and .section == \"$SECTION\") | .epic // \"\"" "$YML")"
+      ;;
   esac
   if [ "$held_epic" = "$EPIC" ]; then
     return 0
@@ -192,6 +205,12 @@ held_by_other_epic() {
       ;;
     release-tag)
       held_epic="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$ID\") | .epic // \"\"" "$YML")"
+      ;;
+    release-band)
+      # GDI-778: bands are SECTION-EXCLUSIVE but NOT epic-exclusive. Many
+      # epics in the same section can share a band; an epic in another
+      # section reserving the same band IS a conflict (sections own bands).
+      held_epic="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$ID\" and .section != \"$SECTION\") | .epic // \"\"" "$YML" | head -1)"
       ;;
   esac
   if [ -z "$held_epic" ] || [ "$held_epic" = "none" ] || [ "$held_epic" = "null" ]; then
@@ -280,6 +299,26 @@ case "$RESOURCE" in
         \"epic\": \"$EPIC\",
         \"proposed_tag\": \"$ID\",
         \"anchor_sha\": \"pending\"
+      }]
+    " "$YML" > "$TMP"
+    ;;
+  release-band)
+    # GDI-778: record band-intent in releases.in_flight with proposed_tag set
+    # to the band shape (vN.M.x). Stage 9 will call next-tag.sh at create-time
+    # to compute the actual concrete tag from gh release list — the registry
+    # is no longer the source of truth for the specific tag (which was the
+    # whole point of the GDI-778 contract change).
+    #
+    # The band intent is still useful for: (1) audit trail of which sections
+    # have epics in flight; (2) cross-section ownership check (two sections
+    # cannot both claim the same band — see held_by_other_epic).
+    yq "
+      .releases.in_flight = (.releases.in_flight // []) + [{
+        \"section\": \"$SECTION\",
+        \"epic\": \"$EPIC\",
+        \"proposed_tag\": \"$ID\",
+        \"anchor_sha\": \"pending\",
+        \"note\": \"band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh\"
       }]
     " "$YML" > "$TMP"
     ;;
