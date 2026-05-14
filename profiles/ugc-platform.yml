@@ -1,0 +1,115 @@
+# =====================================================================
+# UGC Platform — Coordination Profile
+# =====================================================================
+# Per-product parameterization for the coordination scripts. This is the
+# product-shape file: paths, language, section letters, pillar definitions.
+# It does NOT carry live state -- live state lives in
+# allocations/ugc-platform.yml.
+#
+# Validated by schemas/profile.yml.schema.json. Linked from the allocation
+# YAML via .profile_ref (D-017).
+
+product:
+  name: ugc-platform
+  repo: syndigo/ugc-platform
+  language: kotlin
+
+section_range:
+  letters: [A, B, C, D, E, F, G, H, I, J]
+
+migration:
+  dir_pattern: services/ugc-api/src/main/resources/db/migration
+  filename_pattern: V*__*.sql
+  version_prefix: V
+  test_fixture_threshold: 900
+
+ai_surface_files:
+  - path: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
+    role: model_registry
+    append_list_conflict_class: true
+    max_concurrent_holders: 1
+  - path: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
+    role: prompts
+    append_list_conflict_class: true
+    max_concurrent_holders: 1
+  - path: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
+    role: model_registry_test
+    append_list_conflict_class: true
+    max_concurrent_holders: 1
+
+release_unit:
+  name: section
+  tag_format: vMAJOR.MINOR.PATCH
+
+# Static pillar definitions (the immutable shape). Live status lives in
+# allocations/ugc-platform.yml#pillars[]. The 10 pillars below are taken
+# from gameplan.md §2 (stable assignments) and the functional spec.
+pillars:
+  - letter: A
+    name: Product Catalog Management
+    scope: Ingestion, validation, hierarchy, locales, AI schema-mapping, dedup
+    fr_prefix: FR-A.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: B
+    name: Content Collection
+    scope: Post-purchase solicitations, multi-product forms, AI email gen, send-time opt
+    fr_prefix: FR-B.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: C
+    name: Content Display
+    scope: Render UGC on storefronts, widgets, filtering, sorting, summary generation
+    fr_prefix: FR-C.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: D
+    name: Questions & Answers
+    scope: Two-way Q&A, routing to SMEs, CSA queue, draft assist
+    fr_prefix: FR-D.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: E
+    name: Moderation & Governance
+    scope: Observation codes, publication decisions, rule engine, audit
+    fr_prefix: FR-E.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: F
+    name: Syndication & Distribution
+    scope: Cross-network product matching, refresh cadence, partner config
+    fr_prefix: FR-F.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: G
+    name: Sampling & Creator Programs
+    scope: Campaigns, vetted communities, fulfillment, creator UGC
+    fr_prefix: FR-G.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: H
+    name: Social & Visual UGC
+    scope: Rights management, social listening, gallery display
+    fr_prefix: FR-H.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: I
+    name: Analytics, Insights & AI
+    scope: Dashboards, NL builder, sentiment, topic extraction, benchmarks
+    fr_prefix: FR-I.
+    default_max_in_flight_frs: 2
+    default_ship_frequency: unlimited
+  - letter: J
+    name: Platform Services
+    scope: APIs, auth, config, compliance, cross-cutting AI governance
+    fr_prefix: FR-J.
+    default_max_in_flight_frs: 1
+    default_ship_frequency: every_4h
+
+orchestration:
+  default_pillar_persona: personas/pillar-orchestrator.md
+  default_portfolio_persona: personas/portfolio-orchestrator.md
+  # Cap on how many pillars may have any FR in-flight at once. UGC has 10
+  # pillars but ModelRegistry.kt is a global single-writer file -- we cannot
+  # actually run more than ~3 pillars in parallel without lock contention.
+  max_concurrent_pillars_in_flight: 4

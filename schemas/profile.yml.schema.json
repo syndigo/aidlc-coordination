@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/syndigo/aidlc-coordination/schemas/profile.yml.schema.json",
+  "title": "AIDLC Coordination Per-Product Profile",
+  "description": "Per-product parameterization for the coordination scripts. Lives at profiles/<product>.yml. The allocation YAML at allocations/<product>.yml references its profile via .profile_ref. See D-017.",
+  "type": "object",
+  "required": ["product", "section_range", "migration", "ai_surface_files", "release_unit"],
+  "additionalProperties": false,
+  "properties": {
+    "product": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "repo": { "type": "string" },
+        "language": {
+          "type": "string",
+          "description": "Primary language. Hints to scripts that need to grep for symbols (e.g. .kt vs .py vs .ts)."
+        }
+      }
+    },
+    "section_range": {
+      "type": "object",
+      "required": ["letters"],
+      "additionalProperties": false,
+      "properties": {
+        "letters": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]$" },
+          "uniqueItems": true,
+          "minItems": 1,
+          "description": "Stable list of section letters this product uses. status.sh and pillar-status.sh iterate over this list."
+        }
+      }
+    },
+    "migration": {
+      "type": "object",
+      "required": ["dir_pattern", "filename_pattern"],
+      "additionalProperties": false,
+      "description": "Where the product keeps its DB migrations. Used by audit-flyway.sh and reserve.sh --product-repo-path drift checks.",
+      "properties": {
+        "dir_pattern": {
+          "type": "string",
+          "description": "Shell-glob path under the product repo, e.g. services/ugc-api/src/main/resources/db/migration"
+        },
+        "filename_pattern": {
+          "type": "string",
+          "description": "Filename glob, e.g. V*__*.sql for Flyway, *__*.sql for raw, etc."
+        },
+        "version_prefix": {
+          "type": "string",
+          "description": "Version-id prefix for the registry. Defaults to 'V' for Flyway. Set differently for products that use Liquibase or raw timestamps.",
+          "default": "V"
+        },
+        "test_fixture_threshold": {
+          "type": "integer",
+          "description": "Versions at or above this number are considered test fixtures and excluded from production next-free computation. ugc-platform uses 900.",
+          "default": 900
+        }
+      }
+    },
+    "ai_surface_files": {
+      "type": "array",
+      "description": "Paths (relative to product repo) of files that act as AI surface registries. Pre-seeded as single-writer locks when a model surface is reserved.",
+      "items": {
+        "type": "object",
+        "required": ["path", "role"],
+        "additionalProperties": false,
+        "properties": {
+          "path": { "type": "string" },
+          "role": {
+            "type": "string",
+            "enum": ["model_registry", "prompts", "model_registry_test", "other"]
+          },
+          "append_list_conflict_class": { "type": "boolean" },
+          "max_concurrent_holders": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "release_unit": {
+      "type": "object",
+      "required": ["name", "tag_format"],
+      "additionalProperties": false,
+      "description": "What the product calls its release-tag-per-X granularity. ugc-platform = 'section', other products may use 'module' or 'service'.",
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["section", "module", "service", "layer", "pillar"]
+        },
+        "tag_format": {
+          "type": "string",
+          "description": "Format hint for human-readable release tags, e.g. 'vMAJOR.MINOR.PATCH'."
+        }
+      }
+    },
+    "pillars": {
+      "type": "array",
+      "description": "Static pillar definitions for the product. The allocation YAML's pillars[] block carries live state; this carries the immutable shape (name, FRs in scope). Lets a fresh allocation YAML be regenerated from the profile when bootstrapping a new product.",
+      "items": {
+        "type": "object",
+        "required": ["letter", "name"],
+        "additionalProperties": false,
+        "properties": {
+          "letter": { "type": "string", "pattern": "^[A-Z]$" },
+          "name": { "type": "string" },
+          "scope": { "type": "string" },
+          "fr_prefix": {
+            "type": "string",
+            "description": "FR-id prefix for this pillar, e.g. 'FR-A.' for ugc-platform Pillar A."
+          },
+          "default_max_in_flight_frs": { "type": "integer", "minimum": 1 },
+          "default_ship_frequency": {
+            "type": "string",
+            "enum": ["unlimited", "hourly", "every_4h", "daily", "weekly"]
+          }
+        }
+      }
+    },
+    "orchestration": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Default orchestration knobs the portfolio-orchestrator persona reads when the allocation YAML doesn't override.",
+      "properties": {
+        "default_pillar_persona": { "type": "string" },
+        "default_portfolio_persona": { "type": "string" },
+        "max_concurrent_pillars_in_flight": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}
