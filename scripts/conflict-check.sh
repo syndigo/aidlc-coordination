@@ -30,6 +30,7 @@ FR=""
 FILES=""
 FLYWAY_VERSIONS=""
 MODEL_SURFACES=""
+RELEASE_TAGS=""
 PRODUCT="$DEFAULT_PRODUCT"
 EMIT_JSON=0
 CLAIM=0
@@ -47,6 +48,11 @@ Optional:
   --files-to-touch <csv>      Comma-separated list of files about to be edited
   --flyway-versions <csv>     Comma-separated Flyway versions the work would claim
   --model-surfaces <csv>      Comma-separated model surfaces the work would claim
+  --release-tags <csv>        Comma-separated semver release tags the work would claim
+                              (e.g. v0.33.0). GDI-770 retro: Stage 9 must check
+                              its assigned next-section-release before invoking
+                              `gh release create`, otherwise a sibling tab that
+                              reached Stage 9 first wins by race.
   --product <name>            Default: ugc-platform
   --json                      Emit structured JSON on stdout
   --claim                     If GO, chain-call reserve.sh for the detected needs
@@ -67,6 +73,7 @@ while [ $# -gt 0 ]; do
     --files-to-touch) FILES="$2"; shift 2 ;;
     --flyway-versions) FLYWAY_VERSIONS="$2"; shift 2 ;;
     --model-surfaces) MODEL_SURFACES="$2"; shift 2 ;;
+    --release-tags) RELEASE_TAGS="$2"; shift 2 ;;
     --product)  PRODUCT="$2"; shift 2 ;;
     --json)     EMIT_JSON=1; shift ;;
     --claim)    CLAIM=1; shift ;;
@@ -175,6 +182,40 @@ if [ -n "$MODEL_SURFACES" ]; then
   done
 fi
 
+# --- check release-tags (GDI-770 retro)
+#
+# A release-tag is "held" if it appears as in_flight (with a proposed_tag
+# matching the candidate) OR if it appears as an already-shipped flyway/
+# model-registry release_tag in this product's allocations. The first guards
+# against two tabs reaching Stage 9 with the same tag in flight; the second
+# guards against a stale cron re-running an already-shipped tag.
+if [ -n "$RELEASE_TAGS" ]; then
+  oldIFS="$IFS"
+  IFS=','
+  # shellcheck disable=SC2086
+  set -- $RELEASE_TAGS
+  IFS="$oldIFS"
+  for t in "$@"; do
+    [ -z "$t" ] && continue
+    # 1. in_flight (held by an open Stage 9 attempt)
+    held="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$t\") | .epic // \"\"" "$YML")"
+    if [ -n "$held" ] && [ "$held" != "null" ]; then
+      held_section="$(yq -r ".releases.in_flight[]? | select(.proposed_tag == \"$t\") | .section // \"\"" "$YML")"
+      if [ "$held_section" != "$SECTION" ]; then
+        add_conflict "WAIT release-tag=$t held_by=$held section=$held_section (in_flight)"
+      fi
+    fi
+    # 2. already-shipped tag (registry shows it under flyway.shipped or current_main)
+    shipped_epic="$(yq -r ".flyway.shipped[]? | select(.release_tag == \"$t\") | .epic // \"\"" "$YML")"
+    if [ -z "$shipped_epic" ] || [ "$shipped_epic" = "null" ]; then
+      shipped_epic="$(yq -r ".model_registry.shipped[]? | select(.release_tag == \"$t\") | .epic // \"\"" "$YML")"
+    fi
+    if [ -n "$shipped_epic" ] && [ "$shipped_epic" != "null" ] && [ "$shipped_epic" != "$EPIC" ]; then
+      add_conflict "WAIT release-tag=$t already-shipped by=$shipped_epic"
+    fi
+  done
+fi
+
 # --- check anchor dependencies (is THIS fr blocked by a not-yet-shipped anchor?)
 anchor_block="$(yq -r ".anchor_dependencies[] | select(.status != \"shipped\" and (.consumers[] | select(.fr == \"$FR\" and .status == \"blocked_until_anchor_shipped\"))) | \"WAIT anchor=\" + .anchor + \" status=\" + .status" "$YML" 2>/dev/null || true)"
 if [ -n "$anchor_block" ] && [ "$anchor_block" != "null" ]; then
@@ -228,6 +269,17 @@ if [ -z "$conflicts" ]; then
         [ -z "$s" ] && continue
         "$(dirname "$0")/reserve.sh" --resource model-registry --section "$SECTION" \
           --epic "$EPIC" --id "$s" --fr "$FR" --product "$PRODUCT" || true
+      done
+    fi
+    if [ -n "$RELEASE_TAGS" ]; then
+      oldIFS="$IFS"; IFS=','
+      # shellcheck disable=SC2086
+      set -- $RELEASE_TAGS
+      IFS="$oldIFS"
+      for t in "$@"; do
+        [ -z "$t" ] && continue
+        "$(dirname "$0")/reserve.sh" --resource release-tag --section "$SECTION" \
+          --epic "$EPIC" --id "$t" --fr "$FR" --product "$PRODUCT" || true
       done
     fi
   fi

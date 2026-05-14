@@ -34,6 +34,7 @@ FR=""
 TTL_HOURS=24
 EMIT_JSON=0
 DRY_RUN=0
+PRODUCT_REPO_PATH=""
 
 print_help() {
   cat <<'USAGE'
@@ -49,6 +50,14 @@ Optional:
   --product <name>            Default: ugc-platform
   --fr <FR-X.Y.Z>             Functional requirement reference
   --ttl-hours N               Hours until expiry (default: 24)
+  --product-repo-path <path>  GDI-770 retro: when reserving a flyway version,
+                              if a path to the product repo is supplied, scan
+                              for an existing V<id>__*.sql file. If found
+                              under a DIFFERENT owner than --epic, emit a
+                              loud warning but proceed (you may legitimately
+                              be reserving a version a sibling tab has
+                              already abandoned). Pass --product-repo-path
+                              to enable.
   --json                      Emit structured JSON on stdout
   --dry-run                   Plan only; do not edit/commit/push
   --help, --version
@@ -66,6 +75,7 @@ while [ $# -gt 0 ]; do
     --ttl-hours) TTL_HOURS="$2"; shift 2 ;;
     --json)     EMIT_JSON=1; shift ;;
     --dry-run)  DRY_RUN=1; shift ;;
+    --product-repo-path) PRODUCT_REPO_PATH="$2"; shift 2 ;;
     --help|-h)  print_help; exit 0 ;;
     --version)  print_version; exit 0 ;;
     *) log_err "Unknown argument: $1"; print_help; exit 2 ;;
@@ -98,6 +108,40 @@ case "$RESOURCE" in
 esac
 
 YML="$(resolve_yml_path "$PRODUCT")"
+
+# ----- GDI-770 retro: on-disk drift warning (flyway only) -------------------
+# When reserving a Flyway version, optionally scan the product repo for an
+# existing V<id>__*.sql file. If found and owned by a different epic,
+# WARN the operator. Do NOT block — the operator may legitimately be claiming
+# a version that was abandoned by a prior tab, or may intend to renumber.
+if [ "$RESOURCE" = "flyway" ] && [ -n "$PRODUCT_REPO_PATH" ]; then
+  if [ -d "$PRODUCT_REPO_PATH" ]; then
+    drift_file=""
+    # Find any V<id>__*.sql across common migration paths. ugc-platform uses
+    # services/ugc-api/src/main/resources/db/migration; other repos may
+    # differ but `find` is path-agnostic. Exclude common build-output dirs
+    # (bin/, build/, target/, out/, .gradle/, node_modules/) so we don't
+    # false-positive on compiled-resource copies.
+    drift_file="$(
+      find "$PRODUCT_REPO_PATH" -type f -name "${ID}__*.sql" \
+        -not -path '*/bin/*' \
+        -not -path '*/build/*' \
+        -not -path '*/target/*' \
+        -not -path '*/out/*' \
+        -not -path '*/.gradle/*' \
+        -not -path '*/node_modules/*' \
+        2>/dev/null | head -1
+    )"
+    if [ -n "$drift_file" ]; then
+      log_warn "On-disk drift detected: $drift_file already exists for $ID"
+      log_warn "  If a sibling tab owns this file, your reservation is stale."
+      log_warn "  Recommend: run scripts/audit-flyway.sh --product-repo-path \"$PRODUCT_REPO_PATH\" to confirm."
+      log_warn "  Proceeding with reservation; rename your migration if needed."
+    fi
+  else
+    log_warn "--product-repo-path does not exist: $PRODUCT_REPO_PATH (skipping disk-drift check)"
+  fi
+fi
 
 # ----- compute expiry -------------------------------------------------------
 

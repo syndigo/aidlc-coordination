@@ -38,6 +38,7 @@ EPIC=""
 ID=""
 STATUS=""
 RELEASE_TAG=""
+REASON=""
 PRODUCT="$DEFAULT_PRODUCT"
 EMIT_JSON=0
 
@@ -50,10 +51,11 @@ Required:
   --section <A..J>
   --epic <GDI-XXX>
   --id <id>
-  --status <shipped|released>
+  --status <shipped|released|abandoned>
 
 Optional:
   --release-tag <vX.Y.Z>      Required for status=shipped; ignored otherwise
+  --reason "<text>"           Required for status=abandoned (audit trail)
   --product <name>            Default: ugc-platform
   --json
   --help, --version
@@ -62,6 +64,14 @@ Notes:
   --status=released is valid for file-lock and release-tag only.
   Using it with flyway or model-registry is rejected (use
   --status=shipped --release-tag vX.Y.Z instead). See D-013.
+
+  --status=abandoned (GDI-770 retro) is the clean exit for a stale
+  reservation that will NEVER ship — e.g. when a sibling tab raced
+  for the same Flyway version and won, or when the operator chose
+  a different version mid-flight. Removes the reserved row entirely
+  (no shipped append). Requires --reason so the git commit message
+  carries the audit trail. Valid for flyway and model-registry.
+  Use this instead of letting reservations TTL-expire silently.
 USAGE
 }
 
@@ -73,6 +83,7 @@ while [ $# -gt 0 ]; do
     --id)       ID="$2"; shift 2 ;;
     --status)   STATUS="$2"; shift 2 ;;
     --release-tag) RELEASE_TAG="$2"; shift 2 ;;
+    --reason)   REASON="$2"; shift 2 ;;
     --product)  PRODUCT="$2"; shift 2 ;;
     --json)     EMIT_JSON=1; shift ;;
     --help|-h)  print_help; exit 0 ;;
@@ -93,12 +104,17 @@ for var_name in RESOURCE SECTION EPIC ID STATUS; do
 done
 
 case "$STATUS" in
-  shipped|released) ;;
-  *) log_err "Invalid --status: $STATUS (expected shipped|released)"; exit 2 ;;
+  shipped|released|abandoned) ;;
+  *) log_err "Invalid --status: $STATUS (expected shipped|released|abandoned)"; exit 2 ;;
 esac
 
 if [ "$STATUS" = "shipped" ] && [ -z "$RELEASE_TAG" ]; then
   log_err "--release-tag is required when --status=shipped"
+  exit 2
+fi
+
+if [ "$STATUS" = "abandoned" ] && [ -z "$REASON" ]; then
+  log_err "--reason is required when --status=abandoned (audit trail in git commit message)"
   exit 2
 fi
 
@@ -116,7 +132,19 @@ if [ "$STATUS" = "released" ]; then
   case "$RESOURCE" in
     file-lock|release-tag) ;;
     flyway|model-registry)
-      log_err "--status=released is not valid for --resource=$RESOURCE (use --status=shipped with --release-tag)"
+      log_err "--status=released is not valid for --resource=$RESOURCE (use --status=shipped with --release-tag, or --status=abandoned --reason ... to drop a stale reservation)"
+      exit 2
+      ;;
+  esac
+fi
+
+# --status=abandoned is for flyway/model-registry only (drops the reservation
+# without a shipped row). file-lock/release-tag use --status=released.
+if [ "$STATUS" = "abandoned" ]; then
+  case "$RESOURCE" in
+    flyway|model-registry) ;;
+    file-lock|release-tag)
+      log_err "--status=abandoned is not valid for --resource=$RESOURCE (use --status=released for file-lock/release-tag)"
       exit 2
       ;;
   esac
@@ -132,29 +160,44 @@ trap 'rm -f "$TMP"' EXIT
 
 case "$RESOURCE" in
   flyway)
-    # Remove from .flyway.reserved, append to .flyway.shipped.
-    yq "
-      .flyway.shipped += [{
-        \"version\": \"$ID\",
-        \"section\": \"$SECTION\",
-        \"epic\": \"$EPIC\",
-        \"release_tag\": \"$RELEASE_TAG\",
-        \"shipped_at\": \"$NOW\"
-      }] |
-      .flyway.reserved |= map(select(.version != \"$ID\"))
-    " "$YML" > "$TMP"
+    if [ "$STATUS" = "abandoned" ]; then
+      # GDI-770 retro: remove the stale reservation entirely; do NOT append
+      # to .shipped (no real release tag). The git commit message carries
+      # the audit trail via --reason.
+      yq "
+        .flyway.reserved |= map(select(.version != \"$ID\"))
+      " "$YML" > "$TMP"
+    else
+      # Remove from .flyway.reserved, append to .flyway.shipped.
+      yq "
+        .flyway.shipped += [{
+          \"version\": \"$ID\",
+          \"section\": \"$SECTION\",
+          \"epic\": \"$EPIC\",
+          \"release_tag\": \"$RELEASE_TAG\",
+          \"shipped_at\": \"$NOW\"
+        }] |
+        .flyway.reserved |= map(select(.version != \"$ID\"))
+      " "$YML" > "$TMP"
+    fi
     ;;
   model-registry)
-    yq "
-      .model_registry.shipped += [{
-        \"surface\": \"$ID\",
-        \"section\": \"$SECTION\",
-        \"epic\": \"$EPIC\",
-        \"release_tag\": \"$RELEASE_TAG\",
-        \"shipped_at\": \"$NOW\"
-      }] |
-      .model_registry.pending |= map(select(.surface != \"$ID\"))
-    " "$YML" > "$TMP"
+    if [ "$STATUS" = "abandoned" ]; then
+      yq "
+        .model_registry.pending |= map(select(.surface != \"$ID\"))
+      " "$YML" > "$TMP"
+    else
+      yq "
+        .model_registry.shipped += [{
+          \"surface\": \"$ID\",
+          \"section\": \"$SECTION\",
+          \"epic\": \"$EPIC\",
+          \"release_tag\": \"$RELEASE_TAG\",
+          \"shipped_at\": \"$NOW\"
+        }] |
+        .model_registry.pending |= map(select(.surface != \"$ID\"))
+      " "$YML" > "$TMP"
+    fi
     ;;
   file-lock)
     # Clear held_by (set to none).
@@ -185,7 +228,13 @@ fi
 
 if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
   git_pull_rebase || log_warn "rebase skipped"
-  git_commit_and_push "chore(release): $EPIC releases $RESOURCE/$ID as $STATUS" || {
+  commit_msg="chore(release): $EPIC releases $RESOURCE/$ID as $STATUS"
+  if [ "$STATUS" = "abandoned" ] && [ -n "$REASON" ]; then
+    commit_msg="$commit_msg
+
+Reason: $REASON"
+  fi
+  git_commit_and_push "$commit_msg" || {
     log_err "push failed"
     if [ "$EMIT_JSON" = "1" ]; then
       emit_json "error" "git push failed"

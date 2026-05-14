@@ -168,7 +168,31 @@ Section A's session now operates in the worktree at
 GDI-720 (the Jira ticket for FR-A.1.9). The coordination repo is no longer touched
 until ship time.
 
-### Step 1.4 — Ship + release
+### Step 1.4 — Stage 9 release-tag pre-flight (GDI-770 retro)
+
+Before invoking `gh release create`, claim the release tag in the registry
+so a sibling tab that reaches Stage 9 concurrently can't win the same
+`vX.Y.Z` by race. The pattern mirrors the Flyway / model-registry holds:
+
+```sh
+$ cd ~/Projects/aidlc-coordination
+$ ./scripts/conflict-check.sh --section A --fr FR-A.1.9 \
+    --release-tags v0.28.0 --json
+# GO ⇒ proceed; WAIT ⇒ another tab claimed it; pick the next minor and retry.
+
+$ ./scripts/reserve.sh --resource release-tag --section A \
+    --epic section-A-FR-A.1.9-epic --id v0.28.0 --ttl-hours 4
+```
+
+The reservation lives in `.releases.in_flight[]`. Stage 10's
+`release.sh --resource release-tag --status=released` advances
+`.releases.current_main` to the new tag and removes the in-flight row.
+
+This step closes the GDI-708 / GDI-770 collision class where two tabs cut
+the same `v0.31.0` first-come-first-served because the registry only
+arbitrated Flyway versions and file locks, not tags.
+
+### Step 1.5 — Ship + release
 
 When the PR merges and `v0.28.0` is tagged:
 
@@ -205,6 +229,21 @@ unblocked sections.
 > because it would append a row with an empty `release_tag`, which fails schema
 > validation (`semverTag` rejects `""`). `--status=released` remains valid for
 > `file-lock` (clears `held_by`) and `release-tag` (sets `current_main`). See D-013.
+>
+> **GDI-770 retro — clean exit for stale reservations.** If a sibling tab won
+> the race for the version/surface you reserved (the GDI-770 V29/V30
+> pattern), use `--status=abandoned --reason "<text>"` to remove the
+> reservation cleanly without a shipped append. This is valid for `flyway`
+> and `model-registry` only. The `--reason` is required and is carried in
+> the git commit message for audit.
+>
+> Example:
+>
+> ```sh
+> ./scripts/release.sh --resource flyway --section D \
+>   --epic GDI-770 --id V29 --status abandoned \
+>   --reason "Sibling tab GDI-742 won V29 race; renamed to V31 via fix-forward"
+> ```
 
 ---
 

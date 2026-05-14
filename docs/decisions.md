@@ -355,6 +355,114 @@ flyway V20/V24/V25 and model_registry `review-summary-locale`.
 
 ---
 
+## D-014 (2026-05-13) — Coordination race-condition fixes from GDI-770 retrospective
+
+### Context
+
+The GDI-770 SDLC run (Section D / FR-D.2 multi-source answers, parallel
+with Sections A/B/C/D) surfaced four classes of coordination gap that the
+Day-1 scripts didn't catch:
+
+1. **Release-tag race.** Two tabs reach Stage 9 with the same
+   `vX.Y.Z` because `releases.next_per_section` is documentary, not
+   enforced. GDI-708 took `v0.31.0` while GDI-709 was assigned `v0.31.x`;
+   GDI-709 had to shift to `v0.32.x` mid-flight via a registry edit.
+2. **Flyway version race during Stage 4.** Section A's GDI-742 grabbed
+   V29 mid-Stage-4 of GDI-770; then Section C's GDI-C-1-6 grabbed V30
+   while GDI-770 already held V30 on disk. The reservation registry
+   doesn't poll for on-disk drift, so the operator only discovers the
+   collision when CI applies the migration.
+3. **No clean exit for stale reservations.** When a sibling tab wins
+   the race for a version, the loser has no clean way to surrender the
+   reservation — `release.sh --status=released` is rejected for flyway
+   (per D-013), and the only alternative is to let the 24-hour TTL
+   expire silently.
+4. **`git pull --rebase` failure on unstaged changes.** Operators with
+   any working-tree modifications saw "cannot pull with rebase: You have
+   unstaged changes" inside every `reserve.sh`/`release.sh` call. The
+   rebase actually would have applied cleanly, but the error was loud
+   and confusing.
+
+Also surfaced: `next_free` in the YAML is stale (only updated lazily by
+the most recent reserve call), and `reserve.sh` has no signal when a
+sibling tab has ALREADY written a V<id> migration to disk.
+
+### Decision
+
+1. **`conflict-check.sh` gains `--release-tags <csv>`.** Iterates the
+   list, WAIT-blocks if any tag appears as `.releases.in_flight[].proposed_tag`
+   held by a different section OR as a `.flyway.shipped[].release_tag`
+   already-shipped by a different epic. Chain-callable via `--claim`.
+   The `/sdlc` Stage 9 protocol must call this BEFORE `gh release create`.
+
+2. **`scripts/audit-flyway.sh` (new).** Read-only auditor that scans a
+   product repo's Flyway migration directory and reconciles against the
+   registry. Emits one row per Vxx in either source with a status of
+   `OK`, `DRIFT-disk-only`, `DRIFT-registry-only`, or
+   `DRIFT-owner-mismatch?`. Exit 1 if any drift detected. Intended for
+   Stage 4 pre-flight and ad-hoc operator use.
+
+3. **`release.sh` gains `--status=abandoned --reason "<text>"`** for
+   `flyway` and `model-registry` resources. Removes the reserved row
+   without a shipped append. The `--reason` is required and carried
+   in the git commit message body for audit. This is the clean exit
+   for stale reservations.
+
+4. **`_lib.sh:git_pull_rebase()` auto-stashes** before the rebase and
+   `git stash pop`s after. If the stash pop conflicts (rare for the
+   small allocation-YAML edits this repo carries), the stash is left in
+   place with a recovery message.
+
+5. **`status.sh` lazy-computes `next_free`** from
+   `max(shipped|reserved version) + 1`, filtered to the production range
+   (V1-V899). The YAML's static `.flyway.next_free` field is still
+   shown as `[yaml-declared: VXX — drift]` when it disagrees with the
+   computed value.
+
+6. **`reserve.sh` gains `--product-repo-path <path>`** (optional). When
+   reserving a Flyway version, scans the product repo for an existing
+   `V<id>__*.sql` outside common build-output directories. If found,
+   emits a loud WARN but proceeds — the operator may legitimately be
+   reserving a version a sibling tab abandoned.
+
+No schema changes — all behavior changes live in the scripts. D-013's
+constraint (flyway/model-registry use `--status=shipped` with a real
+release_tag) is preserved; abandoned is a new third path for the
+explicit "this reservation will never ship" case.
+
+### Consequences
+
+- `/sdlc` Stage 9 dispatch protocol gains an explicit
+  `conflict-check.sh --release-tags <vX.Y.Z>` call. Until that's wired,
+  operators run the check manually before `gh release create`.
+- `scripts/audit-flyway.sh` becomes part of the Stage 4 dispatch
+  toolkit. The dispatch agent reads the audit output as a
+  precondition signal before writing any migration file.
+- The `next_free` value in the YAML becomes documentary only; the
+  authoritative answer comes from `status.sh`. A subsequent ADR may
+  remove the static field entirely, but that's a schema change and is
+  deferred.
+- Operators who saw spurious `git pull --rebase failed` warnings
+  during normal reserve/release calls will no longer see them.
+- `--status=abandoned` is NOT permitted for `file-lock` or
+  `release-tag` — those continue to use `--status=released`. The error
+  message disambiguates.
+
+### References
+
+- `scripts/audit-flyway.sh` (new)
+- `scripts/conflict-check.sh` (`--release-tags` block + chain-call)
+- `scripts/release.sh` (`--status=abandoned` path)
+- `scripts/reserve.sh` (`--product-repo-path` warning)
+- `scripts/_lib.sh:git_pull_rebase` (stash wrap)
+- `scripts/status.sh` (lazy next_free)
+- `docs/parallel-session-playbook.md` § Step 1.4 (Stage 9 release-tag pre-flight)
+- Source incidents: GDI-708 (v0.31.0 first race), GDI-709 (shift to v0.32.x),
+  GDI-770 (V29 + V30 + V31 cascade)
+- Lessons doc: `docs/lessons-from-GDI-708.md`
+
+---
+
 ## How to add an ADR
 
 ```sh
