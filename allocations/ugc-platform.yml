@@ -240,6 +240,11 @@ flyway:
       epic: GDI-917
       release_tag: v0.43.0
       shipped_at: "2026-05-14T22:10:22Z"
+    - version: V44
+      section: B
+      epic: GDI-917
+      release_tag: v0.43.0
+      shipped_at: "2026-05-14T22:15:47Z"
   reserved:
     - version: V23
       section: A
@@ -670,7 +675,8 @@ pillars:
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-B.1.4, FR-B.1.9]
     in_flight_frs: [FR-B.2.8]
-    shipped_frs: []
+    shipped_frs:
+      - FR-B.2.3
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
         reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
