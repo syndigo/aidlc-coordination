@@ -255,21 +255,21 @@ flyway:
       expires_at: "2026-05-15T03:28:48Z"
     - version: V938
       section: H
-      epic: section-H-FR-H.4-epic
+      epic: GDI-886
       fr: FR-H.4
       status: reserved
       reserved_at: "2026-05-14T14:41:42Z"
       expires_at: "2026-05-16T14:41:42Z"
     - version: V40
       section: H
-      epic: section-H-FR-H.4-epic
+      epic: GDI-886
       fr: FR-H.4
       status: reserved
       reserved_at: "2026-05-14T14:42:06Z"
       expires_at: "2026-05-16T14:42:06Z"
     - version: V940
       section: H
-      epic: section-H-FR-H.4-epic
+      epic: GDI-886
       fr: FR-H.4
       status: reserved
       reserved_at: "2026-05-14T14:42:08Z"
