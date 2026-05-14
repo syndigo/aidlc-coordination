@@ -466,20 +466,7 @@ releases:
     H: v0.35.x
     I: v0.36.x
     J: v0.37.x
-  in_flight:
-    - section: A
-      epic: section-A-FR-A.1.9-epic
-      proposed_tag: v0.28.0
-      anchor_sha: pending
-      note: Locale auto-translation (FR-A.1.9)
-    - section: E
-      epic: GDI-824
-      proposed_tag: v0.38.0
-      anchor_sha: pending
-    - section: F
-      epic: GDI-846
-      proposed_tag: v0.39.0
-      anchor_sha: pending
+  in_flight: []
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
@@ -532,6 +519,19 @@ profile_ref: profiles/ugc-platform.yml
 # write to this. The static shape (name, scope, FR prefix) lives in the
 # profile YAML; this block carries status, in-flight FRs, serial chains,
 # blockers.
+#
+# 2026-05-14 reconciliation pass (Phase 3 of contention-audit-2026-05-14):
+#   - in_flight_frs reset from flyway.reserved.fr (registry truth)
+#   - shipped_frs intentionally left empty for pre-D-016 history. The
+#     epic-to-FR mapping for historical ships isn't reliably reconstructible
+#     from the registry alone (flyway.shipped carries epic, not FR id).
+#     New ships from this point forward populate via:
+#       release.sh --status=shipped --fr <FR-X.Y.Z> --update-pillars-block
+#   - releases.in_flight pruned (3 stale entries: A v0.28.0, E v0.38.0,
+#     F v0.39.0 — all superseded by actual ship tags in flyway.shipped).
+#   - F.1.5.1 retained in pillars[F].in_flight_frs even though no
+#     flyway.reserved entry exists, because the GDI-846 epic recently
+#     shipped flyway V37/V937 at v0.42.0 — F is mid-cycle, not idle.
 pillars:
   - letter: A
     name: Product Catalog Management
@@ -548,7 +548,7 @@ pillars:
     status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-B.1.4, FR-B.1.9]
-    in_flight_frs: [FR-B.1.4]
+    in_flight_frs: [FR-B.2.8]
     shipped_frs: []
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
@@ -558,10 +558,10 @@ pillars:
     max_in_flight_frs: 2
   - letter: C
     name: Content Display
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-C.1.9, FR-C.1.18]
-    in_flight_frs: [FR-C.1.9]
+    in_flight_frs: []
     shipped_frs: []
     serial_chains:
       - chain: [FR-A.1.9, FR-C.1.18]
@@ -571,17 +571,19 @@ pillars:
     max_in_flight_frs: 2
   - letter: D
     name: Questions & Answers
-    status: not_started
+    status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-D.1, FR-D.2, FR-D.3, FR-D.4, FR-D.5, FR-D.6, FR-D.7, FR-D.8, FR-D.9, FR-D.10, FR-D.11, FR-D.12, FR-D.13]
-    in_flight_frs: []
+    in_flight_frs:
+      - FR-D.2
+      - FR-D.5
     shipped_frs: []
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
   - letter: E
     name: Moderation & Governance
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
@@ -611,10 +613,11 @@ pillars:
     max_in_flight_frs: 2
   - letter: H
     name: Social & Visual UGC
-    status: not_started
+    status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
+    in_flight_frs:
+      - FR-H.4
     shipped_frs: []
     blocked_on: []
     ship_frequency: unlimited
@@ -631,7 +634,7 @@ pillars:
     max_in_flight_frs: 2
   - letter: J
     name: Platform Services
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
