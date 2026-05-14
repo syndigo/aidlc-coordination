@@ -463,6 +463,112 @@ explicit "this reservation will never ship" case.
 
 ---
 
+## D-015 (2026-05-14) — `release.sh --all-for-epic` orphan-reservation sweep
+
+**Status:** Accepted
+**Date:** 2026-05-14
+**Decider:** GDI-798
+
+### Context
+
+`scripts/release.sh` only releases the single resource identified by
+`--resource`/`--id`. When an epic's SDLC run reaches Stage 10, the
+orchestrator's release hook releases ONLY the canonical resource the ticket
+named at intake. Older-version reservations the epic accumulated mid-flight
+— e.g. an early Flyway version reserved before the schema was refactored,
+a test-fixture version paired with the production version, or a model-
+registry surface that was renamed during development — remain in the
+registry under the same epic key. They become orphans: never going to ship,
+never going to be released, only TTL-expire silently 24-48h later.
+
+Live confirmation: GDI-800 shipped V32 + V932 + cleared its file-locks
+at Stage 10 (2026-05-14T02:11Z), but V22 (`epic: GDI-800`, FR-A.1.7,
+onboarding-schema-mapping) and V923 (test-fixture pair) were left
+`status: reserved` under GDI-800. Operators had to grep the registry and
+craft individual `release.sh --status=abandoned` calls per orphan.
+
+### Decision
+
+Add a sweep mode to `release.sh`:
+
+```sh
+release.sh --all-for-epic <KEY> [--reason "<text>"] [--dry-run] [--json]
+```
+
+The mode is mutually exclusive with `--resource`/`--id`/`--status`. It
+walks the registry and releases every reservation matching the epic:
+
+- `flyway.reserved`            -> dropped (abandoned semantics)
+- `flyway.test_fixture_range.reserved` -> dropped
+- `model_registry.pending`     -> dropped
+- `single_writer_files` where `held_by == KEY` -> `held_by: none`
+- `releases.in_flight`         -> dropped
+
+All edits land in a single `yq` pass and a single commit. The commit
+message body carries the list of resources swept (for audit). `--reason`
+is optional with a sensible default; `--dry-run` previews the sweep
+without editing. Idempotent: zero matches exits 0 with a no-op log.
+
+### Rationale
+
+- **One sweep, one commit.** Mirrors the existing per-resource code path
+  (single yq edit + commit + push) so the audit trail stays linear.
+- **Same allowed scope as existing flags.** No new schema fields; no new
+  resource categories. The sweep operates entirely on data the script
+  already knows how to release.
+- **Abandoned semantics for flyway/model-registry.** Per D-013 and D-014,
+  these resources can't be `released` without a real release_tag, so we
+  use the `abandoned`-style "drop the reserved row" path. No `shipped`
+  appends — orphans by definition will never ship under this epic.
+- **Idempotent.** Re-runnable as part of a Stage 10 hook, a manual cleanup,
+  or a periodic sweep script without side effects.
+
+### Rejected alternatives
+
+- **Auto-sweep at the end of every `release.sh --status=shipped` call.**
+  Too magical — operators expect `release.sh` to touch only what they
+  named. The sweep is opt-in via a distinct flag.
+- **A separate `sweep.sh` script.** Would duplicate the YAML-edit
+  scaffolding (require_tools, resolve_yml_path, git_pull_rebase,
+  git_commit_and_push). Keeping the sweep inside `release.sh` reuses
+  every helper.
+- **Walk by section instead of epic.** A section can hold reservations
+  for many concurrent epics; sweeping by section would over-clean. Epic
+  is the unit of work that ships, so epic is the unit of sweep.
+
+### Consequences
+
+**Positive:**
+- Stage 10 hooks (or operators) can `release.sh --all-for-epic <KEY>`
+  immediately after the canonical release and the registry is clean.
+- The retroactive cleanup of GDI-800's V22/V923 orphans is one command,
+  not three hand-crafted `--status=abandoned` calls.
+- The `status.sh` view of "active reservations" stops surfacing
+  reservations whose epic has already shipped.
+
+**Negative:**
+- Operators must remember to use `--all-for-epic` for the post-ship
+  sweep. Surfaced in the playbook under § "Step 1.5 — Ship + release".
+- If an operator runs `--all-for-epic` mid-flight (BEFORE the canonical
+  resource has shipped), they will drop their own in-flight reservations.
+  Mitigated by `--dry-run` showing the plan first.
+
+### Follow-ups
+
+- Wire `--all-for-epic` into the `/sdlc` orchestrator's Stage 10 hook so
+  every Stage 10 close sweeps orphans automatically (without operator
+  intervention). Until then, operators run the sweep manually.
+
+### References
+
+- `scripts/release.sh` (sweep block: `if [ -n "$ALL_FOR_EPIC" ]; then ... fi`)
+- `docs/parallel-session-playbook.md` § "Step 1.5 — Ship + release"
+- Source incident: GDI-800 (V32/V932 shipped, V22/V923 orphaned)
+- Sibling ADRs: D-013 (flyway --status=released ban),
+  D-014 (--status=abandoned for stale reservations)
+
+---
+
 ## How to add an ADR
 
 ```sh

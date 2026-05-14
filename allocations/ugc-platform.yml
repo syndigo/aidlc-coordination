@@ -184,6 +184,11 @@ flyway:
       epic: GDI-800
       release_tag: v0.38.0
       shipped_at: "2026-05-14T02:11:17Z"
+    - version: V34
+      section: B
+      epic: GDI-816
+      release_tag: v0.39.0
+      shipped_at: "2026-05-14T03:06:39Z"
   reserved:
     - version: V21
       section: A
@@ -222,13 +227,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-13T22:45:10Z"
       expires_at: "2026-05-14T22:45:10Z"
-    - version: V34
-      section: B
-      epic: GDI-816
-      fr: FR-B.3.1
-      status: reserved
-      reserved_at: "2026-05-14T01:51:31Z"
-      expires_at: "2026-05-15T01:51:31Z"
     - version: V35
       section: C
       epic: GDI-C-1-9
