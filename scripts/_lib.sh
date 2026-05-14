@@ -158,6 +158,59 @@ validate_semver_tag() {
 # do NOT open a PR per edit on Day 1 — the audit trail is the linear commit
 # history on main.
 
+# D-021 (P1.4): worktree-context detection for the orchestrator tier.
+# The pillar-orchestrator and portfolio-orchestrator personas spawn many
+# sibling reserve.sh / release.sh calls; if they run in the shared main
+# clone, every one of those invocations runs git_pull_rebase in the same
+# working tree and the operator's other tabs get stomped (this session
+# itself nearly lost untracked files via that path). Worktrees isolate
+# per-session state.
+#
+# Detection: a regular clone has $REPO_ROOT/.git as a DIRECTORY; a
+# worktree has $REPO_ROOT/.git as a FILE that contains "gitdir: <path>"
+# pointing at the main clone's worktrees/<name> dir.
+#
+# Two helpers:
+#   warn_if_not_worktree   — soft warn for read-only paths (status scripts).
+#                            Always returns 0; emits a one-line WARN that
+#                            tells the operator about the contract without
+#                            blocking the read.
+#   require_worktree_strict — hard refuse for write paths. Returns 1 if
+#                             not in a worktree, with full recovery hint.
+#                             Bypassable by setting ALLOW_NON_WORKTREE=1
+#                             in the caller's environment.
+#
+# Args: $1 = persona/script name for the error message.
+warn_if_not_worktree() {
+  caller="${1:-orchestrator}"
+  if [ -d "$REPO_ROOT/.git" ]; then
+    log_warn "$caller: running in the main clone, not a worktree."
+    log_warn "  Orchestrator personas should run in a per-epic worktree."
+    log_warn "  See: ./scripts/worktree.sh --help and docs/orchestration-tiers.md"
+  fi
+  return 0
+}
+
+require_worktree_strict() {
+  caller="${1:-orchestrator}"
+  if [ "${ALLOW_NON_WORKTREE:-0}" = "1" ]; then
+    log_warn "$caller: ALLOW_NON_WORKTREE=1; running outside worktree at operator's risk"
+    return 0
+  fi
+  if [ -d "$REPO_ROOT/.git" ]; then
+    log_err "$caller: refusing to run in the main clone ($REPO_ROOT)"
+    log_err "  Orchestrator-tier writes must run in a worktree to prevent"
+    log_err "  cross-session working-tree contamination. See D-021 / GDI-728."
+    log_err "  Create a worktree per epic:"
+    log_err "    ./scripts/worktree.sh add --repo-path $REPO_ROOT --epic <KEY> \\"
+    log_err "      --branch orchestrator/<persona>-<KEY>"
+    log_err "  Then cd into the new worktree and re-run."
+    log_err "  Or set ALLOW_NON_WORKTREE=1 in your environment to override."
+    return 1
+  fi
+  return 0
+}
+
 git_pull_rebase() {
   # GDI-770 retro: previously this failed loudly with "cannot pull with rebase:
   # You have unstaged changes" when the operator's local clone had unrelated

@@ -51,16 +51,34 @@ parallel with one another, coordinated by the Portfolio Orchestrator above them.
 
 ## Decision loop
 
-Each tick, the Pillar Orchestrator runs this loop:
+**Phase 0 (every tick, before anything else): isolate in a worktree.** The Pillar
+Orchestrator MUST run from a per-epic worktree, never the main clone. The status
+scripts will warn if you forget; they don't refuse, but ignoring the warning means
+your sibling Section Owner sessions can stomp on each other's working trees (this
+exact failure mode prompted D-021). One-time setup at the start of a pillar's
+session:
 
-1. **Read state.** Run `./scripts/pillar-status.sh <letter>` to get the current
-   in-flight count, blockers, lock contention.
-2. **Cull expired reservations.** If any of this pillar's reservations have
-   `expires_at` in the past, run `release.sh --status=abandoned --reason=ttl-expired`.
+```sh
+./scripts/worktree.sh add --repo-path <main-clone> --epic <pillar-tracking-epic> \
+  --branch orchestrator/pillar-<letter>-<epic>
+cd <new-worktree-path>
+```
+
+Then on each tick:
+
+1. **Read state.** Run `./scripts/pillar-status.sh --letter <letter>` to get the
+   current in-flight count, blockers, lock contention.
+2. **Cull expired reservations.** Run `./scripts/release.sh --sweep-expired`
+   (D-020). This drops every flyway / model-registry reservation whose
+   `expires_at` is in the past — including reservations from other pillars,
+   which is intentional: stale reservations from any pillar block the whole
+   product. Add `--dry-run` first if you want to see what would drop.
 3. **Pick the next launchable FR.** From `fr_backlog`, find the first FR where:
    - It is not already in `in_flight_frs`
    - It is not at the front of an unsatisfied `serial_chains[i]` (predecessor must be in
-     `shipped_frs` or in the global `flyway.shipped` / `model_registry.shipped`)
+     `shipped_frs` or in the global `flyway.shipped` / `model_registry.shipped`).
+     The intra-pillar chain guard in `reserve.sh` will refuse the reserve
+     anyway, but checking here saves a round trip.
    - It is not in any `blocked_on` entry
    - `len(in_flight_frs) < max_in_flight_frs`
 4. **Pre-flight lock contention.** Run `conflict-check.sh --files-to-touch <expected
@@ -69,10 +87,15 @@ Each tick, the Pillar Orchestrator runs this loop:
    `/sdlc <ticket>`). The Section Owner runs the standard `/sdlc --profile <product>`
    flow which will call `reserve.sh` automatically at Phase 0.6.
 6. **Update pillar block.** Append the FR to `in_flight_frs` after the Section Owner's
-   reserve succeeds.
-7. **Watch for completion.** When a Section Owner ships, move the FR from
-   `in_flight_frs` to `shipped_frs`. If the shipped FR was the predecessor of an
-   intra-pillar serial chain, the next chain entry becomes launchable on the next tick.
+   reserve succeeds. (When the Section Owner's `/sdlc --profile` is wired with
+   `--update-pillars-block` at Stage 10, this also happens automatically on the
+   ship side — see step 7.)
+7. **Watch for completion.** When a Section Owner ships, the registry entry should
+   be marked via `release.sh --status=shipped --fr <FR-X.Y.Z> --update-pillars-block`
+   (D-016 P0). That single call moves the FR from `in_flight_frs` to `shipped_frs`,
+   updates the matching `anchor_dependencies[].status` if applicable, and prunes
+   `releases.in_flight[]`. If the shipped FR was the predecessor of an intra-pillar
+   serial chain, the next chain entry becomes launchable on the next tick.
 
 ## Hand-off contract: Pillar -> Section Owner
 

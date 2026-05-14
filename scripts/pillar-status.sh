@@ -55,6 +55,11 @@ validate_section "$LETTER"
 
 require_tools
 
+# D-021 (P1.4): warn (don't block) if running in the main clone. Read-only
+# scripts are safe to invoke ad-hoc, but the orchestrator persona docs
+# require per-epic worktrees for the write-side flow this script informs.
+warn_if_not_worktree "pillar-status.sh"
+
 YML="$(resolve_yml_path "$PRODUCT")"
 
 # Confirm the pillar exists in the YAML. If not, the product hasn't adopted

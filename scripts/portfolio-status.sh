@@ -48,6 +48,11 @@ done
 
 require_tools
 
+# D-021 (P1.4): warn (don't block) if running in the main clone. The
+# portfolio orchestrator persona docs require a per-epic worktree for the
+# write-side flow this script informs (--update-stats writes the YAML).
+warn_if_not_worktree "portfolio-status.sh"
+
 YML="$(resolve_yml_path "$PRODUCT")"
 
 # Profile lookup (D-017). The portfolio cap lives in the profile.
