@@ -109,7 +109,12 @@ pillars:
 orchestration:
   default_pillar_persona: personas/pillar-orchestrator.md
   default_portfolio_persona: personas/portfolio-orchestrator.md
-  # Cap on how many pillars may have any FR in-flight at once. UGC has 10
-  # pillars but ModelRegistry.kt is a global single-writer file -- we cannot
-  # actually run more than ~3 pillars in parallel without lock contention.
-  max_concurrent_pillars_in_flight: 4
+  # Cap on how many pillars may have any FR in-flight at once. Day-2 (D-023)
+  # raised this from 4 to 8 based on 24h of observed throughput: 16 ships
+  # across 5 distinct pillars, only 2/16 needed the load-bearing AI lock,
+  # and the substrate handled the parallelism cleanly. The tighter, more
+  # accurate constraint is single_writer_files[].max_concurrent_holders=1
+  # on the AI surfaces (ModelRegistry.kt / Prompts.kt / ModelRegistryTest.kt),
+  # which is already enforced. Revisit if rebase contention becomes a real
+  # bottleneck (likely around 12+ pillars).
+  max_concurrent_pillars_in_flight: 8

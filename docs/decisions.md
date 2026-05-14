@@ -732,6 +732,324 @@ schema validation is unaffected.
 
 ---
 
+## D-018 (2026-05-14) — `git_commit_and_push` stages only the touched file
+
+### Status
+
+Accepted. Day-2 P1.1 fix.
+
+### Context
+
+`git_commit_and_push()` in `_lib.sh` did `git add allocations/`, which staged
+every YAML in the directory. During Day-2 P0 development I created
+`allocations/ugc-test.yml` as a sandbox copy of the live registry to dry-run
+the new `--update-pillars-block` hooks without pushing to main. The script
+ran with `--product ugc-test` correctly, but `git_commit_and_push` then
+staged BOTH `ugc-test.yml` AND `ugc-platform.yml` and pushed the bundle as
+one commit (`b4eff31`). Reverted in `35bb8ac`. The live UGC YAML wasn't
+mutated because of `--product` scoping, but the foot-gun is real: any
+operator with a sandbox file in `allocations/` would publish it.
+
+### Decision
+
+Add an explicit second arg to `git_commit_and_push()` for the file path to
+stage. All four call sites (reserve.sh, release.sh per-resource +
+`--all-for-epic`, portfolio-status.sh `--update-stats`) updated to pass
+`$YML`. Default of `allocations/` retained for any unforeseen caller, so
+the change is backward-compatible.
+
+### Consequences
+
+- Sandbox YAMLs in `allocations/` no longer leak into commits.
+- Future scripts that mutate the registry MUST pass the file path
+  explicitly; the prefix-match-staging behavior is now opt-in, not default.
+
+### References
+
+- `scripts/_lib.sh#git_commit_and_push`
+- Callers: `scripts/reserve.sh`, `scripts/release.sh`, `scripts/portfolio-status.sh`
+- Source incident: commit `b4eff31` (reverted in `35bb8ac`).
+
+---
+
+## D-019 (2026-05-14) — `git_pull_rebase` surfaces stash-pop failures with recovery commands
+
+### Status
+
+Accepted. Day-2 P1.2 fix.
+
+### Context
+
+`git_pull_rebase()` swallowed `git stash pop` failures with
+`2>/dev/null || log_warn "stash pop conflicted; recover with: git stash list"`.
+The warning fired during a sibling reserve.sh invocation in this session
+and was missed; only the stash entry on the stack saved the untracked work
+(in this session: the orchestrator personas, status scripts, profile
+files, and tiers doc — all uncommitted at the time, all on the verge of
+being lost).
+
+### Decision
+
+Three changes to `git_pull_rebase()`:
+
+1. Capture the stash SHA via `git rev-parse 'stash@{0}'` immediately
+   after `stash push`, so the recovery command names a durable identity
+   even if sibling tabs push additional stashes between push and pop.
+2. On stash pop failure, `log_err` (not `log_warn`) with the captured
+   SHA, the stash count, AND three recovery commands (`stash list`,
+   `stash apply <sha>`, `stash show -p <sha>`) plus the cleanup
+   `stash drop <sha>` for after recovery.
+3. Return non-zero so the calling script can decide to abort the
+   operation instead of blindly continuing on a half-merged tree.
+
+### Consequences
+
+- A pop conflict is now loud, named, and recoverable. Sessions that
+  discover stash pop failed can choose to abort (re-run later) or
+  recover (`stash apply` + manual conflict resolution).
+- The subshell wrapper was removed; shell flow is explicit. No
+  behavior change for callers, but easier to read.
+
+### References
+
+- `scripts/_lib.sh#git_pull_rebase`
+- Source incident: this session's near-loss of untracked Day-1 work
+  (Phase 0 of `reports/contention-audit-2026-05-14.md`).
+
+---
+
+## D-020 (2026-05-14) — `release.sh --sweep-expired` drops TTL-expired reservations
+
+### Status
+
+Accepted. Day-2 P1.3.
+
+### Context
+
+Reservations carry `expires_at` fields, but nothing read them or acted on
+them. The pillar-orchestrator persona docs referenced a "TTL-expired
+sweep" that had no script behind it. Audit finding 6 in
+`reports/contention-audit-2026-05-14.md` flagged V21 and V23 (Section A)
+as expiring soon with no cleanup path.
+
+### Decision
+
+`release.sh --sweep-expired` finds every reservation in the registry
+whose `expires_at` is in the past (string comparison against `iso_now` —
+ISO-8601 timestamps sort lexicographically) and drops them in a single
+yq pass:
+
+- `flyway.reserved` → dropped
+- `flyway.test_fixture_range.reserved` → dropped
+- `model_registry.pending` → dropped
+
+Does NOT touch `single_writer_files` (their `.until` field is cleared by
+the file's next reservation, not on a wall-clock sweep — changing that
+contract would alter behavior for everything that reads `held_by`/`until`).
+
+Does NOT touch `releases.in_flight` (those are now pruned by the D-016
+P0 hooks at ship time).
+
+Mutually exclusive with `--resource` and `--all-for-epic`. Idempotent:
+zero expired entries exits 0.
+
+### Consequences
+
+- Orchestrator personas can call `--sweep-expired` at the top of every
+  tick to cull stale reservations across the whole product.
+- The portfolio-orchestrator persona doc was updated to make this the
+  first step of every tick.
+
+### References
+
+- `scripts/release.sh#sweep_expired`
+- `personas/portfolio-orchestrator.md#decision-loop` step 1.
+
+---
+
+## D-021 (2026-05-14) — Orchestrator scripts warn when not in a worktree
+
+### Status
+
+Accepted. Day-2 P1.4. Codifies the recommendation from GDI-728 / D-008.
+
+### Context
+
+The orchestrator personas spawn many sibling reserve.sh / release.sh
+calls. If the orchestrator runs in the shared main clone, every one of
+those calls runs `git_pull_rebase` in the same working tree and the
+operator's other tabs get stomped. This session itself almost lost
+untracked files via that path (D-019 covers the immediate fix; D-021
+addresses the systemic behavior).
+
+### Decision
+
+Two new helpers in `_lib.sh`:
+
+- `warn_if_not_worktree <caller>` — soft warn for read-only paths
+  (status scripts). Emits a one-line WARN telling the operator about
+  the worktree contract; never blocks. Always returns 0.
+- `require_worktree_strict <caller>` — hard refuse for write paths.
+  Returns 1 if not in a worktree. Bypassable via `ALLOW_NON_WORKTREE=1`
+  in the caller's environment.
+
+Detection: a regular clone has `$REPO_ROOT/.git` as a directory; a
+worktree has it as a file pointing back at the main clone's `worktrees/`
+dir.
+
+Wired today into `pillar-status.sh` and `portfolio-status.sh` (soft
+warn). The strict guard is available for any future write-path
+orchestrator script. Persona docs updated to make Phase 0 (worktree
+setup) explicit at the top of each decision loop.
+
+### Consequences
+
+- Operators get a one-line WARN reminding them of the contract; they
+  can ignore it for ad-hoc reads.
+- Future orchestrator scripts that mutate the registry can call
+  `require_worktree_strict` to refuse hard.
+- No behavior change for `reserve.sh` / `release.sh` (Section Owners
+  legitimately use those from the main clone).
+
+### References
+
+- `scripts/_lib.sh#warn_if_not_worktree`, `#require_worktree_strict`
+- `scripts/pillar-status.sh`, `scripts/portfolio-status.sh`
+- `personas/pillar-orchestrator.md#decision-loop` Phase 0
+- `personas/portfolio-orchestrator.md#decision-loop` Phase 0
+- Sibling: D-008 / GDI-728 (worktree-per-epic convention).
+
+---
+
+## D-022 (2026-05-14) — `bootstrap-from-profile.sh` for new products
+
+### Status
+
+Accepted. Day-2 P1.5 follow-up to D-016/D-017.
+
+### Context
+
+D-017 introduced `profiles/<product>.yml` carrying immutable product
+shape. New products still required hand-authoring an
+`allocations/<product>.yml` to match. Tedious and error-prone — the
+allocation YAML has 8+ required top-level blocks plus per-pillar entries.
+
+### Decision
+
+`scripts/bootstrap-from-profile.sh --product <name>` reads
+`profiles/<name>.yml` and generates a Day-1
+`allocations/<name>.yml` with:
+
+- `product.{name, repo, sections}` from profile
+- empty `flyway` / `model_registry` / `releases.in_flight` blocks
+- `releases.next_per_section` seeded as `v0.1.x` for every letter
+- `single_writer_files` seeded from `profile.ai_surface_files` (or a
+  `docs/decisions.md` placeholder if the profile has no AI surfaces,
+  since the schema requires at least one entry)
+- `pillars[]` seeded from `profile.pillars[]` with `status:not_started`,
+  empty FR lists, and per-pillar caps from profile defaults
+- `profile_ref` pointing back at the profile
+
+Refuses to overwrite an existing allocation unless `--force`. `--dry-run`
+prints the generated YAML to stdout without writing.
+
+### Consequences
+
+- Onboarding a new product is now: (1) author profile, (2) bootstrap,
+  (3) commit. Three steps instead of "copy ugc-platform.yml and edit by
+  hand."
+- Generated allocations validate against the schema immediately, so
+  the operator can run `reserve.sh` against the new product right away.
+- `--force` is dangerous — destroys live coordination state. Documented
+  in `--help` and the commit message.
+
+### References
+
+- `scripts/bootstrap-from-profile.sh`
+- `schemas/profile.yml.schema.json`
+- `schemas/allocation.yml.schema.json`
+
+---
+
+## D-023 (2026-05-14) — Pillar parallelism cap raised from 4 to 8 based on observed throughput
+
+### Status
+
+Accepted. Revises a Day-1 estimate based on 24h of real usage.
+
+### Context
+
+`profiles/ugc-platform.yml#orchestration.max_concurrent_pillars_in_flight`
+was set to 4 on Day-1 (D-016). The number was a guess: I had no
+throughput data and no usage data, and I picked 4 as a conservative
+ceiling assuming the load-bearing AI surface locks
+(`ModelRegistry.kt` / `Prompts.kt` / `ModelRegistryTest.kt`) would be
+the bottleneck.
+
+24 hours of real usage data:
+
+- **16 flyway ships across 5 distinct pillars** (A, B, C, D, F) in the
+  last 24 hours. ~one ship per 90 minutes sustained.
+- **Only 2 of those 16 ships needed an AI surface** (model_registry
+  shipped 2 entries: B's email-template-gen, C's review-summary-locale).
+  ~12.5% of work hits the load-bearing locks.
+- The substrate handled 5 in_flight pillars concurrently without falling
+  over. The contention I documented in
+  `reports/contention-audit-2026-05-14.md` was about state staleness
+  (`shipped_frs` not updating, `releases.in_flight` not pruning),
+  not lock contention.
+
+The Day-1 "4 cap because of AI lock" rationale was wrong: the AI lock
+is a *per-file* constraint, not a *per-pillar* constraint. The tighter,
+more accurate constraint is
+`single_writer_files[].max_concurrent_holders=1` on the AI surfaces,
+which is already in the schema and enforced.
+
+### Decision
+
+Raise `max_concurrent_pillars_in_flight` from 4 to 8.
+
+### Alternatives considered
+
+- **Hold at 4 + observe one more day.** Rejected — we have enough data
+  to act, and the Phase 3 audit already proved the substrate handles
+  5+ pillars cleanly. Holding the lower cap costs throughput.
+- **Raise to 10 (one per UGC pillar).** Rejected — `git_pull_rebase`
+  contention scales linearly with pillar count, and at ~32 calls per
+  FR cycle × 10 pillars = 320 calls, the rebase storm would become the
+  bottleneck. 8 is the empirical sweet spot.
+- **Remove the cap entirely.** Rejected — without a ceiling, a runaway
+  orchestrator could spin up FRs faster than the human portfolio
+  layer can review.
+
+### Consequences
+
+- The portfolio orchestrator can now run up to 8 pillars concurrently
+  before the cap warning fires.
+- AI lock pressure increases: with 8 pillars, the probability that
+  2+ want the AI lock concurrently at any given moment is ~50%+, so
+  more queuing on `ModelRegistry.kt`. This is acceptable — the lock
+  works correctly; queuing is the intended behavior.
+- If rebase contention becomes a real bottleneck (likely around 12+
+  pillars), revisit by either: (a) batching reserves, (b) moving to
+  a longer-lived HTTP service (revisits D-001), or (c) sharding the
+  registry per-pillar (revisits D-002).
+
+### Follow-ups
+
+- After another week of usage, retro this number against actual
+  observed parallelism. If we never hit 6+ in flight, dial back. If
+  we routinely hit 8 and queue on the AI lock, consider a Pillar-A-only
+  carve-out or batching reserves.
+
+### References
+
+- `profiles/ugc-platform.yml#orchestration.max_concurrent_pillars_in_flight`
+- `reports/contention-audit-2026-05-14.md` Phase 3 dashboard.
+- Sibling: D-016 (Day-1 estimate this revises).
+
+---
+
 ## How to add an ADR
 
 ```sh
