@@ -61,15 +61,18 @@ compute_flyway_next_free() {
 }
 
 if [ "$EMIT_JSON" = "1" ]; then
-  computed_next="$(compute_flyway_next_free)"
-  yq -o=json --arg next "$computed_next" '
+  # yq (mikefarah v4) doesn't accept jq's --arg; pass shell variables via env()
+  # which yq reads from the OS environment of the eval expression.
+  COMPUTED_NEXT="$(compute_flyway_next_free)"
+  export COMPUTED_NEXT
+  yq -o=json '
     {
       "product": .product.name,
       "current_main": .releases.current_main,
       "flyway": {
         "shipped_count": (.flyway.shipped | length),
         "reserved_count": (.flyway.reserved | length),
-        "next_free": $next,
+        "next_free": env(COMPUTED_NEXT),
         "next_free_yaml_declared": .flyway.next_free
       },
       "model_registry": {
