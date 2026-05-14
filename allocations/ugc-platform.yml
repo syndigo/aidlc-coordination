@@ -194,6 +194,11 @@ flyway:
       epic: GDI-C-1-9
       release_tag: v0.40.0
       shipped_at: "2026-05-14T04:51:58Z"
+    - version: V31
+      section: D
+      epic: GDI-770
+      release_tag: v0.41.0
+      shipped_at: "2026-05-14T04:54:18Z"
   reserved:
     - version: V21
       section: A
@@ -217,13 +222,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-13T21:10:02Z"
       expires_at: "2026-05-14T21:10:02Z"
-    - version: V31
-      section: D
-      epic: GDI-770
-      fr: FR-D.2
-      status: reserved
-      reserved_at: "2026-05-13T22:45:10Z"
-      expires_at: "2026-05-14T22:45:10Z"
     - version: V36
       section: E
       epic: GDI-824
