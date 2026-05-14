@@ -400,6 +400,10 @@ single_writer_files:
     held_by: none
     until: "2026-05-14T01:19:36Z"
     reason: released via release.sh
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/feeds/OrderFeedProcessor.kt
+    held_by: GDI-856
+    until: "2026-05-14T07:18:33Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.36.0
   next_per_section:
