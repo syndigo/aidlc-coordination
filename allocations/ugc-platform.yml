@@ -353,9 +353,9 @@ single_writer_files:
     reason: released via release.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: GDI-800
-    until: "2026-05-15T22:55:27Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-14T02:11:20Z"
+    reason: released via release.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
     held_by: GDI-800
