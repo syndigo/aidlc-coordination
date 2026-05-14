@@ -449,6 +449,10 @@ releases:
       epic: GDI-846
       proposed_tag: v0.39.0
       anchor_sha: pending
+    - section: C
+      epic: GDI-830
+      proposed_tag: v0.40.0
+      anchor_sha: pending
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
