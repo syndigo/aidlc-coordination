@@ -1,0 +1,647 @@
+# =====================================================================
+# UGC Platform — Allocation Registry
+# =====================================================================
+# This is the live coordination state for the syndigo/ugc-platform repo.
+# Sessions read this before starting work and write to it via the scripts
+# under ../scripts/. The file is structured for safe parallel edits at the
+# section level: Section A never edits Section C's entries, and vice versa.
+#
+# Six top-level sections (required by schemas/allocation.yml.schema.json):
+#   - product            (identity)
+#   - flyway             (DB migration version reservations)
+#   - model_registry     (AI model surfaces — names + versions)
+#   - single_writer_files (files that only one section may edit at a time)
+#   - releases           (current main + per-section next semver)
+#   - anchor_dependencies (cross-section blocking relationships)
+#   - tfc_deploy_queue   (forward-looking; Day-1 stub only)
+#
+# As of 2026-05-12. Verified against syndigo/ugc-platform release tags and
+# the live parallel-session message contexts at hand-off time.
+
+product:
+  name: ugc-platform
+  repo: syndigo/ugc-platform
+  sections: [A, B, C, D, E, F, G, H, I, J]
+  # Section letter assignments are stable (see ugc-platform plan-document).
+  # New sections require an ADR in docs/decisions.md.
+flyway:
+  # Pre-AIDLC migrations: V1-V12 shipped before this registry existed. We
+  # don't carry per-version epic tracking for them.
+  shipped:
+    - version: V1
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V2
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V3
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V4
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V5
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V6
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V7
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V8
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V9
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V10
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V11
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    - version: V12
+      epic: pre-aidlc
+      release_tag: pre-aidlc
+      shipped_at: 2026-05-01T00:00:00Z
+    # AIDLC-tracked migrations begin here.
+    - version: V13
+      section: A
+      epic: GDI-499
+      release_tag: v0.13.0
+      shipped_at: 2026-05-10T01:47:41Z
+      note: Catalog validation framework
+    - version: V14
+      section: A
+      epic: GDI-613
+      release_tag: v0.23.0
+      shipped_at: 2026-05-12T20:33:02Z
+      note: AI image-content validation findings
+    - version: V15
+      section: A
+      epic: GDI-613
+      release_tag: v0.23.0
+      shipped_at: 2026-05-12T20:33:02Z
+      note: V14 idempotency unique index (follow-on)
+    - version: V16
+      section: B
+      epic: GDI-634
+      release_tag: v0.24.0
+      shipped_at: 2026-05-12T23:41:37Z
+      note: site_keys (consumer site-key auth backend)
+    - version: V17
+      section: C
+      epic: GDI-638
+      release_tag: v0.26.0
+      shipped_at: 2026-05-13T04:00:43Z
+      note: Reviews filter + sort index
+    - version: V18
+      section: A
+      epic: GDI-645
+      release_tag: v0.27.0
+      shipped_at: 2026-05-13T04:01:54Z
+      note: Catalog category findings (FR-A.1.11)
+    - version: V19
+      section: A
+      epic: GDI-660
+      release_tag: v0.28.0
+      shipped_at: "2026-05-13T15:11:11Z"
+    # release_tag omitted on V24/V20/V25 below: these rows were appended
+    # via release.sh --status=released, which is a no-op for flyway and
+    # left release_tag empty (schema rejects ""). The field is optional;
+    # backfill once the migration ships with a tagged release. See D-013.
+    - version: V24
+      section: C
+      epic: GDI-NEW-C118
+      shipped_at: "2026-05-13T15:54:46Z"
+    - version: V20
+      section: A
+      epic: section-A-FR-A.1.8-epic
+      shipped_at: "2026-05-13T16:10:42Z"
+    - version: V25
+      section: D
+      epic: GDI-709
+      shipped_at: "2026-05-13T17:02:21Z"
+    - version: V20
+      section: A
+      epic: GDI-699
+      release_tag: v0.29.0
+      shipped_at: "2026-05-13T18:20:59Z"
+    - version: V24
+      section: C
+      epic: GDI-692
+      release_tag: v0.30.0
+      shipped_at: "2026-05-13T18:29:15Z"
+    - version: V25
+      section: B
+      epic: GDI-708
+      release_tag: v0.31.0
+      shipped_at: "2026-05-13T19:47:22Z"
+    - version: V26
+      section: D
+      epic: GDI-709
+      release_tag: v0.32.0
+      shipped_at: "2026-05-13T20:27:36Z"
+    - version: V27
+      section: C
+      epic: GDI-C-1-7
+      release_tag: v0.33.0
+      shipped_at: "2026-05-13T21:22:48Z"
+    - version: V28
+      section: B
+      epic: GDI-752
+      release_tag: v0.34.0
+      shipped_at: "2026-05-13T22:27:14Z"
+    - version: V30
+      section: C
+      epic: GDI-C-1-6
+      release_tag: v0.36.0
+      shipped_at: "2026-05-14T00:18:06Z"
+    - version: V33
+      section: B
+      epic: GDI-808
+      release_tag: v0.37.0
+      shipped_at: "2026-05-14T01:19:37Z"
+    - version: V32
+      section: A
+      epic: GDI-800
+      release_tag: v0.38.0
+      shipped_at: "2026-05-14T02:11:15Z"
+    - version: V932
+      section: A
+      epic: GDI-800
+      release_tag: v0.38.0
+      shipped_at: "2026-05-14T02:11:17Z"
+    - version: V34
+      section: B
+      epic: GDI-816
+      release_tag: v0.39.0
+      shipped_at: "2026-05-14T03:06:39Z"
+    - version: V35
+      section: C
+      epic: GDI-C-1-9
+      release_tag: v0.40.0
+      shipped_at: "2026-05-14T04:51:58Z"
+    - version: V31
+      section: D
+      epic: GDI-770
+      release_tag: v0.41.0
+      shipped_at: "2026-05-14T04:54:18Z"
+    - version: V37
+      section: F
+      epic: GDI-846
+      release_tag: v0.42.0
+      shipped_at: "2026-05-14T05:30:09Z"
+    - version: V937
+      section: F
+      epic: GDI-846
+      release_tag: v0.42.0
+      shipped_at: "2026-05-14T05:30:25Z"
+    - version: V42
+      section: B
+      epic: GDI-907
+      release_tag: v0.43.0
+      shipped_at: "2026-05-14T16:46:49Z"
+  reserved:
+    - version: V21
+      section: A
+      epic: GDI-742
+      fr: FR-A.1.12
+      status: reserved
+      reserved_at: 2026-05-13T22:00:00Z
+      expires_at: 2026-05-15T22:00:00Z
+      note: Fuzzy dedup (re-keyed from section-A-FR-A.1.12-epic placeholder at initiation)
+    - version: V23
+      section: A
+      epic: section-A-buffer
+      status: reserved
+      reserved_at: 2026-05-13T22:00:00Z
+      expires_at: 2026-05-15T22:00:00Z
+      note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
+    - version: V29
+      section: D
+      epic: GDI-770
+      fr: FR-D.2
+      status: reserved
+      reserved_at: "2026-05-13T21:10:02Z"
+      expires_at: "2026-05-14T21:10:02Z"
+    - version: V36
+      section: E
+      epic: GDI-824
+      fr: ""
+      status: reserved
+      reserved_at: "2026-05-14T02:23:13Z"
+      expires_at: "2026-05-15T02:23:13Z"
+    - version: V38
+      section: G
+      epic: GDI-857
+      fr: FR-G.1.1
+      status: reserved
+      reserved_at: "2026-05-14T03:25:15Z"
+      expires_at: "2026-05-15T03:25:15Z"
+    - version: V938
+      section: H
+      epic: GDI-886
+      fr: FR-H.4
+      status: reserved
+      reserved_at: "2026-05-14T14:41:42Z"
+      expires_at: "2026-05-16T14:41:42Z"
+    - version: V40
+      section: H
+      epic: GDI-886
+      fr: FR-H.4
+      status: reserved
+      reserved_at: "2026-05-14T14:42:06Z"
+      expires_at: "2026-05-16T14:42:06Z"
+    - version: V940
+      section: H
+      epic: GDI-886
+      fr: FR-H.4
+      status: reserved
+      reserved_at: "2026-05-14T14:42:08Z"
+      expires_at: "2026-05-16T14:42:08Z"
+    - version: V41
+      section: D
+      epic: GDI-899
+      fr: FR-D.5
+      status: reserved
+      reserved_at: "2026-05-14T14:56:42Z"
+      expires_at: "2026-05-15T14:56:42Z"
+  next_free: V24
+  # Test fixture migrations live in their own range so they don't collide
+  # with production schema versions.
+  test_fixture_range:
+    shipped:
+      # V900-V919: legacy test grants, pre-AIDLC.
+      - {version: V900, status: shipped, epic: pre-aidlc}
+      - {version: V901, status: shipped, epic: pre-aidlc}
+      - {version: V902, status: shipped, epic: pre-aidlc}
+      - {version: V903, status: shipped, epic: pre-aidlc}
+      - {version: V904, status: shipped, epic: pre-aidlc}
+      - {version: V905, status: shipped, epic: pre-aidlc}
+      - {version: V906, status: shipped, epic: pre-aidlc}
+      - {version: V907, status: shipped, epic: pre-aidlc}
+      - {version: V908, status: shipped, epic: pre-aidlc}
+      - {version: V909, status: shipped, epic: pre-aidlc}
+      - {version: V910, status: shipped, epic: pre-aidlc}
+      - {version: V911, status: shipped, epic: pre-aidlc}
+      - {version: V912, status: shipped, epic: pre-aidlc}
+      - {version: V913, status: shipped, epic: pre-aidlc}
+      - {version: V914, status: shipped, epic: pre-aidlc}
+      - {version: V915, status: shipped, epic: pre-aidlc}
+      - {version: V916, status: shipped, epic: pre-aidlc}
+      - {version: V917, status: shipped, epic: pre-aidlc}
+      - {version: V918, status: shipped, epic: pre-aidlc}
+      - {version: V919, status: shipped, epic: pre-aidlc}
+    reserved:
+      # V920-V924 are paired 1:1 with V19-V23 (Section A's upcoming work).
+      - {version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-14T22:00:00Z'}
+      - {version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V922, section: A, epic: GDI-742, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+      - {version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+    next_free: V925
+model_registry:
+  # ModelRegistry.kt + Prompts.kt are the single-anchor surfaces. Edits to
+  # them must be serialized — see single_writer_files below.
+  shipped:
+    - surface: smoke
+      section: J
+      epic: bootstrap
+      release_tag: v0.19.0
+      shipped_at: 2026-05-11T21:52:17Z
+    - surface: synth-catalog-image
+      section: A
+      epic: GDI-591
+      release_tag: v0.22.0
+      shipped_at: 2026-05-12T16:29:05Z
+    - surface: synth-catalog-translate
+      section: A
+      epic: GDI-591
+      release_tag: v0.22.0
+      shipped_at: 2026-05-12T16:29:05Z
+    - surface: catalog-image-validation
+      section: A
+      epic: GDI-613
+      release_tag: v0.23.0
+      shipped_at: 2026-05-12T20:33:02Z
+    - surface: catalog-category-sanity
+      section: A
+      epic: GDI-645
+      release_tag: v0.27.0
+      shipped_at: 2026-05-13T04:01:54Z
+    - surface: catalog-locale-translation
+      section: A
+      epic: GDI-660
+      release_tag: v0.28.0
+      shipped_at: "2026-05-13T15:11:16Z"
+    # release_tag omitted: appended via release.sh --status=released which
+    # left it empty (schema rejects ""). Backfill once tagged. See D-013.
+    - surface: review-summary-locale
+      section: C
+      epic: GDI-NEW-C118
+      shipped_at: "2026-05-13T15:54:48Z"
+    - surface: review-summary-locale
+      section: C
+      epic: GDI-692
+      release_tag: v0.30.0
+      shipped_at: "2026-05-13T18:29:18Z"
+    - surface: email-template-gen
+      section: B
+      epic: GDI-708
+      release_tag: v0.31.0
+      shipped_at: "2026-05-13T19:47:25Z"
+  pending:
+    - surface: review-precheck
+      section: B
+      epic: GDI-907
+      fr: FR-B.2.8
+      status: reserved
+      reserved_at: "2026-05-14T15:38:47Z"
+      expires_at: "2026-05-16T03:38:47Z"
+single_writer_files:
+  # Files that only one section may edit at a time. The held_by value is an
+  # epic key (matches model_registry.pending or flyway.reserved entries).
+  # held_by: none means the file is currently unlocked — sections may grab
+  # a short-lived lock per edit.
+  #
+  # ⚠ GDI-692 retro (2026-05-13): the locks on ModelRegistry.kt + Prompts.kt
+  # + ModelRegistryTest.kt are LOAD-BEARING. They look "append-safe" because
+  # each new AI surface adds an entry at end-of-section, but git auto-merge
+  # FAILS when two parallel sessions append in the same adjacent line region
+  # (the when-clause body, the enum entry list, the test fixture block, the
+  # `containsExactlyInAnyOrder(...)` argument list). Both Section A's GDI-699
+  # and Section C's GDI-692 hit this exact conflict on 2026-05-13.
+  #
+  # DO NOT release these locks as a "false-positive mitigation." The WAIT
+  # they trigger when another section is editing is the correct behavior —
+  # it forces serialization on a real conflict surface. The lock holds the
+  # ENTIRE file for the duration of the edit, even though only ~3 lines
+  # within it change.
+  # Path corrected 2026-05-13 (FR-A.1.12 pre-flight discovery): the registry
+  # tracked these as `ai/ModelRegistry.kt` and `ai/Prompts.kt` but the actual
+  # files live under `ai/governance/` and `ai/prompt/` subpackages. The stale
+  # path caused `conflict-check.sh --files-to-touch <real-path>` to return a
+  # false-positive GO when the locks were held — yq matched on nothing.
+  # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
+  # coordination.touch_patterns[].file` updated in lockstep.
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
+    held_by: GDI-907
+    until: "2026-05-16T03:38:43Z"
+    reason: reserved via reserve.sh
+    append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
+    held_by: GDI-907
+    until: "2026-05-16T03:38:45Z"
+    reason: reserved via reserve.sh
+    append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
+  - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
+    held_by: none
+    note: |
+      ⚠ GDI-692 retro: ALSO load-bearing append-list conflict class. Test
+      fixtures (e.g., `containsExactlyInAnyOrder(...)`, `hasSize(N)`, per-
+      surface stubs in `stubAllPrompts()`) collide on the same lines when
+      two sessions add surfaces concurrently. Any reservation against
+      ModelRegistry.kt SHOULD also reserve this file (paired lock).
+    append_list_conflict_class: true
+    until: "2026-05-14T05:31:22Z"
+    reason: released via release.sh
+  - file: docs/decisions.md
+    held_by: none
+    note: Append-safe at the section level — each section appends ADR-X-NNN entries
+  - file: docs/gameplan.md
+    held_by: none
+    note: Section-scoped headings; conflicts rare
+  - file: .claude/pipeline-learnings.md
+    held_by: none
+    note: |
+      Append-safe — each retro appends its own block at end-of-file. The
+      Retro Aggregator (FOLLOW-UP) will dedup on a schedule.
+  - file: .claude/CLAUDE.md
+    held_by: none
+    note: Rarely touched. Lock per-edit; release on commit.
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/service/EmailDispatchService.kt
+    held_by: none
+    until: "2026-05-14T14:57:31Z"
+    reason: released via release.sh --all-for-epic
+  - file: services/ugc-api/src/main/resources/application-dev.yml
+    held_by: none
+    until: "2026-05-14T01:19:36Z"
+    reason: released via release.sh
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/feeds/OrderFeedProcessor.kt
+    held_by: none
+    until: "2026-05-14T14:57:35Z"
+    reason: released via release.sh --all-for-epic
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/reminders/ReminderDispatcher.kt
+    held_by: none
+    until: "2026-05-14T14:57:31Z"
+    reason: released via release.sh --all-for-epic
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/service/ReviewService.kt
+    held_by: GDI-907
+    until: "2026-05-16T03:38:40Z"
+    reason: reserved via reserve.sh
+releases:
+  current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
+  next_per_section:
+    A: v0.28.x
+    B: v0.29.x
+    C: v0.30.x
+    D: v0.32.x # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
+    E: v0.32.x
+    F: v0.33.x
+    G: v0.34.x
+    H: v0.35.x
+    I: v0.36.x
+    J: v0.37.x
+  in_flight:
+    - section: A
+      epic: section-A-FR-A.1.9-epic
+      proposed_tag: v0.28.0
+      anchor_sha: pending
+      note: Locale auto-translation (FR-A.1.9)
+    - section: E
+      epic: GDI-824
+      proposed_tag: v0.38.0
+      anchor_sha: pending
+    - section: F
+      epic: GDI-846
+      proposed_tag: v0.39.0
+      anchor_sha: pending
+anchor_dependencies:
+  # Cross-section blocking relationships. A "single-anchor surface" is a piece
+  # of behavior that must be implemented ONCE and reused; downstream consumers
+  # cannot proceed until the anchor ships.
+  - anchor: FR-A.1.9
+    description: Translation single-anchor surface
+    section: A
+    status: shipped
+    consumers:
+      - fr: C.1.18
+        section: C
+        status: not_started
+        note: Reviews translation pass uses the translation surface
+      - fr: B.1.9
+        section: B
+        status: not_started
+        note: Edge SDK preview-translate consumes the surface
+      - fr: J.5.4
+        section: J
+        status: not_started
+        note: Test harness needs the surface to render synthetic translations
+    shipped_at: "2026-05-13T14:52:03Z"
+    shipped_release: v0.28.0
+  - anchor: FR-F.1.5.1
+    description: AI-elevated product matching
+    section: F
+    status: not_started
+    consumers:
+      - fr: A.1.12
+        section: A
+        status: deferred
+        note: Fuzzy dedup is downstream of elevated matching; defer A.1.12 if F.1.5.1 slips
+tfc_deploy_queue:
+  # Day-1 stub. Section sessions do NOT write to this. They continue to merge
+  # directly to dev as today. This field is populated by the future Coordinator
+  # skill (Phase-2) once TFC dispatch is on the AIDLC critical path.
+  current_deployed_sha: 2652a12f
+  current_desired_sha: 2652a12f
+  pending_pushes: []
+  next_batch_window: null
+  note: |
+    Day-1 stub — populated by the future Coordinator skill. Section sessions
+    don't write to this in Day 1; they continue to merge directly to dev as
+    today.
+# D-017: per-product profile (paths, language, pillar shape). Lives at
+# profiles/ugc-platform.yml. Scripts read it to stay product-agnostic.
+profile_ref: profiles/ugc-platform.yml
+# D-016: pillar tier. Each pillar maps 1:1 to a section letter for UGC.
+# Live state -- pillar-orchestrator and portfolio-orchestrator personas
+# write to this. The static shape (name, scope, FR prefix) lives in the
+# profile YAML; this block carries status, in-flight FRs, serial chains,
+# blockers.
+pillars:
+  - letter: A
+    name: Product Catalog Management
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-A.1.12]
+    in_flight_frs: [FR-A.1.12]
+    shipped_frs: [FR-A.1.1, FR-A.1.2, FR-A.1.3, FR-A.1.4, FR-A.1.5, FR-A.1.6, FR-A.1.7, FR-A.1.8, FR-A.1.9, FR-A.1.10, FR-A.1.11]
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: B
+    name: Content Collection
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-B.1.4, FR-B.1.9]
+    in_flight_frs: [FR-B.1.4]
+    shipped_frs: []
+    serial_chains:
+      - chain: [FR-A.1.9, FR-B.1.9]
+        reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: C
+    name: Content Display
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-C.1.9, FR-C.1.18]
+    in_flight_frs: [FR-C.1.9]
+    shipped_frs: []
+    serial_chains:
+      - chain: [FR-A.1.9, FR-C.1.18]
+        reason: C.1.18 (reviews translation) consumes the A.1.9 translation anchor
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: D
+    name: Questions & Answers
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-D.1, FR-D.2, FR-D.3, FR-D.4, FR-D.5, FR-D.6, FR-D.7, FR-D.8, FR-D.9, FR-D.10, FR-D.11, FR-D.12, FR-D.13]
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: E
+    name: Moderation & Governance
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: F
+    name: Syndication & Distribution
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-F.1.5.1]
+    in_flight_frs: [FR-F.1.5.1]
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 1
+  - letter: G
+    name: Sampling & Creator Programs
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-G.1.1]
+    in_flight_frs: [FR-G.1.1]
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: H
+    name: Social & Visual UGC
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: I
+    name: Analytics, Insights & AI
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: J
+    name: Platform Services
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: every_4h
+    max_in_flight_frs: 1
+    serial_with: []
+stats:
+  computed_at: "2026-05-14T05:04:46Z"
+  in_flight_pillar_count: 7
+  in_flight_section_count: 5
+  longest_ttl_expiry: "2026-05-16T02:47:36Z"
+  critical_path_anchor: FR-F.1.5.1
+  blocked_pillars: []
