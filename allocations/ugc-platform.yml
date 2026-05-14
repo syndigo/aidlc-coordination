@@ -644,9 +644,9 @@ pillars:
     max_in_flight_frs: 1
     serial_with: []
 stats:
-  computed_at: "2026-05-14T05:04:46Z"
-  in_flight_pillar_count: 7
-  in_flight_section_count: 5
-  longest_ttl_expiry: "2026-05-16T02:47:36Z"
+  computed_at: "2026-05-14T17:11:15Z"
+  in_flight_pillar_count: 6
+  in_flight_section_count: 7
+  longest_ttl_expiry: "2026-05-16T14:42:08Z"
   critical_path_anchor: FR-F.1.5.1
   blocked_pillars: []
