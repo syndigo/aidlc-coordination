@@ -238,13 +238,9 @@ flyway:
     - version: V44
       section: B
       epic: GDI-917
+      fr: FR-B.2.3
       release_tag: v0.43.0
-      shipped_at: "2026-05-14T22:10:22Z"
-    - version: V44
-      section: B
-      epic: GDI-917
-      release_tag: v0.43.0
-      shipped_at: "2026-05-14T22:15:47Z"
+      shipped_at: "2026-05-14T22:07:20Z"
     - version: V49
       section: I
       epic: GDI-930
@@ -294,10 +290,10 @@ flyway:
     - version: V43
       section: B
       epic: GDI-917
-      fr: ""
-      status: reserved
+      note: Slot reserved but skipped — GDI-917 used V44 instead. Released unused.
+      status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
-      expires_at: "2026-05-15T18:18:18Z"
+      released_at: "2026-05-14T23:00:00Z"
     - version: V45
       section: D
       epic: GDI-925
