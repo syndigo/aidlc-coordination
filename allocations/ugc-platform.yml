@@ -444,17 +444,28 @@ single_writer_files:
     until: "2026-05-16T03:38:40Z"
     reason: reserved via reserve.sh
 releases:
-  # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md):
-  # 5 GitHub releases exist that aren't in flyway.shipped because they had no
-  # DB migration (or the migration was already attributed to an earlier version):
+  # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
+  # and the audit-registry-drift.sh script): GitHub releases that aren't in
+  # flyway.shipped because they had no DB migration (or the migration was
+  # already attributed to an earlier version). Tag-only releases don't get
+  # flyway.shipped rows (schema requires version: V\d+). Document here so the
+  # drift checker doesn't re-flag these.
+  #
+  # First-pass (audit subagent, releases v0.21.x onward):
   #   - v0.21.0 (2026-05-12T02:06:47Z) — A / GDI-565 — AI Provider Bootstrap
   #   - v0.21.1 (2026-05-12T02:49:44Z) — A / hot-fix — Default to Bedrock
   #   - v0.22.0 (2026-05-12T15:57:10Z) — A / GDI-591 — Synthetic catalog generator
   #     (synth-catalog-image + synth-catalog-translate already in model_registry.shipped)
   #   - v0.25.0 (2026-05-13T01:13:04Z) — B / GDI-637 — Edge SDK siteKey init
   #   - v0.36.1 (2026-05-14T00:53:42Z) — / GDI-786 — Flyway out-of-order on dev
-  # Tag-only releases don't get flyway.shipped rows (schema requires version: V\d+).
-  # Document here so the next audit cycle doesn't re-flag these as drift.
+  #
+  # Second-pass (drift-check script, releases v0.17.x — v0.20.x demo loop):
+  #   - v0.17.0 (2026-05-11T18:58:16Z) — A / FR-A.1.5 — Catalog Refresh scheduled+on-demand
+  #     (V12 catalog_refresh.sql already in flyway.shipped)
+  #   - v0.18.0 (2026-05-11T19:45:25Z) — A demo — reviews resolve productRef
+  #   - v0.18.1 (2026-05-11T20:52:49Z) — / harness UI hot-fix — render product metadata
+  #   - v0.20.0 (2026-05-11T23:12:32Z) — B widget — first real ugc-review-summary widget
+  #   - v0.20.1 (2026-05-11T23:52:08Z) — C / FR-C.1.1+FR-C.2.4 — Schema.org JSON-LD on widget
   current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
     A: v0.28.x
@@ -574,24 +585,24 @@ pillars:
     max_in_flight_frs: 2
   - letter: D
     name: Questions & Answers
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-D.1, FR-D.2, FR-D.3, FR-D.4, FR-D.5, FR-D.6, FR-D.7, FR-D.8, FR-D.9, FR-D.10, FR-D.11, FR-D.12, FR-D.13]
-    in_flight_frs:
-      - FR-D.5
+    in_flight_frs: []
     shipped_frs:
       - FR-D.2
+      - FR-D.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
   - letter: E
     name: Moderation & Governance
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs:
+    in_flight_frs: []
+    shipped_frs:
       - FR-E.1.1
-    shipped_frs: []
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
@@ -608,11 +619,12 @@ pillars:
     max_in_flight_frs: 1
   - letter: G
     name: Sampling & Creator Programs
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-G.1.1]
-    in_flight_frs: [FR-G.1.1]
-    shipped_frs: []
+    in_flight_frs: []
+    shipped_frs:
+      - FR-G.1.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2

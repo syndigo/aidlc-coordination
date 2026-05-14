@@ -72,11 +72,19 @@ Then on each tick:
    for this — Pillar Orchestrators will also call it on their tick, but the
    portfolio sweep catches reservations from pillars whose orchestrator isn't
    running. Idempotent.
-2. **Refresh stats.** Run `./scripts/portfolio-status.sh --update-stats` (writes
+2. **Audit drift against external truth (D-024).** Run
+   `./scripts/audit-registry-drift.sh --product <name> --product-repo-path <local-clone>`.
+   Compares the registry against migrations on disk and GitHub releases. If
+   drift > 0, STOP and resolve before making scheduling decisions —
+   decisions on stale state were the root cause of the Phase 4 audit's
+   10 findings (`reports/contention-audit-2026-05-14.md`). Most fixes are
+   one `release.sh --status=shipped --update-pillars-block` call per
+   finding.
+3. **Refresh stats.** Run `./scripts/portfolio-status.sh --update-stats` (writes
    the `stats:` block in the allocation YAML).
-3. **Read the dashboard.** Critical-path anchor, in-flight pillar count, blocked
+4. **Read the dashboard.** Critical-path anchor, in-flight pillar count, blocked
    pillars, lock contention.
-4. **Resolve cross-pillar anchor blockers.** For each `pillars[].blocked_on` entry that
+5. **Resolve cross-pillar anchor blockers.** For each `pillars[].blocked_on` entry that
    names another pillar's FR:
    - If the anchor has shipped, remove it from `blocked_on` and notify the relevant
      Pillar Orchestrator that its serial chain is now satisfied. (D-016 P0 hook
@@ -85,17 +93,17 @@ Then on each tick:
    - If the anchor is in_flight, leave it.
    - If the anchor is not_started, decide whether to (a) ask its Pillar Orchestrator
      to prioritize it, or (b) accept the slip and re-prioritize downstream pillars.
-5. **Enforce the parallelism cap.** Count pillars with status == `in_flight`. If
+6. **Enforce the parallelism cap.** Count pillars with status == `in_flight`. If
    `> max_concurrent_pillars_in_flight`, set the lowest-priority pillar to `deferred`
    (the one with the most blocked_on entries or the longest TTL).
-6. **Enforce ship-window serialization.** Read each pillar's `serial_with`. If two
+7. **Enforce ship-window serialization.** Read each pillar's `serial_with`. If two
    pillars on each other's lists both have a fresh release in `releases.in_flight`,
    make one of them wait (typically the lower-priority one). (D-016 P0 hook 3
    keeps `releases.in_flight` pruned, so this check is meaningful.)
-7. **Promote successor epics.** Scan `releases.in_flight[]` for entries with
+8. **Promote successor epics.** Scan `releases.in_flight[]` for entries with
    `successor_epic` set whose predecessor moved to `shipped`. Notify the relevant
    Pillar Orchestrator to add the successor FR to its in-flight set.
-8. **Surface the critical path.** Compute the longest unshipped chain through
+9. **Surface the critical path.** Compute the longest unshipped chain through
    `anchor_dependencies`. Write to `stats.critical_path_anchor`. The next tick should
    prioritize that anchor's pillar.
 

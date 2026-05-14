@@ -233,3 +233,40 @@ lazy compute already exists. Day-3.
 
 After 1–4 land, re-run `portfolio-status.sh` and the dashboard should
 reflect ground truth. Then we can decide which pillars to defer / prioritize.
+
+---
+
+## Phase 4 (cross-check vs UGC repo + GitHub releases) — landed 2026-05-14
+
+After Phase 3 reconciled the registry against itself, a follow-up audit
+compared the registry against the actual UGC repo and GitHub releases.
+**10 drift findings** caught (5 untracked tags, 4 migrations on disk
+not in registry, 1 stale anchor + collateral pillar fixes).
+
+Reconciliation landed in commit `1293f0e` (the diff slipped into the
+"chore(stats): refresh portfolio stats" commit because portfolio-status.sh
+auto-pushed during the same edit window — the data is correct, the
+commit message is misleading; documented here for the audit trail).
+
+Subsequent invocation of the new `audit-registry-drift.sh` script
+caught **5 MORE untracked tags** (v0.17.0, v0.18.0, v0.18.1, v0.20.0,
+v0.20.1) that the original audit's `--limit 20` cut off. All 10 untracked
+tags are now noted in the `releases:` comment block. Pillar D, E, G
+in_flight_frs were moved to shipped_frs (their merged-to-dev work is
+genuinely shipped, just not tagged).
+
+**Final dashboard after Phase 4:** zero drift findings, 2 pillars
+in_flight (B/H), 8 not_started. Cap of 8 is fine.
+
+## Phase 5 (recurring drift detection) — landed 2026-05-14
+
+`scripts/audit-registry-drift.sh` (D-024) makes the cross-check
+repeatable. Five drift checks: disk-vs-registry migrations, stale
+reservations, GitHub-releases-not-in-registry, anchor staleness, and
+pillar-speculation. Read-only; exits 1 on findings; JSON mode for
+machine consumption.
+
+Wired into the portfolio-orchestrator persona doc as step 2 of every
+tick (after `--sweep-expired`, before `--update-stats`). Future Phase
+5+ work could add CI integration so any push to `allocations/` that
+introduces drift fails the PR.

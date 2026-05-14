@@ -1050,6 +1050,114 @@ Raise `max_concurrent_pillars_in_flight` from 4 to 8.
 
 ---
 
+## D-024 (2026-05-14) — `audit-registry-drift.sh` — recurring registry-vs-reality check
+
+### Status
+
+Accepted. Closes the structural gap that produced the Phase 4 audit.
+
+### Context
+
+The Phase 3 reconciliation (commit `ce5b276`) compared the registry against
+itself — pillars vs `flyway.reserved.fr`. That caught the speculative
+`in_flight_frs` seeds I'd left over from Day-1, but it was a closed loop:
+the registry can be internally consistent and still wildly out of sync
+with the actual product repo.
+
+The Phase 4 audit (one-off subagent run) compared the registry against
+GitHub releases and migrations on disk and found:
+
+- 5 GitHub releases not in `flyway.shipped[].release_tag` (v0.21.0,
+  v0.21.1, v0.22.0, v0.25.0, v0.36.1). A second pass via the new
+  drift script found 5 MORE (v0.17.0, v0.18.0, v0.18.1, v0.20.0,
+  v0.20.1) — the audit's `gh release list --limit 20` truncated.
+- Migrations on disk that the registry didn't know about (V36, V38,
+  V39, V41 — all merged to dev but not yet tagged).
+- An anchor (FR-F.1.5.1) marked `not_started` in `anchor_dependencies`
+  even though it had shipped at v0.42.0 hours earlier.
+- A renumbered Flyway version (V21 → V29 by GDI-786) that the registry
+  recorded as "still reserved" because nobody updated it after the
+  rename.
+
+The drift was a process failure, not a substrate failure: nothing was
+catching it because nothing was looking. After Phase 3 wrapped, my
+"the registry is honest now" claim was technically true (against the
+internal check) and substantively false (against external truth).
+
+### Decision
+
+Add `scripts/audit-registry-drift.sh` — a read-only script that
+compares the registry against external truth on every invocation. Five
+checks:
+
+1. **Migrations on disk vs registry.** Walk the product repo's
+   migration directory; flag any `V*__*.sql` not in `flyway.shipped`
+   or `flyway.reserved`.
+2. **Reserved entries that already shipped.** For each
+   `flyway.reserved` entry, check if a matching migration file exists
+   on disk; if so, the entry is stale.
+3. **GitHub releases not in registry.** Pull the last N releases via
+   `gh release list`; flag any tag not in `flyway.shipped[].release_tag`
+   or noted in the `releases:` comment block.
+4. **Anchor staleness vs GitHub releases.** For each unshipped anchor,
+   scan recent release titles for the FR id; if found, flag as stale.
+5. **Pillar `in_flight_frs` without backing reservation.** For each
+   pillar's `in_flight_frs` entry, verify a matching `flyway.reserved`
+   or `model_registry.pending` entry exists.
+
+Read-only. Exit 0 if no drift; exit 1 if any finding. JSON mode for
+machine consumption.
+
+### Alternatives considered
+
+- **Bake the checks into reserve.sh / release.sh.** Rejected — those
+  are write paths and should stay focused. The drift check is
+  orchestrator-tier read-only work.
+- **Add to portfolio-status.sh.** Rejected — that script is the
+  cheap "what's the state" view; the drift check is the more
+  expensive "is the state honest" view. Different cadence
+  (every-tick vs every-few-ticks).
+- **Schedule via cron / GitHub Action.** Deferred. The orchestrator
+  personas can call it on every tick today; CI integration is a
+  Phase 5 follow-up.
+
+### Consequences
+
+- Orchestrator personas have a single command to call to verify
+  registry honesty before making decisions.
+- The 10 untracked GitHub releases (5 from Phase 4 audit, 5 newly
+  discovered) are documented in the `releases:` comment block so
+  the drift checker doesn't re-flag them.
+- New "merged-to-dev = shipped" semantics emerge from this work:
+  Pillars D, E, G's recent FR-D.5 / FR-E.1.1 / FR-G.1.1 work
+  produced flyway migrations on dev without semver tags. These are
+  now in `flyway.shipped` with `release_tag` omitted, and in
+  `pillars[].shipped_frs`. The pillar status flips to `not_started`
+  if no further work is in flight.
+- The drift script's exit-code-1-on-finding makes it CI-friendly.
+  Phase 5 work could add a `.github/workflows/drift-check.yml`
+  that runs on every push and fails red if drift exists.
+
+### Follow-ups
+
+- Wire orchestrator persona docs to call `audit-registry-drift.sh`
+  at the top of every tick alongside `release.sh --sweep-expired`.
+- CI: add a workflow that runs the drift check on every push to
+  `allocations/` and fails the PR if drift exists.
+- The script currently hardcodes the migration directory fallback
+  to `services/ugc-api/...`; remove the fallback and require the
+  profile path once all in-flight products have profiles.
+- Consider extending the script to check `model_registry.pending`
+  vs git history (similar to flyway-on-disk).
+
+### References
+
+- `scripts/audit-registry-drift.sh`
+- `reports/contention-audit-2026-05-14.md` Phase 4 cross-check.
+- Sibling: D-017 (profile-driven paths the drift checker reads).
+
+---
+
 ## How to add an ADR
 
 ```sh
