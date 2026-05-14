@@ -489,3 +489,126 @@ tfc_deploy_queue:
     Day-1 stub — populated by the future Coordinator skill. Section sessions
     don't write to this in Day 1; they continue to merge directly to dev as
     today.
+# D-017: per-product profile (paths, language, pillar shape). Lives at
+# profiles/ugc-platform.yml. Scripts read it to stay product-agnostic.
+profile_ref: profiles/ugc-platform.yml
+# D-016: pillar tier. Each pillar maps 1:1 to a section letter for UGC.
+# Live state -- pillar-orchestrator and portfolio-orchestrator personas
+# write to this. The static shape (name, scope, FR prefix) lives in the
+# profile YAML; this block carries status, in-flight FRs, serial chains,
+# blockers.
+pillars:
+  - letter: A
+    name: Product Catalog Management
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-A.1.12]
+    in_flight_frs: [FR-A.1.12]
+    shipped_frs: [FR-A.1.1, FR-A.1.2, FR-A.1.3, FR-A.1.4, FR-A.1.5, FR-A.1.6, FR-A.1.7, FR-A.1.8, FR-A.1.9, FR-A.1.10, FR-A.1.11]
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: B
+    name: Content Collection
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-B.1.4, FR-B.1.9]
+    in_flight_frs: [FR-B.1.4]
+    shipped_frs: []
+    serial_chains:
+      - chain: [FR-A.1.9, FR-B.1.9]
+        reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: C
+    name: Content Display
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-C.1.9, FR-C.1.18]
+    in_flight_frs: [FR-C.1.9]
+    shipped_frs: []
+    serial_chains:
+      - chain: [FR-A.1.9, FR-C.1.18]
+        reason: C.1.18 (reviews translation) consumes the A.1.9 translation anchor
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: D
+    name: Questions & Answers
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-D.1, FR-D.2, FR-D.3, FR-D.4, FR-D.5, FR-D.6, FR-D.7, FR-D.8, FR-D.9, FR-D.10, FR-D.11, FR-D.12, FR-D.13]
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: E
+    name: Moderation & Governance
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: F
+    name: Syndication & Distribution
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-F.1.5.1]
+    in_flight_frs: [FR-F.1.5.1]
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 1
+  - letter: G
+    name: Sampling & Creator Programs
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: [FR-G.1.1]
+    in_flight_frs: [FR-G.1.1]
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: H
+    name: Social & Visual UGC
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: I
+    name: Analytics, Insights & AI
+    status: not_started
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: unlimited
+    max_in_flight_frs: 2
+  - letter: J
+    name: Platform Services
+    status: in_flight
+    owner_persona: personas/pillar-orchestrator.md
+    fr_backlog: []
+    in_flight_frs: []
+    shipped_frs: []
+    blocked_on: []
+    ship_frequency: every_4h
+    max_in_flight_frs: 1
+    serial_with: []
+stats:
+  computed_at: "2026-05-14T05:04:46Z"
+  in_flight_pillar_count: 7
+  in_flight_section_count: 5
+  longest_ttl_expiry: "2026-05-16T02:47:36Z"
+  critical_path_anchor: FR-F.1.5.1
+  blocked_pillars: []
