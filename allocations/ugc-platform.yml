@@ -235,6 +235,11 @@ flyway:
       epic: GDI-899
       shipped_at: "2026-05-14T16:01:28Z"
       note: FR-D.5 answer_helpful_votes; merged to dev (commit 44a8e20), tag pending
+    - version: V44
+      section: B
+      epic: GDI-917
+      release_tag: v0.43.0
+      shipped_at: "2026-05-14T22:10:22Z"
   reserved:
     - version: V23
       section: A
@@ -278,13 +283,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T18:18:18Z"
       expires_at: "2026-05-15T18:18:18Z"
-    - version: V44
-      section: B
-      epic: GDI-917
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-14T20:25:10Z"
-      expires_at: "2026-05-15T20:25:11Z"
     - version: V45
       section: D
       epic: GDI-925
