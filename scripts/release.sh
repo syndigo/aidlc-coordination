@@ -69,7 +69,7 @@ print_help() {
 release.sh — mark a reserved resource as shipped or released.
 
 Per-resource mode (required args):
-  --resource <flyway|model-registry|file-lock|release-tag>
+  --resource <flyway|model-registry|file-lock|release-tag|release-band>
   --section <A..J>
   --epic <GDI-XXX>
   --id <id>
@@ -301,18 +301,18 @@ if [ "$STATUS" = "abandoned" ] && [ -z "$REASON" ]; then
 fi
 
 case "$RESOURCE" in
-  flyway|model-registry|file-lock|release-tag) ;;
+  flyway|model-registry|file-lock|release-tag|release-band) ;;
   *) log_err "Invalid --resource: $RESOURCE"; exit 2 ;;
 esac
 
 # For flyway and model-registry, the only meaningful terminal status is
 # "shipped" (with a real release_tag). "released" on those resources
 # would append a row with an empty release_tag, which fails schema
-# validation (semverTag rejects empty string). file-lock and release-tag
-# legitimately use --status=released. See docs/decisions.md (D-013).
+# validation (semverTag rejects empty string). file-lock, release-tag, and
+# release-band legitimately use --status=released. See docs/decisions.md (D-013).
 if [ "$STATUS" = "released" ]; then
   case "$RESOURCE" in
-    file-lock|release-tag) ;;
+    file-lock|release-tag|release-band) ;;
     flyway|model-registry)
       log_err "--status=released is not valid for --resource=$RESOURCE (use --status=shipped with --release-tag, or --status=abandoned --reason ... to drop a stale reservation)"
       exit 2
@@ -321,12 +321,12 @@ if [ "$STATUS" = "released" ]; then
 fi
 
 # --status=abandoned is for flyway/model-registry only (drops the reservation
-# without a shipped row). file-lock/release-tag use --status=released.
+# without a shipped row). file-lock/release-tag/release-band use --status=released.
 if [ "$STATUS" = "abandoned" ]; then
   case "$RESOURCE" in
     flyway|model-registry) ;;
-    file-lock|release-tag)
-      log_err "--status=abandoned is not valid for --resource=$RESOURCE (use --status=released for file-lock/release-tag)"
+    file-lock|release-tag|release-band)
+      log_err "--status=abandoned is not valid for --resource=$RESOURCE (use --status=released for file-lock/release-tag/release-band)"
       exit 2
       ;;
   esac
@@ -393,6 +393,17 @@ case "$RESOURCE" in
     yq "
       .releases.in_flight |= ((. // []) | map(select(.proposed_tag != \"$ID\"))) |
       .releases.current_main = \"$ID\"
+    " "$YML" > "$TMP"
+    ;;
+  release-band)
+    # GDI-778: release-band releases drop the band-intent entry from
+    # in_flight but DO NOT update current_main (the band is vN.M.x — not a
+    # concrete tag). When --status=shipped and --release-tag <vN.M.Z> is
+    # supplied, current_main is set to the concrete tag. Otherwise just the
+    # band intent is cleared.
+    yq "
+      .releases.in_flight |= ((. // []) | map(select(.proposed_tag != \"$ID\" or .section != \"$SECTION\" or .epic != \"$EPIC\")))
+      $( [ -n "$RELEASE_TAG" ] && printf '| .releases.current_main = \"%s\"' "$RELEASE_TAG" )
     " "$YML" > "$TMP"
     ;;
 esac
