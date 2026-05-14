@@ -423,7 +423,7 @@ single_writer_files:
     until: "2026-05-15T03:28:32Z"
     reason: reserved via reserve.sh
 releases:
-  current_main: v0.36.0
+  current_main: v0.37.0
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -441,10 +441,6 @@ releases:
       proposed_tag: v0.28.0
       anchor_sha: pending
       note: Locale auto-translation (FR-A.1.9)
-    - section: C
-      epic: GDI-C-1-9
-      proposed_tag: v0.37.0
-      anchor_sha: pending
     - section: E
       epic: GDI-824
       proposed_tag: v0.38.0
