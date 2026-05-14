@@ -166,27 +166,62 @@ git_pull_rebase() {
   # would have applied cleanly — but it dropped a confusing log line into
   # every reserve/release call. Wrap with stash include-untracked + pop so
   # the rebase always sees a clean tree.
-  (
-    cd "$REPO_ROOT" || return 1
-    stash_ref=""
-    if ! git diff-index --quiet HEAD -- 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
-      stash_ref="$(git stash push --include-untracked --quiet --message "aidlc-coordination/git_pull_rebase auto-stash" 2>/dev/null && echo stashed || true)"
+  #
+  # D-019 (P1.2 Day-2 hardening): the original implementation silently
+  # swallowed `git stash pop` failures with `2>/dev/null || log_warn`,
+  # which meant a conflicting pop would leave the stash present but the
+  # operator wouldn't notice unless they remembered to run `git stash
+  # list`. This session itself almost lost untracked files because of
+  # that path (see reports/contention-audit-2026-05-14.md sibling
+  # finding). Hardening:
+  #   1. Capture the stash SHA explicitly via `git rev-parse 'stash@{0}'`
+  #      after push; this is the durable identity even if other stashes
+  #      get pushed in between by sibling tabs.
+  #   2. On pop failure, surface the captured SHA, the stash list count,
+  #      AND the manual recovery command. Return non-zero so the calling
+  #      script can decide whether to abort the operation rather than
+  #      blindly continuing on a half-merged tree.
+  #   3. Subshell removed so log_err / log_warn output stays attached to
+  #      the calling script's stderr (was working anyway, but this makes
+  #      the data flow explicit).
+  cd "$REPO_ROOT" || return 1
+
+  stash_sha=""
+  if ! git diff-index --quiet HEAD -- 2>/dev/null \
+       || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+    if git stash push --include-untracked --quiet \
+         --message "aidlc-coordination/git_pull_rebase auto-stash" 2>/dev/null; then
+      stash_sha="$(git rev-parse 'stash@{0}' 2>/dev/null || true)"
+      if [ -z "$stash_sha" ]; then
+        log_err "git_pull_rebase: stash push appeared to succeed but rev-parse returned empty SHA"
+        return 1
+      fi
     fi
-    rc=0
-    if ! git pull --rebase --quiet; then
-      rc=1
+  fi
+
+  rebase_rc=0
+  if ! git pull --rebase --quiet; then
+    rebase_rc=1
+  fi
+
+  if [ -n "$stash_sha" ]; then
+    if ! git stash pop --quiet 2>/dev/null; then
+      # Pop failed — the stash is still on the stack. Locate it by SHA
+      # in case sibling tabs have pushed additional stashes in the
+      # meantime, and tell the operator exactly how to recover.
+      stash_count="$(git stash list 2>/dev/null | wc -l | tr -d ' ')"
+      log_err "git_pull_rebase: stash pop conflicted; YOUR WORK IS SAFE in stash $stash_sha"
+      log_err "  Total stashes on stack: $stash_count"
+      log_err "  Recover with one of:"
+      log_err "    git stash list                         # find the stash by SHA"
+      log_err "    git stash apply $stash_sha             # reapply the stash"
+      log_err "    git stash show -p $stash_sha           # inspect what's in it"
+      log_err "  Then resolve conflicts and: git stash drop $stash_sha"
+      return 1
     fi
-    if [ "$stash_ref" = "stashed" ]; then
-      # If pop conflicts (extremely rare for the coordination repo's small
-      # allocation YAML edits), leave the stash in place — operator can
-      # recover with `git stash list`.
-      git stash pop --quiet 2>/dev/null || log_warn "git stash pop conflicted; recover with: git stash list"
-    fi
-    return "$rc"
-  ) || {
-    log_err "git pull --rebase failed"
-    return 1
-  }
+  fi
+
+  return "$rebase_rc"
 }
 
 git_commit_and_push() {
