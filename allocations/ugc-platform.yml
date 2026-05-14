@@ -273,14 +273,14 @@ flyway:
       expires_at: "2026-05-16T03:38:26Z"
     - version: V43
       section: B
-      epic: GDI-NEW-B23
+      epic: GDI-917
       fr: ""
       status: reserved
       reserved_at: "2026-05-14T18:18:18Z"
       expires_at: "2026-05-15T18:18:18Z"
     - version: V44
       section: B
-      epic: GDI-NEW-B23
+      epic: GDI-917
       fr: ""
       status: reserved
       reserved_at: "2026-05-14T20:25:10Z"
@@ -494,7 +494,7 @@ releases:
     J: v0.37.x
   in_flight:
     - section: B
-      epic: GDI-NEW-B23
+      epic: GDI-917
       proposed_tag: v0.43.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
