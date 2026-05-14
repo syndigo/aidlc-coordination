@@ -450,6 +450,115 @@
           "type": "string"
         }
       }
+    },
+    "profile_ref": {
+      "description": "D-017: relative path to the per-product profile YAML (paths, language, pillar shape). Scripts read this to stay product-agnostic.",
+      "type": "string"
+    },
+    "pillars": {
+      "description": "D-016: pillar tier. Each pillar maps 1:1 to a section letter. Live state — written by pillar-orchestrator / portfolio-orchestrator personas. Static shape (name, scope) lives in the profile YAML; this block carries status, in-flight FRs, serial chains, blockers.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "letter",
+          "name",
+          "status"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "letter": {
+            "$ref": "#/definitions/sectionLetter"
+          },
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "in_flight",
+              "not_started",
+              "shipped",
+              "blocked"
+            ]
+          },
+          "owner_persona": {
+            "type": "string"
+          },
+          "fr_backlog": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "in_flight_frs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "shipped_frs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "blocked_on": {
+            "type": "array"
+          },
+          "ship_frequency": {
+            "type": "string"
+          },
+          "max_in_flight_frs": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "serial_chains": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "chain": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                },
+                "reason": { "type": "string" }
+              }
+            }
+          },
+          "serial_with": {
+            "type": "array"
+          }
+        }
+      }
+    },
+    "stats": {
+      "description": "Portfolio statistics, refreshed periodically by the portfolio-orchestrator persona. Read-only signal — DO NOT hand-edit; the refresh job overwrites.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "computed_at": {
+          "type": "string"
+        },
+        "in_flight_pillar_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "in_flight_section_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "longest_ttl_expiry": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "critical_path_anchor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "blocked_pillars": {
+          "type": "array"
+        }
+      }
     }
   }
 }
