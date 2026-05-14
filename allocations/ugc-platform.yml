@@ -436,7 +436,7 @@ single_writer_files:
     until: "2026-05-14T14:57:31Z"
     reason: released via release.sh --all-for-epic
 releases:
-  current_main: v0.42.0
+  current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
     A: v0.28.x
     B: v0.29.x
