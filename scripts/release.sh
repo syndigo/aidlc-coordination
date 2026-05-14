@@ -63,6 +63,11 @@ EMIT_JSON=0
 # registry whose epic matches <KEY>. Mutually exclusive with --resource mode.
 ALL_FOR_EPIC=""
 DRY_RUN=0
+# D-020 (P1.3): --sweep-expired finds every reservation whose expires_at
+# is in the past and abandons each (drops from reserved arrays; no shipped
+# append). Mutually exclusive with --resource and --all-for-epic modes.
+# Audit finding 6 in reports/contention-audit-2026-05-14.md.
+SWEEP_EXPIRED=0
 # D-016 Day-2: --update-pillars-block opt-in flag fires three hooks that
 # bring pillars[]/anchor_dependencies/releases.in_flight in sync with the
 # per-resource edit this call is making. Opt-in for one release cycle to
@@ -95,6 +100,21 @@ Sweep mode (GDI-798):
                               Use after Stage 10 to sweep stale older-version
                               reservations left behind by the canonical ship.
                               Idempotent — zero matches exits 0.
+
+Sweep mode (D-020 / P1.3):
+  --sweep-expired             Mutually exclusive with --resource and
+                              --all-for-epic. Drops every reservation whose
+                              expires_at is in the past:
+                                * flyway.reserved        -> dropped
+                                * flyway.test_fixture... -> dropped
+                                * model_registry.pending -> dropped
+                              Does NOT touch single_writer_files (those have
+                              their own .until field, cleared by the file's
+                              next reservation, not on a wall-clock sweep).
+                              Does NOT touch releases.in_flight (those are
+                              pruned by P0 hooks at ship time).
+                              Use --dry-run to preview the sweep first.
+                              Idempotent — zero expired entries exits 0.
 
 Optional:
   --release-tag <vX.Y.Z>      Required for status=shipped; ignored otherwise
@@ -161,6 +181,7 @@ while [ $# -gt 0 ]; do
     --reason)   REASON="$2"; shift 2 ;;
     --product)  PRODUCT="$2"; shift 2 ;;
     --all-for-epic) ALL_FOR_EPIC="$2"; shift 2 ;;
+    --sweep-expired) SWEEP_EXPIRED=1; shift ;;
     --dry-run)  DRY_RUN=1; shift ;;
     --update-pillars-block) UPDATE_PILLARS=1; shift ;;
     --fr)       FR="$2"; shift 2 ;;
@@ -176,8 +197,8 @@ require_tools
 # GDI-798: --all-for-epic mode is mutually exclusive with per-resource args.
 # We branch early so the per-resource required-arg checks are skipped.
 if [ -n "$ALL_FOR_EPIC" ]; then
-  if [ -n "$RESOURCE" ] || [ -n "$ID" ] || [ -n "$STATUS" ]; then
-    log_err "--all-for-epic is mutually exclusive with --resource/--id/--status"
+  if [ -n "$RESOURCE" ] || [ -n "$ID" ] || [ -n "$STATUS" ] || [ "$SWEEP_EXPIRED" = "1" ]; then
+    log_err "--all-for-epic is mutually exclusive with --resource/--id/--status and --sweep-expired"
     exit 2
   fi
   # Default reason for audit trail; operator may override via --reason.
@@ -304,6 +325,108 @@ $summary"
 
   if [ "$EMIT_JSON" = "1" ]; then
     emit_json "released" "swept $total reservation(s) for epic=$ALL_FOR_EPIC"
+  fi
+  exit 0
+fi
+
+# D-020 (P1.3): --sweep-expired branch. Mutually exclusive with --resource
+# and --all-for-epic; validated above when --all-for-epic was set, here
+# when --sweep-expired is set.
+if [ "$SWEEP_EXPIRED" = "1" ]; then
+  if [ -n "$RESOURCE" ] || [ -n "$ID" ] || [ -n "$STATUS" ] || [ -n "$ALL_FOR_EPIC" ]; then
+    log_err "--sweep-expired is mutually exclusive with --resource, --id, --status, and --all-for-epic"
+    exit 2
+  fi
+
+  YML="$(resolve_yml_path "$PRODUCT")"
+  NOW="$(iso_now)"
+
+  # ISO-8601 timestamps are sortable as strings, so `expires_at < NOW`
+  # works without parsing into epoch. Enumerate matches by category for
+  # the audit summary, then drop them in a single yq pass.
+  export H_NOW="$NOW"
+  flyway_expired="$(yq -r "
+    .flyway.reserved // [] | map(select(.expires_at != null and .expires_at < strenv(H_NOW))) | .[].version
+  " "$YML")"
+  fixture_expired="$(yq -r "
+    .flyway.test_fixture_range.reserved // [] | map(select(.expires_at != null and .expires_at < strenv(H_NOW))) | .[].version
+  " "$YML")"
+  model_expired="$(yq -r "
+    .model_registry.pending // [] | map(select(.expires_at != null and .expires_at < strenv(H_NOW))) | .[].surface
+  " "$YML")"
+
+  count_lines() {
+    if [ -z "$1" ]; then
+      printf '0'
+    else
+      printf '%s\n' "$1" | grep -c .
+    fi
+  }
+  n_flyway="$(count_lines "$flyway_expired")"
+  n_fixture="$(count_lines "$fixture_expired")"
+  n_model="$(count_lines "$model_expired")"
+  total=$((n_flyway + n_fixture + n_model))
+
+  log_info "Sweep-expired plan for $PRODUCT (cutoff=$NOW):"
+  log_info "  flyway.reserved              : $n_flyway"
+  log_info "  flyway.test_fixture_range    : $n_fixture"
+  log_info "  model_registry.pending       : $n_model"
+  log_info "  total                        : $total"
+
+  if [ "$total" -eq 0 ]; then
+    log_info "Idempotent no-op: no expired reservations"
+    if [ "$EMIT_JSON" = "1" ]; then
+      emit_json "released" "no-op: zero expired reservations"
+    fi
+    exit 0
+  fi
+
+  if [ "$DRY_RUN" = "1" ]; then
+    log_info "--dry-run: no edits performed. Expired entries that would drop:"
+    [ -n "$flyway_expired" ] && printf '  flyway: %s\n' "$flyway_expired" | tr '\n' ' '
+    [ -n "$fixture_expired" ] && printf '  fixture: %s\n' "$fixture_expired" | tr '\n' ' '
+    [ -n "$model_expired" ] && printf '  model: %s\n' "$model_expired" | tr '\n' ' '
+    printf '\n'
+    if [ "$EMIT_JSON" = "1" ]; then
+      emit_json "released" "dry-run: $total expired reservations"
+    fi
+    exit 0
+  fi
+
+  TMP="$(mktemp)"
+  trap 'rm -f "$TMP"' EXIT
+
+  yq "
+    .flyway.reserved |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW)))) |
+    .flyway.test_fixture_range.reserved |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW)))) |
+    .model_registry.pending |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW))))
+  " "$YML" > "$TMP"
+  cp "$TMP" "$YML"
+
+  log_info "Swept $total expired reservation(s)"
+
+  if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
+    git_pull_rebase || log_warn "rebase skipped"
+    summary=""
+    [ "$n_flyway" -gt 0 ] && summary="${summary}flyway: $(printf '%s' "$flyway_expired" | tr '\n' ',' | sed 's/,$//')\n"
+    [ "$n_fixture" -gt 0 ] && summary="${summary}fixture: $(printf '%s' "$fixture_expired" | tr '\n' ',' | sed 's/,$//')\n"
+    [ "$n_model" -gt 0 ] && summary="${summary}model-registry: $(printf '%s' "$model_expired" | tr '\n' ',' | sed 's/,$//')\n"
+    commit_msg="chore(release): sweep $total expired reservation(s)
+
+Cutoff: $NOW
+
+$(printf '%b' "$summary")"
+    git_commit_and_push "$commit_msg" "$YML" || {
+      log_err "push failed"
+      if [ "$EMIT_JSON" = "1" ]; then
+        emit_json "error" "git push failed"
+      fi
+      exit 1
+    }
+  fi
+
+  if [ "$EMIT_JSON" = "1" ]; then
+    emit_json "released" "swept $total expired reservation(s)"
   fi
   exit 0
 fi
