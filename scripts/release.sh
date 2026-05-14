@@ -63,6 +63,14 @@ EMIT_JSON=0
 # registry whose epic matches <KEY>. Mutually exclusive with --resource mode.
 ALL_FOR_EPIC=""
 DRY_RUN=0
+# D-016 Day-2: --update-pillars-block opt-in flag fires three hooks that
+# bring pillars[]/anchor_dependencies/releases.in_flight in sync with the
+# per-resource edit this call is making. Opt-in for one release cycle to
+# de-risk the rollout (audit findings 1, 2, 5 in
+# reports/contention-audit-2026-05-14.md). --fr is required when the flag
+# is set so the pillar-block hook knows which FR id to move.
+UPDATE_PILLARS=0
+FR=""
 
 print_help() {
   cat <<'USAGE'
@@ -94,8 +102,30 @@ Optional:
                               Optional for --all-for-epic (defaults to
                               "swept via --all-for-epic after Stage 10").
   --product <name>            Default: ugc-platform
-  --dry-run                   --all-for-epic only: print the planned sweep
-                              and exit 0 without editing/committing.
+  --fr <FR-X.Y.Z>             Functional requirement id. Required when
+                              --update-pillars-block is set; otherwise
+                              recorded in the commit message only.
+  --update-pillars-block      D-016 Day-2 opt-in: also reconcile pillars[],
+                              anchor_dependencies[], and releases.in_flight[]
+                              to reflect this release. Three hooks fire
+                              after the per-resource edit:
+                                1. move --fr from
+                                   pillars[<section>].in_flight_frs to
+                                   pillars[<section>].shipped_frs (on shipped)
+                                   or just remove from in_flight_frs (on
+                                   released/abandoned). Idempotent.
+                                2. if --fr matches an anchor in
+                                   anchor_dependencies, set status=shipped
+                                   + shipped_at + shipped_release (on shipped).
+                                3. for flyway/model-registry shipped
+                                   resources, drop matching releases.in_flight
+                                   entry (where epic+release-tag match).
+                              See reports/contention-audit-2026-05-14.md.
+  --dry-run                   Print the diff that WOULD apply (or, in
+                              --all-for-epic mode, the planned sweep), then
+                              exit 0 without editing or committing. Use to
+                              test --update-pillars-block hooks against a
+                              sandbox YAML before flipping the default.
   --json
   --help, --version
 
@@ -132,6 +162,8 @@ while [ $# -gt 0 ]; do
     --product)  PRODUCT="$2"; shift 2 ;;
     --all-for-epic) ALL_FOR_EPIC="$2"; shift 2 ;;
     --dry-run)  DRY_RUN=1; shift ;;
+    --update-pillars-block) UPDATE_PILLARS=1; shift ;;
+    --fr)       FR="$2"; shift 2 ;;
     --json)     EMIT_JSON=1; shift ;;
     --help|-h)  print_help; exit 0 ;;
     --version)  print_version; exit 0 ;;
@@ -285,6 +317,17 @@ for var_name in RESOURCE SECTION EPIC ID STATUS; do
   fi
 done
 
+# D-016 Day-2: --update-pillars-block requires --fr so the pillar-block
+# hook knows which FR id to move between in_flight_frs and shipped_frs.
+# Without --fr we'd have to guess which FR this resource backed, and
+# guessing was the original bug (pillar block stayed empty for months).
+if [ "$UPDATE_PILLARS" = "1" ] && [ -z "$FR" ]; then
+  log_err "--update-pillars-block requires --fr <FR-X.Y.Z>"
+  log_err "  The pillar-block hook needs the FR id to move it from"
+  log_err "  pillars[<section>].in_flight_frs to .shipped_frs."
+  exit 2
+fi
+
 case "$STATUS" in
   shipped|released|abandoned) ;;
   *) log_err "Invalid --status: $STATUS (expected shipped|released|abandoned)"; exit 2 ;;
@@ -337,8 +380,110 @@ validate_section "$SECTION"
 YML="$(resolve_yml_path "$PRODUCT")"
 NOW="$(iso_now)"
 
+# D-016 Day-2 hooks. These run AFTER the per-resource yq edit applies to
+# the temp file but BEFORE we cp the temp back over $YML. Composing into
+# the same temp file keeps the whole change in one commit; if any hook
+# fails (e.g., pillar letter doesn't exist in pillars[]), the whole
+# release.sh call exits without mutating the registry.
+#
+# Args: $1 = path to the in-progress YAML temp file
+# All hooks short-circuit when UPDATE_PILLARS=0.
+update_pillar_block_hooks() {
+  hook_target="$1"
+  if [ "$UPDATE_PILLARS" != "1" ]; then
+    return 0
+  fi
+
+  # Confirm pillars[] block exists; if not, the product hasn't adopted the
+  # tier yet -- skip silently so the flag is safe to set unconditionally
+  # in /sdlc Stage 10 wiring.
+  has_pillars="$(yq -r '(.pillars // []) | length' "$hook_target")"
+  if [ "$has_pillars" = "0" ]; then
+    log_warn "--update-pillars-block: no pillars[] block in $YML; skipping hooks"
+    return 0
+  fi
+
+  # --- Hook 1: pillars[<section>].{in_flight_frs, shipped_frs} ----------
+  # On shipped: ensure FR appears in shipped_frs (idempotent), drop from
+  #   in_flight_frs.
+  # On released/abandoned: drop from in_flight_frs only (no shipped append).
+  pillar_exists="$(yq -r ".pillars[]? | select(.letter == \"$SECTION\") | .letter" "$hook_target")"
+  if [ -z "$pillar_exists" ]; then
+    log_warn "--update-pillars-block: pillar $SECTION not in pillars[]; skipping pillar-block hook (anchor + in_flight hooks still run)"
+  else
+    case "$STATUS" in
+      shipped)
+        # Build the new YAML: remove FR from in_flight_frs, append to
+        # shipped_frs only if not already there. yq v4 array .[] update
+        # uses |= for in-place mutation; (… | unique) collapses dupes.
+        export H_SECTION="$SECTION"
+        export H_FR="$FR"
+        yq "
+          (.pillars[] | select(.letter == strenv(H_SECTION))) |= (
+            .in_flight_frs = ((.in_flight_frs // []) | map(select(. != strenv(H_FR)))) |
+            .shipped_frs   = (((.shipped_frs   // []) + [strenv(H_FR)]) | unique)
+          )
+        " "$hook_target" > "${hook_target}.h1" && mv "${hook_target}.h1" "$hook_target"
+        ;;
+      released|abandoned)
+        export H_SECTION="$SECTION"
+        export H_FR="$FR"
+        yq "
+          (.pillars[] | select(.letter == strenv(H_SECTION))) |= (
+            .in_flight_frs = ((.in_flight_frs // []) | map(select(. != strenv(H_FR))))
+          )
+        " "$hook_target" > "${hook_target}.h1" && mv "${hook_target}.h1" "$hook_target"
+        ;;
+    esac
+  fi
+
+  # --- Hook 2: anchor_dependencies[].status -----------------------------
+  # If --fr matches an anchor_dependencies[].anchor and we shipped, set
+  # status=shipped + shipped_at + shipped_release. Idempotent: re-running
+  # against an already-shipped anchor just refreshes shipped_at to NOW
+  # (acceptable -- audit trail is in git anyway).
+  if [ "$STATUS" = "shipped" ] && [ -n "$RELEASE_TAG" ]; then
+    is_anchor="$(yq -r ".anchor_dependencies[]? | select(.anchor == \"$FR\") | .anchor" "$hook_target")"
+    if [ -n "$is_anchor" ]; then
+      export H_FR="$FR"
+      export H_NOW="$NOW"
+      export H_TAG="$RELEASE_TAG"
+      yq "
+        (.anchor_dependencies[] | select(.anchor == strenv(H_FR))) |= (
+          .status = \"shipped\" |
+          .shipped_at = strenv(H_NOW) |
+          .shipped_release = strenv(H_TAG)
+        )
+      " "$hook_target" > "${hook_target}.h2" && mv "${hook_target}.h2" "$hook_target"
+      log_info "  hook2: anchor $FR marked shipped at $RELEASE_TAG"
+    fi
+  fi
+
+  # --- Hook 3: prune releases.in_flight ---------------------------------
+  # On shipped of flyway/model-registry, drop the matching in_flight entry
+  # (epic match AND release-tag match -- be conservative; only prune
+  # entries that are clearly fulfilled by THIS release). The release-tag
+  # and release-band per-resource branches below already prune in_flight,
+  # so we skip them here to avoid double-touch.
+  if [ "$STATUS" = "shipped" ] && [ -n "$RELEASE_TAG" ]; then
+    case "$RESOURCE" in
+      flyway|model-registry)
+        export H_EPIC="$EPIC"
+        export H_TAG="$RELEASE_TAG"
+        yq "
+          .releases.in_flight = ((.releases.in_flight // []) | map(select(
+            .epic != strenv(H_EPIC) or .proposed_tag != strenv(H_TAG)
+          )))
+        " "$hook_target" > "${hook_target}.h3" && mv "${hook_target}.h3" "$hook_target"
+        ;;
+    esac
+  fi
+
+  return 0
+}
+
 TMP="$(mktemp)"
-trap 'rm -f "$TMP"' EXIT
+trap 'rm -f "$TMP" "${TMP}.h1" "${TMP}.h2" "${TMP}.h3"' EXIT
 
 case "$RESOURCE" in
   flyway)
@@ -408,8 +553,29 @@ case "$RESOURCE" in
     ;;
 esac
 
+update_pillar_block_hooks "$TMP" || {
+  log_err "--update-pillars-block hook failed; ABORTING release (no YAML mutation)"
+  exit 1
+}
+
+# D-016 Day-2: --dry-run for per-resource mode (sibling to the pre-existing
+# --all-for-epic dry-run path). Print the diff that WOULD apply; do not
+# write or commit. Critical for testing the new pillar-block hooks against
+# a sandbox YAML without pushing to main.
+if [ "$DRY_RUN" = "1" ]; then
+  log_info "[dry-run] would write the following diff to $YML:"
+  diff -u "$YML" "$TMP" || true
+  if [ "$EMIT_JSON" = "1" ]; then
+    emit_json "released" "dry-run: $RESOURCE/$ID would be released as $STATUS"
+  fi
+  exit 0
+fi
+
 cp "$TMP" "$YML"
 log_info "Released $RESOURCE/$ID (status=$STATUS, epic=$EPIC, section=$SECTION)"
+if [ "$UPDATE_PILLARS" = "1" ]; then
+  log_info "  pillar-block hooks fired (--fr=$FR)"
+fi
 
 # GDI-728: if this session was isolated via worktree.sh, remind the operator
 # to clean it up. We can't know for sure here, but the hint is cheap and
