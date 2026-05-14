@@ -198,14 +198,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Fuzzy dedup (re-keyed from section-A-FR-A.1.12-epic placeholder at initiation)
-    - version: V22
-      section: A
-      epic: GDI-800
-      fr: FR-A.1.7
-      status: reserved
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-15T22:00:00Z
-      note: Onboarding schema mapping
     - version: V23
       section: A
       epic: section-A-buffer
@@ -286,7 +278,6 @@ flyway:
       - {version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-14T22:00:00Z'}
       - {version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
       - {version: V922, section: A, epic: GDI-742, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
-      - {version: V923, section: A, epic: GDI-800, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
       - {version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
     next_free: V925
 model_registry:
