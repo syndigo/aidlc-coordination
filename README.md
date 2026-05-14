@@ -115,23 +115,31 @@ two-session example.
 ```
 .
 ├── allocations/
-│   └── ugc-platform.yml          # the real Day-1 registry
+│   └── ugc-platform.yml          # the real Day-1 registry (live state)
+├── profiles/                     # D-017: per-product shape (paths, language, pillars)
+│   └── ugc-platform.yml
 ├── schemas/
-│   └── allocation.yml.schema.json
+│   ├── allocation.yml.schema.json
+│   └── profile.yml.schema.json   # D-017
 ├── scripts/
-│   ├── reserve.sh              # claim a resource; --resource release-band added GDI-778
-│   ├── release.sh              # mark shipped/released; --resource release-band added GDI-778
-│   ├── next-tag.sh             # GDI-778: compute next free tag at Stage 9 from gh release list
+│   ├── reserve.sh                # D-016: enforces pillar-tier guards; release-band added GDI-778
+│   ├── release.sh                # mark shipped/released; release-band added GDI-778
+│   ├── next-tag.sh               # GDI-778: compute next free tag at Stage 9 from gh release list
 │   ├── conflict-check.sh
 │   ├── status.sh
-│   └── worktree.sh             # GDI-728: isolate concurrent sessions
+│   ├── pillar-status.sh          # D-016: single pillar dashboard
+│   ├── portfolio-status.sh       # D-016: cross-pillar dashboard
+│   └── worktree.sh               # GDI-728: isolate concurrent sessions
 ├── personas/
-│   ├── section-owner.md
+│   ├── section-owner.md          # Tier 1
+│   ├── pillar-orchestrator.md    # D-016, Tier 2
+│   ├── portfolio-orchestrator.md # D-016, Tier 3
 │   ├── release-coordinator.md
 │   ├── compliance-reviewer.md     # FOLLOW-UP (scaffold only)
 │   └── retro-aggregator.md        # FOLLOW-UP (scaffold only)
 ├── docs/
 │   ├── parallel-session-playbook.md
+│   ├── orchestration-tiers.md    # D-016: 3-tier model
 │   ├── how-it-works.md
 │   └── decisions.md
 ├── .github/workflows/ci.yml
@@ -139,6 +147,8 @@ two-session example.
 ├── bootstrap-log.md
 └── README.md
 ```
+
+For multi-pillar coordination, see [docs/orchestration-tiers.md](./docs/orchestration-tiers.md).
 
 ---
 

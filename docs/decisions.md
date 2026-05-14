@@ -569,6 +569,169 @@ without editing. Idempotent: zero matches exits 0 with a no-op log.
 
 ---
 
+## D-016 (2026-05-13) — Three-tier orchestration: Pillar + Portfolio above Section Owner
+
+### Status
+
+Accepted. Substantive (not deferred).
+
+### Context
+
+The Day-1 substrate has one persona for the work-doing role (Section Owner) and one
+for tag-cutting (Release Coordinator). On UGC Platform that worked while ≤2 sections
+were in flight. As the gameplan opened up to 10 pillars (A–J) and the FR backlog grew
+past 50, the human operator (Nate) became the de-facto pillar and portfolio scheduler.
+That work doesn't scale and isn't repeatable across products.
+
+The gap audit identified eleven missing concepts: intra-pillar serial chains,
+single-writer file holder caps, ship-window throttling, cross-pillar critical-path
+selection, successor-epic chaining, lock contention forecasting, parallelism caps,
+quality-gate evidence (GDI-708 retro), per-pillar status tracking, blocked_on
+surfacing, and stats computation. None of these belonged at the Section-Owner tier;
+all of them benefit from being above the Section Owner but below a single
+human-or-Claude that owns the whole product.
+
+### Decision
+
+Introduce two new tiers as personas + scripts on top of the existing substrate:
+
+- **Tier 2: Pillar Orchestrator** — one per pillar. Owns the pillar's FR backlog,
+  intra-pillar serialization, and per-pillar parallelism cap. Spawns Section Owners.
+- **Tier 3: Portfolio Orchestrator** — one per product. Owns cross-pillar scheduling,
+  the critical path, and the portfolio-wide parallelism cap. Spawns Pillar Orchestrators.
+
+The allocation YAML grows by an optional `pillars[]` block (live state) and an optional
+`stats:` block (computed). Existing Day-1 fields are unchanged. Products that don't
+adopt the tiers omit both blocks and the schema still validates — the substrate stays
+backward-compatible.
+
+The `single_writer_files[]` schema gains optional `max_concurrent_holders` and
+`holders[]` to support files where parallel append is genuinely conflict-free.
+`anchorConsumer` gains optional `intra_pillar` and `verified_in_release` so D-011
+(consumer-symbol verification) and intra-vs-cross-pillar distinctions stay encoded.
+
+Two new read-only scripts: `pillar-status.sh <letter>` (single pillar dashboard) and
+`portfolio-status.sh` (cross-pillar dashboard, with `--update-stats` to write the
+computed `stats:` block). The existing `status.sh` remains the granular dump.
+
+`reserve.sh` gains three new pillar-tier guards (intra-pillar serial chain,
+file-lock holder cap, ship-window `serial_with`). All three short-circuit-allow
+when no `pillars[]` block exists, so existing flows are unchanged. A new
+`--bypass-pillar-checks` flag exists as an emergency override.
+
+### Alternatives considered
+
+- **Flat (one mega-orchestrator).** Rejected — one Claude session can't hold 10
+  pillars × N FRs of state in working context. The portfolio decisions get lossy.
+- **Per-FR autonomy (no pillar layer).** Rejected — works only because Nate is the
+  human pillar layer today. Removing him drops intra-pillar coherence.
+- **Add pillar concept inline to existing personas.** Rejected — would muddy the
+  Section Owner contract (which the orchestrator integration in `/sdlc` relies on).
+
+### Consequences
+
+- New: `personas/pillar-orchestrator.md`, `personas/portfolio-orchestrator.md`,
+  `scripts/pillar-status.sh`, `scripts/portfolio-status.sh`,
+  `docs/orchestration-tiers.md`.
+- Schema additions are optional → zero breakage for non-pillar products.
+- `reserve.sh` enforcement is opt-in (only fires when `pillars[]` is present).
+- Day-1 cap on `max_concurrent_pillars_in_flight` for UGC = 4 (encoded in the profile).
+  This is an estimate; revisit after a week of operation.
+- Coupling: `release.sh` does NOT yet promote to `pillars[<letter>].shipped_frs`.
+  Today the Pillar Orchestrator updates the pillar block by hand. Wire that into
+  `release.sh` in a follow-up ADR.
+
+### Follow-ups
+
+- Wire `release.sh` to update `pillars[<letter>].shipped_frs` and remove from
+  `in_flight_frs` automatically on `--status=shipped`.
+- Add `bootstrap-from-profile.sh` so a fresh product can generate a Day-1 allocation
+  YAML from its profile.
+- Promote the orchestrator personas to slash commands (`/pillar`, `/portfolio`) once
+  the manual flow proves stable.
+- Add CI validation for `profiles/*.yml` against `schemas/profile.yml.schema.json`.
+- Add CI checks for the new persona files in `markdown-structure`.
+
+### References
+
+- `personas/pillar-orchestrator.md`, `personas/portfolio-orchestrator.md`
+- `scripts/pillar-status.sh`, `scripts/portfolio-status.sh`
+- `scripts/reserve.sh` (new `pillar_constraints_check()`)
+- `schemas/allocation.yml.schema.json` (new `pillar`, `pillarSerialChain` defs)
+- `docs/orchestration-tiers.md`
+
+---
+
+## D-017 (2026-05-13) — Per-product profile YAML separates product shape from live state
+
+### Status
+
+Accepted. Companion to D-016.
+
+### Context
+
+The Day-1 scripts hardcoded UGC Platform paths in several places: `audit-flyway.sh`
+assumes `services/ugc-api/src/main/resources/db/migration`, `single_writer_files[]`
+hardcodes `ai/governance/ModelRegistry.kt`, the section-letter loop assumes A–J. To
+reuse this substrate for a non-UGC product, those paths must be parameterized.
+
+We could put product-shape fields directly on the allocation YAML, but allocations
+churn (every reserve and release writes), and product shape is immutable. Mixing the
+two means every shape change goes through a coordination commit, and every coordination
+commit risks corrupting the shape.
+
+### Decision
+
+Add a sibling YAML at `profiles/<product>.yml` carrying product shape:
+
+- `migration.dir_pattern`, `filename_pattern`, `version_prefix`, `test_fixture_threshold`
+- `ai_surface_files[]` — the load-bearing single-writer file paths
+- `section_range.letters[]` — which letters this product uses
+- `release_unit.{name, tag_format}` — what the product calls its release granularity
+- `pillars[]` — static pillar definitions (letter, name, scope, FR prefix, defaults)
+- `orchestration.{default_pillar_persona, default_portfolio_persona, max_concurrent_pillars_in_flight}`
+
+The allocation YAML carries a `profile_ref:` field (relative path from repo root)
+pointing at its profile. Scripts that need product shape (`portfolio-status.sh`
+already reads `max_concurrent_pillars_in_flight`; future `audit-flyway.sh` will read
+`migration.dir_pattern`) follow the ref.
+
+Validated by a separate schema at `schemas/profile.yml.schema.json` so allocation
+schema validation is unaffected.
+
+### Alternatives considered
+
+- **Inline shape on allocation YAML.** Rejected — couples shape to live state.
+- **One profile shared across all products.** Rejected — defeats the purpose of
+  per-product parameterization.
+- **Per-product script forks.** Rejected — defeats the substrate-reuse goal.
+
+### Consequences
+
+- New: `schemas/profile.yml.schema.json`, `profiles/ugc-platform.yml`.
+- Schema relaxation: `sectionLetter` was `^[A-J]$`, now `^[A-Z]$` (the per-product
+  subset is pinned in `product.sections` and in the profile's `section_range.letters`).
+  No existing UGC data is invalidated; new products with letters K–Z now validate.
+- The `profile_ref` field on allocations is optional. Existing allocations without
+  one continue to work — scripts fall back to their current hardcoded behavior.
+- CI must validate `profiles/*.yml` against the new schema (follow-up).
+
+### Follow-ups
+
+- Add CI validation for `profiles/*.yml`.
+- Update `audit-flyway.sh` to read `migration.dir_pattern` from the profile when
+  `profile_ref` is present; fall back to UGC default otherwise.
+- Document profile authoring in a new `docs/onboarding-a-new-product.md`.
+
+### References
+
+- `schemas/profile.yml.schema.json`
+- `profiles/ugc-platform.yml`
+- `scripts/portfolio-status.sh` (first script to read `profile_ref`)
+- `docs/orchestration-tiers.md` § "Per-product reuse: the profile layer"
+
+---
+
 ## How to add an ADR
 
 ```sh

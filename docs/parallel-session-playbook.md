@@ -80,6 +80,50 @@ The manual flow below is the right tool for:
 
 ---
 
+## Portfolio mode (D-016, multi-pillar coordination)
+
+When you have ≥3 pillars in flight against the same product, the integrated
+mode above is necessary but not sufficient — it stops two Section Owners
+from stepping on each other, but it doesn't decide *which pillar to run
+next* or *which FR is on the critical path*. That's the job of the
+Portfolio Orchestrator (Tier 3) and Pillar Orchestrator (Tier 2) personas.
+
+A typical multi-pillar tick looks like this:
+
+```sh
+# 1. Portfolio dashboard — read first thing each tick
+./scripts/portfolio-status.sh
+# Shows: in-flight pillar count vs cap, critical path, lock contention,
+#        cross-pillar anchors, blocked_on entries per pillar.
+
+# 2. Refresh the computed stats block (so other tabs see fresh numbers)
+./scripts/portfolio-status.sh --update-stats
+
+# 3. For each pillar that should make progress this tick, hand off to
+#    its Pillar Orchestrator (one /sdlc per pillar, NOT per FR).
+#    The Pillar Orchestrator picks the next launchable FR and spawns a
+#    Section Owner for it via /sdlc <ticket>.
+
+# 4. When a Section Owner ships, release.sh (called automatically by
+#    /sdlc Stage 10) moves the FR to shipped_frs and surfaces any
+#    successor_epic to the Portfolio. The Portfolio reads it on the
+#    next tick and unblocks the chain.
+```
+
+For a single pillar's view (what the Pillar Orchestrator reads on its tick):
+
+```sh
+./scripts/pillar-status.sh --letter B
+# Shows: in_flight_frs vs max cap, fr_backlog, serial_chains with
+#        ship status per link, blocked_on entries, lock contention
+#        forecast for files this pillar's backlog touches.
+```
+
+See [orchestration-tiers.md](./orchestration-tiers.md) for the full 3-tier
+model, hand-off contracts, and authority limits per persona.
+
+---
+
 ## Manual mode (fallback)
 
 The remainder of this document walks through the Day-1 manual flow that

@@ -20,7 +20,7 @@ jobs:
       - name: Lint YAML
         run: |
           yamllint -d "{extends: relaxed, rules: {line-length: {max: 200}}}" \
-            allocations/ .github/workflows/
+            allocations/ profiles/ .github/workflows/
 
   shellcheck:
     name: shellcheck
@@ -50,14 +50,23 @@ jobs:
           sudo chmod +x /usr/local/bin/yq
       - name: Convert YAML to JSON for ajv (preserves timestamp strings)
         run: |
-          for f in allocations/*.yml; do
-            yq -o=json '.' "$f" > "$f.json"
+          for f in allocations/*.yml profiles/*.yml; do
+            [ -f "$f" ] && yq -o=json '.' "$f" > "$f.json"
           done
-      - name: Validate against schema
+      - name: Validate allocations against schema
         run: |
           for f in allocations/*.yml.json; do
             ajv validate -s schemas/allocation.yml.schema.json -d "$f" --all-errors -c ajv-formats
           done
+      - name: Validate profiles against schema (D-017)
+        run: |
+          if [ -d profiles ] && ls profiles/*.yml.json >/dev/null 2>&1; then
+            for f in profiles/*.yml.json; do
+              ajv validate -s schemas/profile.yml.schema.json -d "$f" --all-errors -c ajv-formats
+            done
+          else
+            echo "No profiles to validate (skipping)."
+          fi
 
   markdown-structure:
     name: markdown-structure
@@ -71,10 +80,13 @@ jobs:
                    docs/parallel-session-playbook.md \
                    docs/how-it-works.md \
                    docs/decisions.md \
+                   docs/orchestration-tiers.md \
                    personas/section-owner.md \
                    personas/release-coordinator.md \
                    personas/compliance-reviewer.md \
-                   personas/retro-aggregator.md; do
+                   personas/retro-aggregator.md \
+                   personas/pillar-orchestrator.md \
+                   personas/portfolio-orchestrator.md; do
             test -f "$f" || { echo "MISSING: $f"; exit 1; }
           done
           echo "All required docs present."
@@ -94,6 +106,15 @@ jobs:
         run: |
           chmod +x scripts/*.sh
           ./scripts/status.sh --product ugc-platform || true
+
+      - name: Run pillar-status.sh + portfolio-status.sh (D-016)
+        run: |
+          # Smoke test the orchestrator-tier read-only scripts.
+          # Both must exit 0 against the seeded UGC pillars block.
+          ./scripts/pillar-status.sh --letter A
+          ./scripts/portfolio-status.sh
+          ./scripts/pillar-status.sh --letter B --json | python3 -m json.tool > /dev/null
+          ./scripts/portfolio-status.sh --json | python3 -m json.tool > /dev/null
 
       - name: --json round-trip smoke (GDI-669 retro #1)
         run: |

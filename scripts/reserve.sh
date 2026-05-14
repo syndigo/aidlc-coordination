@@ -41,6 +41,7 @@ TTL_HOURS=24
 EMIT_JSON=0
 DRY_RUN=0
 PRODUCT_REPO_PATH=""
+BYPASS_PILLAR_CHECKS=0
 
 print_help() {
   cat <<'USAGE'
@@ -65,6 +66,11 @@ Optional:
                               be reserving a version a sibling tab has
                               already abandoned). Pass --product-repo-path
                               to enable.
+  --bypass-pillar-checks      D-016: skip the pillar-tier guards (intra-pillar
+                              serial chains, single-writer max_concurrent_holders,
+                              ship-window serial_with peers). Use only when
+                              recovering from a stuck state -- the orchestrator
+                              personas should never set this. Logs a WARN.
   --json                      Emit structured JSON on stdout
   --dry-run                   Plan only; do not edit/commit/push
   --help, --version
@@ -83,6 +89,7 @@ while [ $# -gt 0 ]; do
     --json)     EMIT_JSON=1; shift ;;
     --dry-run)  DRY_RUN=1; shift ;;
     --product-repo-path) PRODUCT_REPO_PATH="$2"; shift 2 ;;
+    --bypass-pillar-checks) BYPASS_PILLAR_CHECKS=1; shift ;;
     --help|-h)  print_help; exit 0 ;;
     --version)  print_version; exit 0 ;;
     *) log_err "Unknown argument: $1"; print_help; exit 2 ;;
@@ -220,6 +227,150 @@ held_by_other_epic() {
   return 0
 }
 
+# ----- D-016 pillar-tier guards --------------------------------------------
+# These are advisory until the pillar tier is populated. If the YAML has no
+# .pillars[] block, every check returns 0 (allow). If the pillar tier IS
+# populated, three rules apply:
+#   1. Intra-pillar serial chains: an FR may not be reserved while one of
+#      its predecessors (in the same pillar's serial_chains[].chain) is
+#      not yet shipped (not in shipped_frs and not in flyway.shipped /
+#      model_registry.shipped depending on resource type).
+#   2. file-lock max_concurrent_holders: if the file declares a holder cap
+#      > 1, the active-holder count (held_by + holders[] not expired) must
+#      be < cap. For the default cap=1, the existing held_by_other_epic
+#      check already covers this -- so the new logic only fires when cap > 1.
+#   3. release-tag serial_with: when reserving a release-tag for pillar X,
+#      refuse if a peer pillar in X.serial_with has a releases.in_flight
+#      entry within the last 1 hour (configurable later).
+#
+# All three short-circuit-allow when --bypass-pillar-checks is set.
+
+# Returns 0 (allow) or 1 (refuse) and sets PILLAR_CHECK_REASON on refuse.
+PILLAR_CHECK_REASON=""
+pillar_constraints_check() {
+  if [ "$BYPASS_PILLAR_CHECKS" = "1" ]; then
+    log_warn "Bypassing pillar-tier checks (--bypass-pillar-checks)"
+    return 0
+  fi
+
+  pillars_present="$(yq -r '(.pillars // []) | length' "$YML")"
+  if [ "$pillars_present" = "0" ]; then
+    return 0
+  fi
+
+  # --- Rule 1: intra-pillar serial chain --------------------------------
+  # Only meaningful with --fr set. Look up serial_chains in this section's
+  # pillar; for each chain, find the index of $FR. If index > 0, the
+  # predecessor at chain[index-1] must be shipped.
+  if [ -n "$FR" ]; then
+    # All chains as "predecessor|successor" pairs where successor == $FR.
+    # We grep for any chain that contains $FR at position > 0.
+    # Build the predecessor list via per-chain split in shell because yq v4
+    # lacks index-of-element on arrays.
+    predecessors="$(yq -r "
+      .pillars[]
+      | select(.letter == \"$SECTION\")
+      | (.serial_chains // [])
+      | .[]
+      | .chain
+      | join(\" \")
+    " "$YML" 2>/dev/null)"
+    # predecessors is one chain per line, space-separated. For each line,
+    # walk and find $FR; if it appears at index > 0, predecessor = previous.
+    if [ -n "$predecessors" ]; then
+      while IFS= read -r line; do
+        [ -z "$line" ] && continue
+        prev=""
+        found_at=0
+        idx=0
+        for token in $line; do
+          if [ "$token" = "$FR" ] && [ "$idx" -gt 0 ]; then
+            found_at=1
+            break
+          fi
+          prev="$token"
+          idx=$((idx + 1))
+        done
+        if [ "$found_at" = "1" ]; then
+          # Check if $prev is shipped: look in this pillar's shipped_frs
+          # AND in cross-pillar shipped_frs (the predecessor may live in
+          # another pillar -- e.g., FR-A.1.9 -> FR-B.1.9).
+          shipped="$(yq -r "
+            [.pillars[].shipped_frs[]?]
+            | .[]
+            | select(. == \"$prev\")
+          " "$YML" 2>/dev/null)"
+          if [ -z "$shipped" ]; then
+            PILLAR_CHECK_REASON="intra-pillar serial chain: predecessor $prev (chain=$line) not yet shipped"
+            return 1
+          fi
+        fi
+      done <<EOF
+$predecessors
+EOF
+    fi
+  fi
+
+  # --- Rule 2: file-lock max_concurrent_holders -------------------------
+  if [ "$RESOURCE" = "file-lock" ]; then
+    cap="$(yq -r ".single_writer_files[] | select(.file == \"$ID\") | .max_concurrent_holders // 1" "$YML")"
+    if [ "$cap" -gt 1 ]; then
+      # Count active holders: held_by != none/null/empty + each holders[]
+      # entry whose .until is in the future. Compare ISO timestamps as
+      # strings (sortable).
+      now="$(iso_now)"
+      active=0
+      held_by="$(yq -r ".single_writer_files[] | select(.file == \"$ID\") | .held_by // \"\"" "$YML")"
+      held_until="$(yq -r ".single_writer_files[] | select(.file == \"$ID\") | .until // \"\"" "$YML")"
+      if [ -n "$held_by" ] && [ "$held_by" != "none" ] && [ "$held_by" != "null" ]; then
+        # held_by counts only if its TTL is in the future (or absent, which we treat as active).
+        if [ -z "$held_until" ] || [ "$held_until" \> "$now" ]; then
+          active=$((active + 1))
+        fi
+      fi
+      # holders[] entries.
+      holder_lines="$(yq -r ".single_writer_files[] | select(.file == \"$ID\") | (.holders // [])[]?.until" "$YML" 2>/dev/null)"
+      if [ -n "$holder_lines" ]; then
+        while IFS= read -r u; do
+          [ -z "$u" ] && continue
+          if [ "$u" \> "$now" ]; then
+            active=$((active + 1))
+          fi
+        done <<EOF
+$holder_lines
+EOF
+      fi
+      if [ "$active" -ge "$cap" ]; then
+        PILLAR_CHECK_REASON="file-lock cap reached: $active active holders >= $cap (max_concurrent_holders)"
+        return 1
+      fi
+    fi
+  fi
+
+  # --- Rule 3: release-tag serial_with ----------------------------------
+  if [ "$RESOURCE" = "release-tag" ]; then
+    peers="$(yq -r ".pillars[] | select(.letter == \"$SECTION\") | (.serial_with // [])[]" "$YML" 2>/dev/null)"
+    if [ -n "$peers" ]; then
+      # Any in_flight entry whose section is in $peers and whose epic was
+      # added to the registry in the last hour blocks us. We don't track
+      # an "added_at" timestamp on releases.in_flight today, so be
+      # conservative: any peer with any in_flight entry blocks.
+      while IFS= read -r peer; do
+        [ -z "$peer" ] && continue
+        peer_in_flight="$(yq -r ".releases.in_flight[]? | select(.section == \"$peer\") | .epic" "$YML" 2>/dev/null | head -1)"
+        if [ -n "$peer_in_flight" ]; then
+          PILLAR_CHECK_REASON="ship-window serial_with: pillar $SECTION must serialize with pillar $peer, which has in-flight epic $peer_in_flight"
+          return 1
+        fi
+      done <<EOF
+$peers
+EOF
+    fi
+  fi
+
+  return 0
+}
+
 # ----- main -----------------------------------------------------------------
 
 if already_held_same_epic; then
@@ -235,6 +386,17 @@ if [ -n "$other_holder" ] && [ "$other_holder" != "$EPIC" ]; then
   log_err "Conflict: $RESOURCE/$ID is held by $other_holder (not $EPIC)"
   if [ "$EMIT_JSON" = "1" ]; then
     emit_json "wait" "held_by=$other_holder"
+  fi
+  exit 3
+fi
+
+# D-016 pillar-tier guards (intra-pillar serial chain, file-lock holder cap,
+# release-tag serial_with). Returns 1 with PILLAR_CHECK_REASON set on refuse.
+if ! pillar_constraints_check; then
+  log_err "Pillar-tier guard refused: $PILLAR_CHECK_REASON"
+  log_err "  Override with --bypass-pillar-checks (orchestrator personas should not)."
+  if [ "$EMIT_JSON" = "1" ]; then
+    emit_json "wait" "$PILLAR_CHECK_REASON"
   fi
   exit 3
 fi

@@ -13,11 +13,13 @@
     "anchor_dependencies",
     "tfc_deploy_queue"
   ],
+  "comment_pillars_optional": "D-016: pillars[] and stats are OPTIONAL on a Day-1 allocation YAML. Products that do not yet have an orchestration tier above section-owner can omit them and the schema still validates. profile_ref is also optional; products without a profiles/<name>.yml continue to use the Day-1 hardcoded UGC paths.",
   "additionalProperties": false,
   "definitions": {
     "sectionLetter": {
       "type": "string",
-      "pattern": "^[A-J]$"
+      "pattern": "^[A-Z]$",
+      "description": "D-017: schema accepts A-Z so non-UGC products with >10 sections validate. The product-specific subset (e.g., A-J for ugc-platform) is pinned in product.sections and in profiles/<product>.yml#section_range."
     },
     "flywayVersion": {
       "type": "string",
@@ -198,6 +200,99 @@
         "append_list_conflict_class": {
           "type": "boolean",
           "description": "GDI-692 retro: file LOOKS append-safe (each session appends an enum value or list entry at end-of-section) but git auto-merge FAILS when two parallel sessions add to adjacent lines. Lock is LOAD-BEARING -- do not release as false-positive mitigation."
+        },
+        "max_concurrent_holders": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "D-016: cap on simultaneous holders. Default 1 (single-writer). Set higher only for files where parallel append is genuinely conflict-free (e.g. an append-only log). reserve.sh refuses if active holders >= this number."
+        },
+        "holders": {
+          "type": "array",
+          "description": "D-016: when max_concurrent_holders > 1, the per-holder list. For max=1 files, held_by is authoritative and this stays empty.",
+          "items": {
+            "type": "object",
+            "required": ["epic", "until"],
+            "additionalProperties": false,
+            "properties": {
+              "epic": { "type": "string" },
+              "section": { "$ref": "#/definitions/sectionLetter" },
+              "until": { "$ref": "#/definitions/isoTimestamp" },
+              "reason": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "pillarSerialChain": {
+      "type": "object",
+      "required": ["chain"],
+      "additionalProperties": false,
+      "properties": {
+        "chain": {
+          "type": "array",
+          "description": "Ordered list of FR identifiers. Each FR may not be reserved until its predecessor is shipped.",
+          "items": { "type": "string" },
+          "minItems": 2
+        },
+        "reason": { "type": "string" }
+      }
+    },
+    "pillar": {
+      "type": "object",
+      "required": ["letter", "name", "status"],
+      "additionalProperties": true,
+      "description": "PR #10 (d2dfdc1) made the schema permissive at the leaf so portfolio-orchestrator can append computed fields (stats snapshots, retro markers) without schema churn. Strict typing on known properties is preserved below; unknown properties pass.",
+      "properties": {
+        "letter": {
+          "$ref": "#/definitions/sectionLetter",
+          "description": "Section letter this pillar maps to. One pillar per section."
+        },
+        "name": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["not_started", "in_flight", "blocked", "shipped", "deferred"]
+        },
+        "owner_persona": {
+          "type": "string",
+          "description": "Pointer to the persona file that owns this pillar (e.g. personas/pillar-orchestrator.md). Multiple pillars share the same persona file -- this just confirms the contract is in force."
+        },
+        "fr_backlog": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Ordered FR backlog for the pillar. Portfolio orchestrator reads to find next launchable work."
+        },
+        "in_flight_frs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "shipped_frs": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "serial_chains": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/pillarSerialChain" },
+          "description": "Intra-pillar dependency chains. reserve.sh refuses to reserve a chain[i] resource if chain[i-1] is not shipped."
+        },
+        "blocked_on": {
+          "type": "array",
+          "description": "Things blocking this pillar from progressing. Each item is a free-form pointer (anchor FR id, external dependency, person waiting on a decision).",
+          "items": { "type": "string" }
+        },
+        "ship_frequency": {
+          "type": "string",
+          "enum": ["unlimited", "hourly", "every_4h", "daily", "weekly"],
+          "description": "Throttle on how often this pillar may cut a release tag. Portfolio orchestrator enforces."
+        },
+        "serial_with": {
+          "type": "array",
+          "description": "Pillar letters this pillar must serialize ship windows with (cannot release in same hour).",
+          "items": { "$ref": "#/definitions/sectionLetter" }
+        },
+        "max_in_flight_frs": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Cap on concurrent in-flight FRs in this pillar. Pillar orchestrator refuses to launch a new section owner past this cap."
         }
       }
     },
@@ -221,6 +316,14 @@
         },
         "note": {
           "type": "string"
+        },
+        "intra_pillar": {
+          "type": "boolean",
+          "description": "D-016: when true, the consumer FR lives in the same pillar as the anchor. Distinguishes intra-pillar serialization (handled by pillar-orchestrator) from cross-pillar dependencies (portfolio-orchestrator)."
+        },
+        "verified_in_release": {
+          "$ref": "#/definitions/semverTag",
+          "description": "D-016: tag at which the consumer was verified to actually call the anchor's symbol (D-011 follow-through). release.sh --consumer-verified writes this."
         }
       }
     }
@@ -375,6 +478,25 @@
               },
               "note": {
                 "type": "string"
+              },
+              "quality_gate_evidence": {
+                "type": "object",
+                "additionalProperties": false,
+                "description": "D-016: GDI-708 retro -- CI green is not sufficient. Stage 10 records what actually verified the work.",
+                "properties": {
+                  "ci_run_url": { "type": "string" },
+                  "local_test_passed": { "type": "boolean" },
+                  "evidence_note": { "type": "string" }
+                }
+              },
+              "successor_epic": {
+                "type": "string",
+                "description": "D-016: the next epic that was blocked on this one. release.sh --status=shipped surfaces this so the portfolio orchestrator can auto-launch the successor."
+              },
+              "consumer_verified": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "D-016: anchor consumers (FR ids) whose symbols were grep-confirmed in the shipped SHA. release.sh --consumer-verified appends here."
               }
             }
           }
@@ -452,111 +574,27 @@
       }
     },
     "profile_ref": {
-      "description": "D-017: relative path to the per-product profile YAML (paths, language, pillar shape). Scripts read this to stay product-agnostic.",
-      "type": "string"
+      "type": "string",
+      "description": "D-017: relative path (from repo root) to the per-product profile YAML. Profiles parameterize migration paths, AI-surface file paths, section ranges, and release-unit naming so scripts stay product-agnostic. Example: profiles/ugc-platform.yml"
     },
     "pillars": {
-      "description": "D-016: pillar tier. Each pillar maps 1:1 to a section letter. Live state — written by pillar-orchestrator / portfolio-orchestrator personas. Static shape (name, scope) lives in the profile YAML; this block carries status, in-flight FRs, serial chains, blockers.",
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": [
-          "letter",
-          "name",
-          "status"
-        ],
-        "additionalProperties": true,
-        "properties": {
-          "letter": {
-            "$ref": "#/definitions/sectionLetter"
-          },
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "in_flight",
-              "not_started",
-              "shipped",
-              "blocked"
-            ]
-          },
-          "owner_persona": {
-            "type": "string"
-          },
-          "fr_backlog": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "in_flight_frs": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "shipped_frs": {
-            "type": "array",
-            "items": { "type": "string" }
-          },
-          "blocked_on": {
-            "type": "array"
-          },
-          "ship_frequency": {
-            "type": "string"
-          },
-          "max_in_flight_frs": {
-            "type": "integer",
-            "minimum": 0
-          },
-          "serial_chains": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": true,
-              "properties": {
-                "chain": {
-                  "type": "array",
-                  "items": { "type": "string" }
-                },
-                "reason": { "type": "string" }
-              }
-            }
-          },
-          "serial_with": {
-            "type": "array"
-          }
-        }
-      }
+      "description": "D-016: pillar-tier orchestration block. Optional -- products without a pillar layer omit this and continue to operate at the section-owner tier. Each pillar entry uses the #/definitions/pillar shape (strict typed properties + additionalProperties: true so portfolio-orchestrator can append computed fields without schema churn — see PR #10 rationale).",
+      "items": { "$ref": "#/definitions/pillar" }
     },
     "stats": {
-      "description": "Portfolio statistics, refreshed periodically by the portfolio-orchestrator persona. Read-only signal — DO NOT hand-edit; the refresh job overwrites.",
       "type": "object",
+      "description": "D-016: computed summary written by status.sh / portfolio-status.sh. Read-only signal for the orchestrator personas. Hand-edits are tolerated but will be overwritten. Fields are nullable so the refresh job can write null when nothing is reserved (matches portfolio-status.sh behavior).",
       "additionalProperties": true,
       "properties": {
-        "computed_at": {
-          "type": "string"
-        },
-        "in_flight_pillar_count": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "in_flight_section_count": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "longest_ttl_expiry": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "critical_path_anchor": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
+        "computed_at": { "type": "string" },
+        "in_flight_pillar_count": { "type": "integer", "minimum": 0 },
+        "in_flight_section_count": { "type": "integer", "minimum": 0 },
+        "longest_ttl_expiry": { "type": ["string", "null"] },
+        "critical_path_anchor": { "type": ["string", "null"] },
         "blocked_pillars": {
-          "type": "array"
+          "type": "array",
+          "items": { "$ref": "#/definitions/sectionLetter" }
         }
       }
     }
