@@ -498,7 +498,7 @@ log_info "Reserved $RESOURCE/$ID for $EPIC (section $SECTION) until $EXPIRES_AT"
 # Commit + push (best-effort; if not in a git repo or no remote, just write).
 if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
   git_pull_rebase || log_warn "rebase skipped"
-  git_commit_and_push "chore(reserve): $EPIC reserves $RESOURCE/$ID (section $SECTION)" || {
+  git_commit_and_push "chore(reserve): $EPIC reserves $RESOURCE/$ID (section $SECTION)" "$YML" || {
     log_err "push failed"
     if [ "$EMIT_JSON" = "1" ]; then
       emit_json "error" "git push failed"

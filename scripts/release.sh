@@ -293,7 +293,7 @@ if [ -n "$ALL_FOR_EPIC" ]; then
 Reason: $REASON
 
 $summary"
-    git_commit_and_push "$commit_msg" || {
+    git_commit_and_push "$commit_msg" "$YML" || {
       log_err "push failed"
       if [ "$EMIT_JSON" = "1" ]; then
         emit_json "error" "git push failed"
@@ -593,7 +593,7 @@ if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
 
 Reason: $REASON"
   fi
-  git_commit_and_push "$commit_msg" || {
+  git_commit_and_push "$commit_msg" "$YML" || {
     log_err "push failed"
     if [ "$EMIT_JSON" = "1" ]; then
       emit_json "error" "git push failed"

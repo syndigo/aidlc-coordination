@@ -191,7 +191,13 @@ git_pull_rebase() {
 
 git_commit_and_push() {
   msg="$1"
-  ( cd "$REPO_ROOT" && git add allocations/ && git commit -m "$msg" --quiet ) || {
+  # D-018 (P1.1): callers SHOULD pass the explicit path of the file they
+  # edited as $2. Default of 'allocations/' is a backward-compat fallback
+  # — it will stage every YAML in the directory, including any sandbox
+  # files an operator may have for testing. That foot-gun caused commit
+  # b4eff31 to push a 647-line ugc-test.yml during P0 dev. Always pass $2.
+  add_target="${2:-allocations/}"
+  ( cd "$REPO_ROOT" && git add "$add_target" && git commit -m "$msg" --quiet ) || {
     log_warn "Nothing to commit (idempotent no-op)"
     return 0
   }
