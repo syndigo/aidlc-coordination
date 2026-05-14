@@ -39,7 +39,32 @@ require_tools
 
 YML="$(resolve_yml_path "$PRODUCT")"
 
+# GDI-770 retro: .flyway.next_free in the YAML is documentary/stale (it's
+# updated lazily by reserve.sh and frequently lags reality). Compute the
+# live next-free as max(shipped.version, reserved.version) + 1 within the
+# PRODUCTION range only — the test-fixture range (V900-V999) lives in a
+# separate test_fixture_range block and must NOT contribute to production
+# allocation. This is the authoritative answer for the operator's "what
+# version should I claim?" question.
+compute_flyway_next_free() {
+  yq -r '
+    [
+      (.flyway.shipped[]?.version),
+      (.flyway.reserved[]?.version)
+    ]
+    | map(select(. != null and (test("^V[0-9]+$"))))
+    | map(sub("^V"; "") | tonumber)
+    | map(select(. < 900))
+    | (max // 0) + 1
+    | "V" + tostring
+  ' "$YML"
+}
+
 if [ "$EMIT_JSON" = "1" ]; then
+  # yq (mikefarah v4) doesn't accept jq's --arg; pass shell variables via env()
+  # which yq reads from the OS environment of the eval expression.
+  COMPUTED_NEXT="$(compute_flyway_next_free)"
+  export COMPUTED_NEXT
   yq -o=json '
     {
       "product": .product.name,
@@ -47,7 +72,8 @@ if [ "$EMIT_JSON" = "1" ]; then
       "flyway": {
         "shipped_count": (.flyway.shipped | length),
         "reserved_count": (.flyway.reserved | length),
-        "next_free": .flyway.next_free
+        "next_free": env(COMPUTED_NEXT),
+        "next_free_yaml_declared": .flyway.next_free
       },
       "model_registry": {
         "shipped_count": (.model_registry.shipped | length),
@@ -68,7 +94,8 @@ product_name="$(yq -r '.product.name' "$YML")"
 current_main="$(yq -r '.releases.current_main' "$YML")"
 flyway_shipped="$(yq -r '.flyway.shipped | length' "$YML")"
 flyway_reserved="$(yq -r '.flyway.reserved | length' "$YML")"
-flyway_next="$(yq -r '.flyway.next_free' "$YML")"
+flyway_next="$(compute_flyway_next_free)"
+flyway_next_yaml="$(yq -r '.flyway.next_free' "$YML")"
 model_shipped="$(yq -r '.model_registry.shipped | length' "$YML")"
 model_pending="$(yq -r '.model_registry.pending | length' "$YML")"
 
@@ -77,7 +104,7 @@ cat <<EOF
  AIDLC Allocation Status — $product_name
 =================================================
  current_main:   $current_main
- flyway:         $flyway_shipped shipped / $flyway_reserved reserved (next free: $flyway_next)
+ flyway:         $flyway_shipped shipped / $flyway_reserved reserved (next free: $flyway_next)$([ "$flyway_next" != "$flyway_next_yaml" ] && printf ' [yaml-declared: %s — drift]' "$flyway_next_yaml" || true)
  model surfaces: $model_shipped shipped / $model_pending pending
 
 --- Active single-writer locks ---

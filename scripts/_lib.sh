@@ -159,7 +159,31 @@ validate_semver_tag() {
 # history on main.
 
 git_pull_rebase() {
-  ( cd "$REPO_ROOT" && git pull --rebase --quiet ) || {
+  # GDI-770 retro: previously this failed loudly with "cannot pull with rebase:
+  # You have unstaged changes" when the operator's local clone had unrelated
+  # working-tree modifications (a common case on shared machines or after a
+  # half-finished sibling-tab session). The error was benign — the rebase
+  # would have applied cleanly — but it dropped a confusing log line into
+  # every reserve/release call. Wrap with stash include-untracked + pop so
+  # the rebase always sees a clean tree.
+  (
+    cd "$REPO_ROOT" || return 1
+    stash_ref=""
+    if ! git diff-index --quiet HEAD -- 2>/dev/null || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+      stash_ref="$(git stash push --include-untracked --quiet --message "aidlc-coordination/git_pull_rebase auto-stash" 2>/dev/null && echo stashed || true)"
+    fi
+    rc=0
+    if ! git pull --rebase --quiet; then
+      rc=1
+    fi
+    if [ "$stash_ref" = "stashed" ]; then
+      # If pop conflicts (extremely rare for the coordination repo's small
+      # allocation YAML edits), leave the stash in place — operator can
+      # recover with `git stash list`.
+      git stash pop --quiet 2>/dev/null || log_warn "git stash pop conflicted; recover with: git stash list"
+    fi
+    return "$rc"
+  ) || {
     log_err "git pull --rebase failed"
     return 1
   }
