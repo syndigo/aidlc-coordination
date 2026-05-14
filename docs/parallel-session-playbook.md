@@ -244,6 +244,27 @@ unblocked sections.
 >   --epic GDI-770 --id V29 --status abandoned \
 >   --reason "Sibling tab GDI-742 won V29 race; renamed to V31 via fix-forward"
 > ```
+>
+> **GDI-798 — orphan sweep after Stage 10.** `release.sh` only releases the
+> single resource its `--id` names. After an epic ships its canonical
+> migration (e.g. GDI-800 shipped V32 + V932 + the file-locks), older-version
+> reservations under the same epic remain orphaned in the registry until
+> manually swept. Use `--all-for-epic` for a one-shot sweep that drops every
+> remaining reservation across `flyway.reserved`, `flyway.test_fixture_range`,
+> `model_registry.pending`, `single_writer_files` (`held_by==KEY`), and
+> `releases.in_flight`. The sweep lands in a single commit and is idempotent
+> (re-running with zero matches exits 0). See D-015.
+>
+> Example — sweep GDI-800's leftover V22/V923 after the V32/V932 ship:
+>
+> ```sh
+> # Preview the sweep first:
+> ./scripts/release.sh --all-for-epic GDI-800 --dry-run
+>
+> # Then execute:
+> ./scripts/release.sh --all-for-epic GDI-800 \
+>   --reason "Stage 10 of GDI-800 shipped V32/V932; sweeping older V22/V923 orphans"
+> ```
 
 ---
 
