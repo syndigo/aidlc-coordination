@@ -209,15 +209,33 @@ flyway:
       epic: GDI-846
       release_tag: v0.42.0
       shipped_at: "2026-05-14T05:30:25Z"
-  reserved:
-    - version: V21
+    - version: V29
       section: A
       epic: GDI-742
-      fr: FR-A.1.12
-      status: reserved
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-15T22:00:00Z
-      note: Fuzzy dedup (re-keyed from section-A-FR-A.1.12-epic placeholder at initiation)
+      release_tag: v0.35.0
+      shipped_at: "2026-05-13T22:01:37Z"
+      note: FR-A.1.12 AI fuzzy duplicate detection (renumbered from V21 by commit d30e580 due to GDI-786 flyway out-of-order)
+    - version: V36
+      section: E
+      epic: GDI-824
+      shipped_at: "2026-05-14T05:34:16Z"
+      note: FR-E.1.1 multi-stage moderation pipeline; merged to dev (commit 96f5cd6), tag pending
+    - version: V38
+      section: G
+      epic: GDI-857
+      shipped_at: "2026-05-14T14:51:56Z"
+      note: FR-G.1.1 sampling members / community of consumers; merged to dev (commit c81a491), tag pending
+    - version: V39
+      section: B
+      epic: GDI-858
+      shipped_at: "2026-05-14T05:41:13Z"
+      note: FR-B.1.4 channel diversification; merged to dev (commit 2062065), tag pending
+    - version: V41
+      section: D
+      epic: GDI-899
+      shipped_at: "2026-05-14T16:01:28Z"
+      note: FR-D.5 answer_helpful_votes; merged to dev (commit 44a8e20), tag pending
+  reserved:
     - version: V23
       section: A
       epic: section-A-buffer
@@ -225,27 +243,6 @@ flyway:
       reserved_at: 2026-05-13T22:00:00Z
       expires_at: 2026-05-15T22:00:00Z
       note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V29
-      section: D
-      epic: GDI-770
-      fr: FR-D.2
-      status: reserved
-      reserved_at: "2026-05-13T21:10:02Z"
-      expires_at: "2026-05-14T21:10:02Z"
-    - version: V36
-      section: E
-      epic: GDI-824
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-14T02:23:13Z"
-      expires_at: "2026-05-15T02:23:13Z"
-    - version: V38
-      section: G
-      epic: GDI-857
-      fr: FR-G.1.1
-      status: reserved
-      reserved_at: "2026-05-14T03:25:15Z"
-      expires_at: "2026-05-15T03:25:15Z"
     - version: V938
       section: H
       epic: GDI-886
@@ -267,13 +264,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T14:42:08Z"
       expires_at: "2026-05-16T14:42:08Z"
-    - version: V41
-      section: D
-      epic: GDI-899
-      fr: FR-D.5
-      status: reserved
-      reserved_at: "2026-05-14T14:56:42Z"
-      expires_at: "2026-05-15T14:56:42Z"
     - version: V42
       section: B
       epic: GDI-907
@@ -454,6 +444,17 @@ single_writer_files:
     until: "2026-05-16T03:38:40Z"
     reason: reserved via reserve.sh
 releases:
+  # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md):
+  # 5 GitHub releases exist that aren't in flyway.shipped because they had no
+  # DB migration (or the migration was already attributed to an earlier version):
+  #   - v0.21.0 (2026-05-12T02:06:47Z) — A / GDI-565 — AI Provider Bootstrap
+  #   - v0.21.1 (2026-05-12T02:49:44Z) — A / hot-fix — Default to Bedrock
+  #   - v0.22.0 (2026-05-12T15:57:10Z) — A / GDI-591 — Synthetic catalog generator
+  #     (synth-catalog-image + synth-catalog-translate already in model_registry.shipped)
+  #   - v0.25.0 (2026-05-13T01:13:04Z) — B / GDI-637 — Edge SDK siteKey init
+  #   - v0.36.1 (2026-05-14T00:53:42Z) — / GDI-786 — Flyway out-of-order on dev
+  # Tag-only releases don't get flyway.shipped rows (schema requires version: V\d+).
+  # Document here so the next audit cycle doesn't re-flag these as drift.
   current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
     A: v0.28.x
@@ -493,12 +494,14 @@ anchor_dependencies:
   - anchor: FR-F.1.5.1
     description: AI-elevated product matching
     section: F
-    status: not_started
+    status: shipped
     consumers:
       - fr: A.1.12
         section: A
-        status: deferred
-        note: Fuzzy dedup is downstream of elevated matching; defer A.1.12 if F.1.5.1 slips
+        status: shipped
+        note: Fuzzy dedup shipped v0.35.0 (GDI-742); upstream F.1.5.1 also shipped v0.42.0
+    shipped_at: "2026-05-14T05:25:04Z"
+    shipped_release: v0.42.0
 tfc_deploy_queue:
   # Day-1 stub. Section sessions do NOT write to this. They continue to merge
   # directly to dev as today. This field is populated by the future Coordinator
@@ -535,11 +538,11 @@ profile_ref: profiles/ugc-platform.yml
 pillars:
   - letter: A
     name: Product Catalog Management
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-A.1.12]
-    in_flight_frs: [FR-A.1.12]
-    shipped_frs: [FR-A.1.1, FR-A.1.2, FR-A.1.3, FR-A.1.4, FR-A.1.5, FR-A.1.6, FR-A.1.7, FR-A.1.8, FR-A.1.9, FR-A.1.10, FR-A.1.11]
+    in_flight_frs: []
+    shipped_frs: [FR-A.1.1, FR-A.1.2, FR-A.1.3, FR-A.1.4, FR-A.1.5, FR-A.1.6, FR-A.1.7, FR-A.1.8, FR-A.1.9, FR-A.1.10, FR-A.1.11, FR-A.1.12]
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
@@ -575,29 +578,31 @@ pillars:
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-D.1, FR-D.2, FR-D.3, FR-D.4, FR-D.5, FR-D.6, FR-D.7, FR-D.8, FR-D.9, FR-D.10, FR-D.11, FR-D.12, FR-D.13]
     in_flight_frs:
-      - FR-D.2
       - FR-D.5
-    shipped_frs: []
+    shipped_frs:
+      - FR-D.2
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
   - letter: E
     name: Moderation & Governance
-    status: not_started
+    status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
+    in_flight_frs:
+      - FR-E.1.1
     shipped_frs: []
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
   - letter: F
     name: Syndication & Distribution
-    status: in_flight
+    status: not_started
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-F.1.5.1]
-    in_flight_frs: [FR-F.1.5.1]
-    shipped_frs: []
+    in_flight_frs: []
+    shipped_frs:
+      - FR-F.1.5.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 1
@@ -644,9 +649,8 @@ pillars:
     max_in_flight_frs: 1
     serial_with: []
 stats:
-  computed_at: "2026-05-14T17:11:15Z"
-  in_flight_pillar_count: 6
-  in_flight_section_count: 7
+  computed_at: "2026-05-14T17:28:42Z"
+  in_flight_pillar_count: 5
+  in_flight_section_count: 5
   longest_ttl_expiry: "2026-05-16T14:42:08Z"
-  critical_path_anchor: FR-F.1.5.1
   blocked_pillars: []
