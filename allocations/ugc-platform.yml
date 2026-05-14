@@ -246,13 +246,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T03:25:15Z"
       expires_at: "2026-05-15T03:25:15Z"
-    - version: V39
-      section: B
-      epic: GDI-858
-      fr: FR-B.1.4
-      status: reserved
-      reserved_at: "2026-05-14T03:28:48Z"
-      expires_at: "2026-05-15T03:28:48Z"
     - version: V938
       section: H
       epic: GDI-886
@@ -427,9 +420,9 @@ single_writer_files:
     held_by: none
     note: Rarely touched. Lock per-edit; release on commit.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/service/EmailDispatchService.kt
-    held_by: GDI-858
-    until: "2026-05-15T03:28:30Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-14T14:57:31Z"
+    reason: released via release.sh --all-for-epic
   - file: services/ugc-api/src/main/resources/application-dev.yml
     held_by: none
     until: "2026-05-14T01:19:36Z"
@@ -439,9 +432,9 @@ single_writer_files:
     until: "2026-05-14T07:18:33Z"
     reason: reserved via reserve.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/collection/reminders/ReminderDispatcher.kt
-    held_by: GDI-858
-    until: "2026-05-15T03:28:32Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-14T14:57:31Z"
+    reason: released via release.sh --all-for-epic
 releases:
   current_main: v0.42.0
   next_per_section:
