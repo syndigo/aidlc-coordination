@@ -270,6 +270,11 @@ flyway:
       epic: GDI-928
       release_tag: v0.49.0
       shipped_at: "2026-05-15T03:13:55Z"
+    - version: V949
+      section: F
+      epic: GDI-928
+      release_tag: v0.49.0
+      shipped_at: "2026-05-15T03:13:58Z"
   reserved:
     - version: V23
       section: A
@@ -355,13 +360,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T20:54:52Z"
       expires_at: "2026-05-16T20:54:52Z"
-    - version: V949
-      section: F
-      epic: GDI-928
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-14T21:04:21Z"
-      expires_at: "2026-05-15T21:04:21Z"
     - version: V51
       section: B
       epic: GDI-971
