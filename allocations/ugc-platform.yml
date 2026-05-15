@@ -545,7 +545,7 @@ flyway:
       expires_at: "2026-05-16T17:53:38Z"
     - version: V58
       section: B
-      epic: GDI-NEW-B25
+      epic: GDI-1028
       fr: FR-B.2.5
       status: reserved
       reserved_at: "2026-05-15T17:59:16Z"
@@ -806,7 +806,7 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: B
-      epic: GDI-NEW-B25
+      epic: GDI-1028
       proposed_tag: v0.56.0
       anchor_sha: pending
 anchor_dependencies:
