@@ -353,14 +353,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T14:02:29Z"
       expires_at: "2026-05-16T14:02:29Z"
-    - version: V957
-      section: C
-      epic: GDI-1029
-      fr: FR-C.1.10
-      status: reserved
-      reserved_at: "2026-05-15T17:48:22Z"
-      expires_at: "2026-05-16T17:48:22Z"
-      note: test-fixture grants for category_snippet_cache (paired with V57)
     - version: V58
       section: B
       epic: GDI-1036
