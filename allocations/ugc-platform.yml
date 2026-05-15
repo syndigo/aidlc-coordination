@@ -697,9 +697,9 @@ single_writer_files:
     until: "2026-05-15T20:47:03Z"
     reason: reserved via reserve.sh
   - file: services/ugc-api/src/main/resources/db/migration/
-    held_by: GDI-926
-    until: "2026-05-15T20:47:05Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-15T14:03:13Z"
+    reason: released via release.sh
   - file: ui/src/routes/
     held_by: GDI-926
     until: "2026-05-15T20:47:07Z"
