@@ -115,8 +115,10 @@ YML="$(resolve_yml_path "$PRODUCT")"
 # for product shape (D-017).
 PROFILE_REF="$(yq -r '.profile_ref // ""' "$YML")"
 MIGRATION_DIR=""
+TEST_FIXTURE_DIR=""
 if [ -n "$PROFILE_REF" ] && [ -f "$REPO_ROOT/$PROFILE_REF" ]; then
   MIGRATION_DIR="$(yq -r '.migration.dir_pattern // ""' "$REPO_ROOT/$PROFILE_REF")"
+  TEST_FIXTURE_DIR="$(yq -r '.migration.test_fixture_dir_pattern // ""' "$REPO_ROOT/$PROFILE_REF")"
   if [ -z "$GH_REPO" ]; then
     GH_REPO="$(yq -r '.product.repo // ""' "$REPO_ROOT/$PROFILE_REF")"
   fi
@@ -166,6 +168,10 @@ if [ "$EMIT_JSON" != "1" ]; then
 fi
 
 DISK_DIR="$REPO_PATH/$MIGRATION_DIR"
+TEST_DISK_DIR=""
+if [ -n "$TEST_FIXTURE_DIR" ]; then
+  TEST_DISK_DIR="$REPO_PATH/$TEST_FIXTURE_DIR"
+fi
 if [ ! -d "$DISK_DIR" ]; then
   emit_finding "disk-migrations" "warn" \
     "Migration directory not found at $DISK_DIR" \
@@ -178,7 +184,7 @@ else
     | .[]
   ' "$YML" 2>/dev/null | sort -u)"
 
-  # Walk the disk; for each V*__*.sql, check membership.
+  # Walk the prod dir; for each V*__*.sql, check membership.
   while IFS= read -r migration_file; do
     [ -z "$migration_file" ] && continue
     base="$(basename "$migration_file")"
@@ -192,6 +198,25 @@ else
   done <<EOF
 $(find "$DISK_DIR" -name 'V*__*.sql' -type f 2>/dev/null | sort -V)
 EOF
+
+  # Also walk the test-fixture dir if configured. Test-fixture migrations
+  # (V900+) live under a sibling directory and ship paired with a prod
+  # migration. They must still appear in flyway.shipped (with paired_with).
+  if [ -n "$TEST_DISK_DIR" ] && [ -d "$TEST_DISK_DIR" ]; then
+    while IFS= read -r migration_file; do
+      [ -z "$migration_file" ] && continue
+      base="$(basename "$migration_file")"
+      version="$(printf '%s' "$base" | sed -n 's/^\(V[0-9][0-9]*\)__.*\.sql$/\1/p')"
+      [ -z "$version" ] && continue
+      if ! printf '%s\n' "$REGISTRY_VERSIONS" | grep -qFx "$version"; then
+        emit_finding "disk-migrations" "error" \
+          "$version test-fixture on disk ($base) is not in flyway.shipped or flyway.reserved" \
+          "Add to flyway.shipped with paired_with: <prod V> and the same release_tag as its paired prod migration"
+      fi
+    done <<EOF
+$(find "$TEST_DISK_DIR" -name 'V*__*.sql' -type f 2>/dev/null | sort -V)
+EOF
+  fi
 fi
 
 # ----- check 2: registry reservations that already shipped (on disk) --------
@@ -201,23 +226,31 @@ if [ "$EMIT_JSON" != "1" ]; then
 fi
 
 if [ -d "$DISK_DIR" ]; then
-  # For each reserved version, check if a V<n>__*.sql file exists.
+  # For each reserved version, check if a V<n>__*.sql file exists in either
+  # the prod or test-fixture directory. V900+ are expected in the test dir.
   reserved_versions="$(yq -r '(.flyway.reserved // [])[] | .version + " " + .epic + " " + (.fr // "no-fr")' "$YML" 2>/dev/null)"
   while IFS= read -r line; do
     [ -z "$line" ] && continue
     version="$(printf '%s' "$line" | awk '{print $1}')"
     epic="$(printf '%s' "$line" | awk '{print $2}')"
-    # Skip test-fixture range (V900+) -- those have separate semantics.
+    # Decide which dir to scan: prod for V<900, test for V>=900 (if known).
+    scan_dir="$DISK_DIR"
     case "$version" in
       V[0-9][0-9][0-9])
         n="$(printf '%s' "$version" | sed 's/^V//')"
         if [ "$n" -ge 900 ]; then
-          continue
+          if [ -n "$TEST_DISK_DIR" ] && [ -d "$TEST_DISK_DIR" ]; then
+            scan_dir="$TEST_DISK_DIR"
+          else
+            # No test dir configured; skip the V900+ check rather than
+            # false-flag against prod dir.
+            continue
+          fi
         fi
         ;;
     esac
-    if find "$DISK_DIR" -name "${version}__*.sql" -type f 2>/dev/null | grep -q .; then
-      file="$(find "$DISK_DIR" -name "${version}__*.sql" -type f 2>/dev/null | head -1)"
+    if find "$scan_dir" -name "${version}__*.sql" -type f 2>/dev/null | grep -q .; then
+      file="$(find "$scan_dir" -name "${version}__*.sql" -type f 2>/dev/null | head -1)"
       emit_finding "stale-reservation" "warn" \
         "$version ($epic) is in flyway.reserved but $(basename "$file") already exists on disk" \
         "release.sh --resource flyway --section <X> --epic $epic --id $version --status shipped --release-tag <vX.Y.Z> --fr <FR-X.Y.Z> --update-pillars-block"

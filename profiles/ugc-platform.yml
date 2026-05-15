@@ -19,6 +19,7 @@ section_range:
 
 migration:
   dir_pattern: services/ugc-api/src/main/resources/db/migration
+  test_fixture_dir_pattern: services/ugc-api/src/test/resources/db/migration
   filename_pattern: V*__*.sql
   version_prefix: V
   test_fixture_threshold: 900

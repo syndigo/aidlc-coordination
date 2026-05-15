@@ -69,6 +69,13 @@
         "shipped_at": {
           "$ref": "#/definitions/isoTimestamp"
         },
+        "fr": {
+          "type": "string"
+        },
+        "paired_with": {
+          "$ref": "#/definitions/flywayVersion",
+          "description": "Prod migration this test-fixture migration is paired with. Test fixtures (V900+) live in the test-resources dir and ship under the same release_tag as their paired prod migration."
+        },
         "note": {
           "type": "string"
         },

@@ -44,6 +44,10 @@
           "type": "string",
           "description": "Shell-glob path under the product repo, e.g. services/ugc-api/src/main/resources/db/migration"
         },
+        "test_fixture_dir_pattern": {
+          "type": "string",
+          "description": "Optional sibling dir for test-fixture migrations (V<test_fixture_threshold>+). audit-registry-drift.sh scans this when set so paired test grants don't false-flag as missing. e.g. services/ugc-api/src/test/resources/db/migration"
+        },
         "filename_pattern": {
           "type": "string",
           "description": "Filename glob, e.g. V*__*.sql for Flyway, *__*.sql for raw, etc."
