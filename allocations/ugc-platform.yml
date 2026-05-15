@@ -514,6 +514,11 @@ flyway:
       paired_with: V56
       shipped_at: "2026-05-15T17:01:43Z"
       note: V956__publication_decisions_test_grants.sql (test-fixture)
+    - version: V58
+      section: B
+      epic: GDI-1028
+      release_tag: v0.56.0
+      shipped_at: "2026-05-15T19:30:34Z"
   reserved:
     - version: V23
       section: A
@@ -543,13 +548,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T17:53:38Z"
       expires_at: "2026-05-16T17:53:38Z"
-    - version: V58
-      section: B
-      epic: GDI-1028
-      fr: FR-B.2.5
-      status: reserved
-      reserved_at: "2026-05-15T17:59:16Z"
-      expires_at: "2026-05-16T23:59:16Z"
     - version: V59
       section: B
       epic: GDI-1036
