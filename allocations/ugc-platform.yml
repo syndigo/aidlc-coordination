@@ -724,6 +724,12 @@ releases:
       epic: GDI-982
       proposed_tag: v0.50.0
       anchor_sha: pending
+    - section: E
+      epic: GDI-998
+      fr: FR-E.2.7
+      proposed_tag: v0.51.0
+      anchor_sha: pending
+      reserved_at: "2026-05-15T03:50:00Z"
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
@@ -857,7 +863,7 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
+    in_flight_frs: [FR-E.1.2, FR-E.2.7]
     shipped_frs:
       - FR-E.1.1
       - FR-E.1.3
