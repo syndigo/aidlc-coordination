@@ -441,6 +441,11 @@ flyway:
       paired_with: V51
       shipped_at: "2026-05-15T00:40:34Z"
       note: V951__tag_templates_test_grants.sql (test-fixture)
+    - version: V55
+      section: E
+      epic: GDI-1009
+      release_tag: v0.53.0
+      shipped_at: "2026-05-15T14:52:34Z"
   reserved:
     - version: V23
       section: A
@@ -506,13 +511,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T04:04:51Z"
       expires_at: "2026-05-17T04:04:51Z"
-    - version: V55
-      section: E
-      epic: GDI-1009
-      fr: FR-E.2.5
-      status: reserved
-      reserved_at: "2026-05-15T04:20:57Z"
-      expires_at: "2026-05-16T04:20:57Z"
     - version: V955
       section: E
       epic: GDI-1009
@@ -901,6 +899,7 @@ pillars:
     shipped_frs:
       - FR-E.1.1
       - FR-E.1.3
+      - FR-E.2.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
