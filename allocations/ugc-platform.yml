@@ -251,6 +251,25 @@ flyway:
       epic: GDI-926
       release_tag: v0.44.0
       shipped_at: "2026-05-14T22:50:16Z"
+    - version: V52
+      section: C
+      epic: GDI-976
+      fr: FR-C.1.8
+      release_tag: v0.48.0
+      shipped_at: "2026-05-15T01:25:19Z"
+      note: review_flags sidecar table — inappropriate flagging, FORCE RLS, tenant-parity trigger
+    - version: V952
+      section: C
+      epic: GDI-976
+      fr: FR-C.1.8
+      release_tag: v0.48.0
+      shipped_at: "2026-05-15T01:25:19Z"
+      note: review_flags test grants (SELECT/INSERT/DELETE + sequence USAGE/SELECT)
+    - version: V50
+      section: F
+      epic: GDI-928
+      release_tag: v0.49.0
+      shipped_at: "2026-05-15T03:13:55Z"
   reserved:
     - version: V23
       section: A
@@ -336,13 +355,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T20:54:52Z"
       expires_at: "2026-05-16T20:54:52Z"
-    - version: V50
-      section: F
-      epic: GDI-928
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-14T21:04:08Z"
-      expires_at: "2026-05-15T21:04:08Z"
     - version: V949
       section: F
       epic: GDI-928
@@ -364,20 +376,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T22:27:47Z"
       expires_at: "2026-05-15T22:27:47Z"
-    - version: V52
-      section: C
-      epic: GDI-976
-      fr: FR-C.1.8
-      status: reserved
-      reserved_at: "2026-05-14T22:58:09Z"
-      expires_at: "2026-05-15T22:58:09Z"
-    - version: V952
-      section: C
-      epic: GDI-976
-      fr: FR-C.1.8
-      status: reserved
-      reserved_at: "2026-05-14T22:58:11Z"
-      expires_at: "2026-05-15T22:58:11Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -611,10 +609,6 @@ releases:
       proposed_tag: v0.44.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: C
-      epic: GDI-976
-      proposed_tag: v0.45.0
-      anchor_sha: pending
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
@@ -653,7 +647,7 @@ tfc_deploy_queue:
   # Day-1 stub. Section sessions do NOT write to this. They continue to merge
   # directly to dev as today. This field is populated by the future Coordinator
   # skill (Phase-2) once TFC dispatch is on the AIDLC critical path.
-  current_deployed_sha: 2652a12f
+  current_deployed_sha: d86c3b21 # GDI-976 v0.48.0 (revert of CI serialization; GDI-976 code present)
   current_desired_sha: 2652a12f
   pending_pushes: []
   next_batch_window: null
@@ -711,7 +705,7 @@ pillars:
     name: Content Display
     status: not_started
     owner_persona: personas/pillar-orchestrator.md
-    fr_backlog: [FR-C.1.8, FR-C.1.10, FR-C.1.11, FR-C.1.12, FR-C.1.13, FR-C.1.14, FR-C.1.15, FR-C.1.16, FR-C.1.17, FR-C.1.18, FR-C.1.19, FR-C.2.2, FR-C.2.3, FR-C.2.5, FR-C.2.6]
+    fr_backlog: [FR-C.1.10, FR-C.1.11, FR-C.1.12, FR-C.1.13, FR-C.1.14, FR-C.1.15, FR-C.1.16, FR-C.1.17, FR-C.1.18, FR-C.1.19, FR-C.2.2, FR-C.2.3, FR-C.2.5, FR-C.2.6]
     in_flight_frs: []
     shipped_frs:
       - FR-C.1.1
@@ -721,6 +715,7 @@ pillars:
       - FR-C.1.5
       - FR-C.1.6
       - FR-C.1.7
+      - FR-C.1.8
       - FR-C.1.9
       - FR-C.2.4
     serial_chains:
