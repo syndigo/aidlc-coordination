@@ -13,7 +13,7 @@
     "anchor_dependencies",
     "tfc_deploy_queue"
   ],
-  "comment_pillars_optional": "D-016: pillars[] and stats are OPTIONAL on a Day-1 allocation YAML. Products that do not yet have an orchestration tier above section-owner can omit them and the schema still validates. profile_ref is also optional; products without a profiles/<name>.yml continue to use the Day-1 hardcoded UGC paths.",
+  "$comment": "D-016: pillars[] and stats are OPTIONAL on a Day-1 allocation YAML. Products that do not yet have an orchestration tier above section-owner can omit them and the schema still validates. profile_ref is also optional; products without a profiles/<name>.yml continue to use the Day-1 hardcoded UGC paths.",
   "additionalProperties": false,
   "definitions": {
     "sectionLetter": {
