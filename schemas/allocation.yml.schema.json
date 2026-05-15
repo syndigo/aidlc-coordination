@@ -43,7 +43,8 @@
         "not_started",
         "deferred",
         "blocked_until_anchor_shipped",
-        "released"
+        "released",
+        "released_unused"
       ]
     },
     "shippedFlyway": {
@@ -113,6 +114,10 @@
         },
         "expires_at": {
           "$ref": "#/definitions/isoTimestamp"
+        },
+        "released_at": {
+          "$ref": "#/definitions/isoTimestamp",
+          "description": "When a reserved slot was released without shipping (status: released_unused). See D-027 for the paired-test-fixture pattern."
         },
         "note": {
           "type": "string"
@@ -257,7 +262,7 @@
         "name": { "type": "string" },
         "status": {
           "type": "string",
-          "enum": ["not_started", "in_flight", "blocked", "shipped", "deferred"]
+          "enum": ["not_started", "in_flight", "in_progress", "blocked", "shipped", "deferred", "complete"]
         },
         "owner_persona": {
           "type": "string",
@@ -469,13 +474,26 @@
               "section",
               "epic"
             ],
-            "additionalProperties": false,
+            "additionalProperties": true,
+            "$comment": "additionalProperties: true because the lifecycle of an in-flight release entry accumulates fields (fr, reserved_at, shipped_at, status, etc.) as it moves through reserve/ship/prune. The typed properties below are the contract; everything else passes through.",
             "properties": {
               "section": {
                 "$ref": "#/definitions/sectionLetter"
               },
               "epic": {
                 "type": "string"
+              },
+              "fr": {
+                "type": "string"
+              },
+              "status": {
+                "$ref": "#/definitions/status"
+              },
+              "reserved_at": {
+                "$ref": "#/definitions/isoTimestamp"
+              },
+              "shipped_at": {
+                "$ref": "#/definitions/isoTimestamp"
               },
               "proposed_tag": {
                 "$ref": "#/definitions/semverTag"
