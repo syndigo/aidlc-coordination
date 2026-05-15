@@ -222,6 +222,11 @@ flyway:
       release_tag: v0.47.0
       shipped_at: "2026-05-15T00:40:34Z"
       note: test-fixture grants for tag_templates + review_tags
+    - version: V60
+      section: D
+      epic: GDI-1046
+      release_tag: v0.32.1
+      shipped_at: "2026-05-15T19:44:45Z"
   reserved:
     - version: V21
       section: A
@@ -372,13 +377,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T18:12:27Z"
       expires_at: "2026-05-16T18:12:27Z"
-    - version: V60
-      section: D
-      epic: GDI-1046
-      fr: FR-D.4
-      status: reserved
-      reserved_at: "2026-05-15T18:36:26Z"
-      expires_at: "2026-05-16T18:36:26Z"
     - version: V960
       section: D
       epic: GDI-1046
