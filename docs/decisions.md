@@ -1359,6 +1359,146 @@ Two smaller changes in the same edit:
 
 ---
 
+## D-027 (2026-05-15) — `audit-registry-drift.sh` scans the test-fixture migration dir; `paired_with` records the pairing
+
+### Status
+
+Accepted. Implemented in `scripts/audit-registry-drift.sh`,
+`profiles/ugc-platform.yml`, `schemas/profile.yml.schema.json`,
+`schemas/allocation.yml.schema.json`, and `allocations/ugc-platform.yml`
+(14 pre-AIDLC + 5 AIDLC-era paired test-fixture migrations backfilled).
+
+### Context
+
+D-024 introduced `audit-registry-drift.sh` to compare the registry against
+disk + GitHub releases. The script walks one directory: `migration.dir_pattern`
+from the per-product profile (for ugc-platform, the prod Flyway dir
+`services/ugc-api/src/main/resources/db/migration`).
+
+In practice, every Section A AI surface and every Section H/B/G ship since
+2026-05-13 produces **two** Flyway migrations: a prod-range V<n> in the prod
+dir, and a paired test-grants V<n+900> in `services/ugc-api/src/test/resources/db/migration`.
+The test-fixture migration grants `app_test_*` roles SELECT/INSERT/DELETE on
+the new schema so integration-test fixtures can write through RLS. This is a
+load-bearing convention — `ModerationModerationsRlsCrossTenantTest`,
+`AnswerSubmissionIT`, `ReviewSummaryRepositoryRlsCrossTenantTest`, etc. all
+depend on it.
+
+The drift checker was blind to that sibling directory. Two failure modes:
+
+1. **False-flag as missing.** During the 8-tab capacity run on 2026-05-14/15,
+   the checker reported V40, V48, V51 as "missing on disk" because it walked
+   only the prod dir. The V900-range entries `(V940, V948, V951)` weren't on
+   the prod path. The orphans were *paired* with the V40/V48/V51 prod rows
+   in the registry but the checker had no concept of "paired"; it just saw
+   reservations with no disk match.
+2. **Silent absence.** Even when a section owner did populate the V9XX
+   entries in the registry, the prod-only disk walk meant the test-fixture
+   side of the pair could land on disk without the registry knowing. By
+   2026-05-15 there were 14 pre-AIDLC (`V900`, `V910`-`V924`) and 5 AIDLC-era
+   (`V929`, `V930`, `V935`, `V936`, `V944`) test-fixture migrations on disk
+   that had no row anywhere in the registry. The checker reported zero drift
+   the entire time — because it never looked.
+
+The dual-mode failure was caught only when a Pillar B operator ran the
+drift check by hand during a `--with-drift-check` bootstrap and the output
+mentioned migration files the operator recognized as already-shipped.
+
+### Decision
+
+Three coordinated changes:
+
+1. **Profile schema (`profiles/<product>.yml`) gains an optional
+   `migration.test_fixture_dir_pattern` field.** When set, the drift checker
+   walks both `migration.dir_pattern` and `migration.test_fixture_dir_pattern`
+   in Check 1, and routes V<test_fixture_threshold>+ lookups in Check 2 to
+   the test-fixture dir. If absent, behavior is unchanged from D-024 (the
+   checker walks only the prod dir).
+2. **Allocation schema (`schemas/allocation.yml.schema.json`) gains
+   `fr` and `paired_with` on `shippedFlyway`.** `paired_with` records the
+   prod V<n> a test-fixture V<n+threshold> ships under. Both fields are
+   optional and backward-compatible.
+3. **The 19 backlogged paired test-fixture migrations are written into
+   the registry in the same PR.** Pre-AIDLC entries use `epic: pre-aidlc`
+   (matching the V1-V12 prod-range convention). AIDLC-era entries carry
+   their real epic + FR + release_tag + paired_with.
+
+`reserve.sh` is **unchanged**. Section owners continue to call
+`reserve.sh --resource flyway --id V<n>` twice per epic — once for prod,
+once for the test-fixture slot — exactly as they do today. The pairing is
+recorded at ship time in the `paired_with` field, not at reserve time.
+
+### Why this approach (and not the alternatives)
+
+Three approaches were considered:
+
+- **(A) Teach the drift checker about the test-fixture dir.** *(Chosen.)*
+  Minimal surface area: one new optional profile field, one new optional
+  shipped-row field, additive changes to the checker. No changes to the
+  reservation API. Fixes the symptom (drift miss) without changing the
+  workflow operators already know.
+- **(B) Add `--paired-with V40` flag to `reserve.sh`.** Cleaner data model
+  long-term — the pairing is recorded at reserve time, not after the fact.
+  But every section-owner caller has to learn a new flag, and the eight
+  active pillar tabs would all need to be re-bootstrapped to pick it up.
+  Deferred; revisit if the dual-reserve pattern becomes onerous in practice.
+- **(C) Both — checker awareness AND `--paired-with` flag.** Most thorough,
+  also the most code to change for what is currently a recordkeeping issue.
+  Rejected as over-engineering: the symptom is fixed by (A), and (B) is a
+  workflow nicety, not a correctness fix.
+
+### Why `test_fixture_threshold` already existed but `test_fixture_dir_pattern` did not
+
+`test_fixture_threshold: 900` was already in the ugc-platform profile (set
+during D-017's per-product profile work). It tells the checker that
+versions `>= 900` are test fixtures and excludes them from
+prod-`next_free` computation. What was missing was *where* those test
+fixtures live on disk. D-017 wrote the threshold from convention (the
+existing on-disk pattern) without thinking about the dir-pattern half of
+the same pair. D-027 closes that gap.
+
+### Consequences
+
+- The drift checker now reports zero findings against `syndigo/ugc-platform`
+  with the test-fixture dir populated. Prior to this work, a clean drift
+  report was indistinguishable from "checker can't see the test dir".
+- Section owners can keep their existing dual-reserve pattern; no workflow
+  change.
+- Pre-AIDLC test-fixture migrations are now first-class registry rows. If
+  a future cleanup task wants to reconcile the V900-V924 range against
+  Jira epics, the rows are in place to be enriched (not added).
+- A `paired_with` field is now schema-supported. Future automation (e.g.,
+  a `release.sh --pair-with V<n>` shorthand, or a CI gate that fails when a
+  test-fixture migration ships without a paired prod migration) has the
+  data surface to build on.
+
+### Carry-forward notes for future products
+
+When `bootstrap-from-profile.sh` (D-022) is used to onboard a new product,
+the operator should:
+
+1. Populate `migration.dir_pattern` (existing requirement).
+2. Populate `migration.test_fixture_dir_pattern` *if and only if* the
+   product splits prod vs test migrations into sibling dirs. Products that
+   keep test fixtures in the same directory as prod migrations (or that
+   don't use Flyway test-grants at all) should leave the field unset.
+3. Pick a `test_fixture_threshold` that does not overlap the prod-range
+   semver allocator. ugc-platform's 900 leaves headroom up to V899 in prod;
+   other products may pick differently.
+
+### References
+
+- `scripts/audit-registry-drift.sh` (Check 1 + Check 2: test-dir aware)
+- `profiles/ugc-platform.yml` (`migration.test_fixture_dir_pattern`)
+- `schemas/profile.yml.schema.json` (`test_fixture_dir_pattern` description)
+- `schemas/allocation.yml.schema.json` (`shippedFlyway.paired_with`, `shippedFlyway.fr`)
+- `allocations/ugc-platform.yml` (19 backfilled rows; 5 V9XX entries restored from `released_unused` -> `shipped` with `paired_with`)
+- Sibling: D-017 (per-product profile separates shape from state), D-022
+  (`bootstrap-from-profile.sh` consumers need the new field), D-024
+  (drift checker; this expands its scope).
+
+---
+
 ## How to add an ADR
 
 ```sh
