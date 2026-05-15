@@ -461,6 +461,11 @@ flyway:
       epic: GDI-982
       release_tag: v0.52.0
       shipped_at: "2026-05-15T16:16:11Z"
+    - version: V54
+      section: E
+      epic: GDI-1002
+      release_tag: v0.53.0
+      shipped_at: "2026-05-15T16:16:13Z"
   reserved:
     - version: V23
       section: A
@@ -498,13 +503,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T03:26:08Z"
       expires_at: "2026-05-17T03:26:08Z"
-    - version: V54
-      section: E
-      epic: GDI-1002
-      fr: FR-E.1.4
-      status: reserved
-      reserved_at: "2026-05-15T04:04:49Z"
-      expires_at: "2026-05-17T04:04:49Z"
     - version: V954
       section: E
       epic: GDI-1002
