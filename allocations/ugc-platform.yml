@@ -517,23 +517,78 @@ flyway:
     - version: V58
       section: B
       epic: GDI-1028
+      fr: FR-B.2.5
       release_tag: v0.56.0
-      shipped_at: "2026-05-15T19:30:34Z"
-    - version: V58
+      shipped_at: "2026-05-15T19:28:13Z"
+      note: FR-B.2.5 Media Upload (consumer media for review submissions).
+    - version: V958
       section: B
       epic: GDI-1028
+      fr: FR-B.2.5
       release_tag: v0.56.0
-      shipped_at: "2026-05-15T19:30:57Z"
+      paired_with: V58
+      shipped_at: "2026-05-15T19:28:13Z"
+      note: V958__media_upload_configs_test_grants.sql (test-fixture)
+    - version: V59
+      section: C
+      epic: GDI-1036
+      fr: FR-C.1.10
+      release_tag: v0.57.0
+      shipped_at: "2026-05-15T19:51:37Z"
+      note: FR-C.1.10 Category Snippet Display — display-api category aggregation surface.
+    - version: V959
+      section: C
+      epic: GDI-1036
+      fr: FR-C.1.10
+      release_tag: v0.57.0
+      paired_with: V59
+      shipped_at: "2026-05-15T19:51:37Z"
+      note: V959__test_grant_category_snippets.sql (test-fixture)
+    - version: V60
+      section: D
+      epic: GDI-1046
+      fr: FR-D.4
+      release_tag: v0.32.1
+      shipped_at: "2026-05-15T19:21:01Z"
+      note: FR-D.4 Verified Answer Badging — V60 adds verified_at/verified_by/verification_source to answers. v0.32.1 is a Section-D back-port branch tag (cut from a base before v0.33.x). Registry previously had this reserved against GDI-1054 — corrected to GDI-1046, the actual shipping epic.
+    - version: V960
+      section: D
+      epic: GDI-1046
+      fr: FR-D.4
+      release_tag: v0.32.1
+      paired_with: V60
+      shipped_at: "2026-05-15T19:21:01Z"
+      note: V960__answer_verified_badge_grants.sql (test-fixture)
     - version: V62
       section: E
       epic: GDI-1064
+      fr: FR-E.1.5
       release_tag: v0.58.0
-      shipped_at: "2026-05-15T20:03:55Z"
+      shipped_at: "2026-05-15T20:03:44Z"
+      note: FR-E.1.5 Multi-Tier Moderation — platform/brand/retailer policy hierarchy.
     - version: V962
       section: E
       epic: GDI-1064
+      fr: FR-E.1.5
       release_tag: v0.58.0
-      shipped_at: "2026-05-15T20:03:57Z"
+      paired_with: V62
+      shipped_at: "2026-05-15T20:03:44Z"
+      note: V962__moderation_tier_configs_grants.sql (test-fixture)
+    - version: V63
+      section: D
+      epic: GDI-1054
+      fr: FR-D.4
+      release_tag: v0.59.0
+      shipped_at: "2026-05-15T20:56:01Z"
+      note: V63__answer_is_verified_flag.sql — second FR-D.4 implementation (GDI-1054) that landed on dev after the v0.32.1/GDI-1046 cut. Co-tagged with FR-D.7 (UI-only, no migration) in v0.59.0; release title names FR-D.7 only.
+    - version: V963
+      section: D
+      epic: GDI-1054
+      fr: FR-D.4
+      release_tag: v0.59.0
+      paired_with: V63
+      shipped_at: "2026-05-15T20:56:01Z"
+      note: V963__answer_is_verified_flag_grants.sql (test-fixture)
   reserved:
     - version: V23
       section: A
@@ -563,34 +618,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T17:53:38Z"
       expires_at: "2026-05-16T17:53:38Z"
-    - version: V59
-      section: B
-      epic: GDI-1036
-      fr: FR-B.2.7
-      status: reserved
-      reserved_at: "2026-05-15T18:05:53Z"
-      expires_at: "2026-05-16T18:05:53Z"
-    - version: V959
-      section: B
-      epic: GDI-1036
-      fr: FR-B.2.7
-      status: reserved
-      reserved_at: "2026-05-15T18:05:55Z"
-      expires_at: "2026-05-16T18:05:55Z"
-    - version: V60
-      section: D
-      epic: GDI-1054
-      fr: FR-D.4
-      status: reserved
-      reserved_at: "2026-05-15T18:34:31Z"
-      expires_at: "2026-05-16T18:34:31Z"
-    - version: V960
-      section: D
-      epic: GDI-1054
-      fr: FR-D.4
-      status: reserved
-      reserved_at: "2026-05-15T18:34:36Z"
-      expires_at: "2026-05-16T18:34:36Z"
     - version: V61
       section: E
       epic: GDI-1055
@@ -848,7 +875,16 @@ releases:
   #     (read-only GET endpoint; no migration; existing moderations table)
   #   - v0.53.0 (2026-05-15T14:51:46Z) — E / GDI-1009 / FR-E.2.5 — Observation / Moderation Code Taxonomy
   #     (tag-only promotion; V55 was already in v0.52.0; no new migration)
-  current_main: v0.58.0 # last canonical semver tag (FR-E.1.4 / GDI-1002, co-ships FR-E.2.1 / GDI-1013). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  #
+  # Fourth-pass (drift sweep, 2026-05-15 night, post v0.59.0):
+  #   - v0.32.1 (2026-05-15T19:21:01Z) — D / GDI-1046 / FR-D.4 — Verified Answer Badging
+  #     (Section-D back-port branch tag cut from a base before v0.33.x; V60 is the
+  #     attached migration. NOT a canonical-trunk tag, but a real release.)
+  #   - v0.59.0 (2026-05-15T20:56:01Z) — D / GDI-1081 / FR-D.7 — Q&A Display Component
+  #     (UI-only release; no new migration of its own. Same tag also contains V63
+  #     from GDI-1054, a second FR-D.4 implementation that landed on dev after the
+  #     v0.32.1/GDI-1046 cut. V63 attributed to GDI-1054/FR-D.4/v0.59.0.)
+  current_main: v0.59.0 # last canonical semver tag (FR-D.7 / GDI-1081 UI-only + V63 / GDI-1054 / FR-D.4 second-implementation co-shipped). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1010,6 +1046,7 @@ pillars:
       - FR-C.1.7
       - FR-C.1.8
       - FR-C.1.9
+      - FR-C.1.10
       - FR-C.2.4
     serial_chains:
       - chain: [FR-A.1.9, FR-C.1.18]
@@ -1025,8 +1062,10 @@ pillars:
     in_flight_frs: []
     shipped_frs:
       - FR-D.2
-      - FR-D.5
       - FR-D.3
+      - FR-D.4
+      - FR-D.5
+      - FR-D.7
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -1041,6 +1080,7 @@ pillars:
       - FR-E.1.2
       - FR-E.1.3
       - FR-E.1.4
+      - FR-E.1.5
       - FR-E.2.1
       - FR-E.2.5
       - FR-E.2.7
