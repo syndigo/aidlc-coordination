@@ -285,6 +285,11 @@ flyway:
       epic: GDI-929
       release_tag: v0.46.0
       shipped_at: "2026-05-15T03:22:20Z"
+    - version: V51
+      section: B
+      epic: GDI-971
+      release_tag: v0.47.0
+      shipped_at: "2026-05-15T03:22:22Z"
   reserved:
     - version: V23
       section: A
@@ -356,13 +361,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T20:54:52Z"
       expires_at: "2026-05-16T20:54:52Z"
-    - version: V51
-      section: B
-      epic: GDI-971
-      fr: FR-B.2.4
-      status: reserved
-      reserved_at: "2026-05-14T22:27:43Z"
-      expires_at: "2026-05-15T22:27:43Z"
     - version: V951
       section: B
       epic: GDI-971
@@ -684,6 +682,7 @@ pillars:
     in_flight_frs: [FR-B.2.8]
     shipped_frs:
       - FR-B.2.3
+      - FR-B.2.4
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
         reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
