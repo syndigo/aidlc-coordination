@@ -353,20 +353,22 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T14:02:29Z"
       expires_at: "2026-05-16T14:02:29Z"
-    - version: V58
+    - version: V64
       section: B
       epic: GDI-1036
       fr: FR-B.2.7
       status: reserved
-      reserved_at: "2026-05-15T18:12:10Z"
-      expires_at: "2026-05-16T18:12:10Z"
-    - version: V958
+      reserved_at: "2026-05-15T20:58:00Z"
+      expires_at: "2026-05-16T20:58:00Z"
+      note: Renumbered from V58 — V58 collided with GDI-1028 V58__media_upload_configs on rebase
+    - version: V964
       section: B
       epic: GDI-1036
       fr: FR-B.2.7
       status: reserved
-      reserved_at: "2026-05-15T18:12:16Z"
-      expires_at: "2026-05-16T18:12:16Z"
+      reserved_at: "2026-05-15T20:58:00Z"
+      expires_at: "2026-05-16T20:58:00Z"
+      note: Renumbered from V958 — paired test grants for V64
     - version: V65
       section: E
       epic: GDI-1086
@@ -381,6 +383,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T20:52:48Z"
       expires_at: "2026-05-16T20:52:48Z"
+    - version: V66
+      section: D
+      epic: GDI-899
+      fr: ""
+      status: reserved
+      reserved_at: "2026-05-15T21:14:19Z"
+      expires_at: "2026-05-16T21:14:19Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
