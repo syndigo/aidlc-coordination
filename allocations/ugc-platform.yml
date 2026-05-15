@@ -302,16 +302,18 @@ flyway:
       section: H
       epic: GDI-886
       fr: FR-H.4
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V40 in v0.45.0
       reserved_at: "2026-05-14T14:41:42Z"
-      expires_at: "2026-05-16T14:41:42Z"
+      released_at: "2026-05-15T03:25:00Z"
     - version: V940
       section: H
       epic: GDI-886
       fr: FR-H.4
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V40 in v0.45.0
       reserved_at: "2026-05-14T14:42:08Z"
-      expires_at: "2026-05-16T14:42:08Z"
+      released_at: "2026-05-15T03:25:00Z"
     - version: V42
       section: B
       epic: GDI-907
@@ -337,9 +339,10 @@ flyway:
       section: D
       epic: GDI-925
       fr: FR-D.3
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V45 (epic GDI-925)
       reserved_at: "2026-05-14T20:45:34Z"
-      expires_at: "2026-05-15T20:45:34Z"
+      released_at: "2026-05-15T03:25:00Z"
     - version: V47
       section: E
       epic: GDI-927
@@ -351,23 +354,26 @@ flyway:
       section: G
       epic: GDI-926
       fr: FR-G.1.2
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V46 in v0.44.0
       reserved_at: "2026-05-14T20:47:57Z"
-      expires_at: "2026-05-15T20:47:57Z"
+      released_at: "2026-05-15T03:25:00Z"
     - version: V948
       section: H
       epic: GDI-929
       fr: FR-H.5
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V48 in v0.46.0
       reserved_at: "2026-05-14T20:54:52Z"
-      expires_at: "2026-05-16T20:54:52Z"
+      released_at: "2026-05-15T03:25:00Z"
     - version: V951
       section: B
       epic: GDI-971
       fr: FR-B.2.4
-      status: reserved
+      status: released_unused
+      note: Dual-reservation by reserve.sh; actual migration shipped as V51 in v0.47.0
       reserved_at: "2026-05-14T22:27:47Z"
-      expires_at: "2026-05-15T22:27:47Z"
+      released_at: "2026-05-15T03:25:00Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
