@@ -246,6 +246,20 @@ flyway:
       epic: GDI-1046
       release_tag: v0.32.1
       shipped_at: "2026-05-15T19:44:47Z"
+    - version: V61
+      section: E
+      epic: GDI-1055
+      fr: FR-E.2.3
+      release_tag: v0.60.0
+      shipped_at: "2026-05-15T21:16:41Z"
+      note: moderation_worklists table + FORCE RLS + filter_config JSONB
+    - version: V961
+      section: E
+      epic: GDI-1055
+      fr: FR-E.2.3
+      release_tag: v0.60.0
+      shipped_at: "2026-05-15T21:16:41Z"
+      note: test-fixture grants for moderation_worklists
   reserved:
     - version: V21
       section: A
@@ -580,7 +594,7 @@ releases:
     B: v0.29.x
     C: v0.30.x
     D: v0.32.x # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
-    E: v0.32.x
+    E: v0.61.x
     F: v0.33.x
     G: v0.34.x
     H: v0.35.x
@@ -730,7 +744,7 @@ pillars:
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
-    shipped_frs: []
+    shipped_frs: [FR-E.2.3]
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
