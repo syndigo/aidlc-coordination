@@ -605,20 +605,22 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T18:40:47Z"
       expires_at: "2026-05-16T18:40:47Z"
-    - version: V63
+    - version: V65
       section: B
       epic: GDI-1076
       fr: FR-B.2.6
       status: reserved
       reserved_at: "2026-05-15T20:09:12Z"
       expires_at: "2026-05-16T20:09:12Z"
-    - version: V963
+      note: "bumped from V63 — V63 shipped concurrently as answer_is_verified_flag"
+    - version: V965
       section: B
       epic: GDI-1076
       fr: FR-B.2.6
       status: reserved
       reserved_at: "2026-05-15T20:09:14Z"
       expires_at: "2026-05-16T20:09:14Z"
+      note: "bumped from V963 — see V65 note"
     - version: V64
       section: E
       epic: GDI-1086
