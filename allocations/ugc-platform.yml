@@ -390,6 +390,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-15T21:14:19Z"
       expires_at: "2026-05-16T21:14:19Z"
+    - version: V966
+      section: D
+      epic: GDI-899
+      fr: ""
+      status: reserved
+      reserved_at: "2026-05-15T21:14:27Z"
+      expires_at: "2026-05-16T21:14:27Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
