@@ -331,11 +331,19 @@ flyway:
       expires_at: "2026-05-16T14:02:29Z"
     - version: V57
       section: C
-      epic: NEW
-      fr: ""
+      epic: GDI-1029
+      fr: FR-C.1.10
       status: reserved
       reserved_at: "2026-05-15T17:48:22Z"
       expires_at: "2026-05-16T17:48:22Z"
+    - version: V957
+      section: C
+      epic: GDI-1029
+      fr: FR-C.1.10
+      status: reserved
+      reserved_at: "2026-05-15T17:48:22Z"
+      expires_at: "2026-05-16T17:48:22Z"
+      note: test-fixture grants for category_snippet_cache (paired with V57)
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -551,7 +559,13 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: C
-      epic: sec-C-FR-C.1.10
+      epic: GDI-1029
+      fr: FR-C.1.10
+      proposed_tag: v0.43.x
+      anchor_sha: pending
+      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
+    - section: C
+      epic: GDI-1024
       proposed_tag: v0.43.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
@@ -635,8 +649,8 @@ pillars:
     name: Content Display
     status: in_flight
     owner_persona: personas/pillar-orchestrator.md
-    fr_backlog: [FR-C.1.9, FR-C.1.18]
-    in_flight_frs: [FR-C.1.9]
+    fr_backlog: [FR-C.1.18]
+    in_flight_frs: [FR-C.1.10]
     shipped_frs: []
     serial_chains:
       - chain: [FR-A.1.9, FR-C.1.18]
