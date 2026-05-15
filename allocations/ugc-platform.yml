@@ -822,7 +822,7 @@ releases:
   #     (read-only GET endpoint; no migration; existing moderations table)
   #   - v0.53.0 (2026-05-15T14:51:46Z) — E / GDI-1009 / FR-E.2.5 — Observation / Moderation Code Taxonomy
   #     (tag-only promotion; V55 was already in v0.52.0; no new migration)
-  current_main: v0.56.0 # last canonical semver tag (FR-E.1.4 / GDI-1002, co-ships FR-E.2.1 / GDI-1013). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  current_main: v0.58.0 # last canonical semver tag (FR-E.1.4 / GDI-1002, co-ships FR-E.2.1 / GDI-1013). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
