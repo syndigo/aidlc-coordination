@@ -488,15 +488,32 @@ flyway:
       section: E
       epic: GDI-1013
       fr: FR-E.2.1
-      shipped_at: "2026-05-15T16:16:13Z"
-      note: FR-E.2.1 moderator search (pg_trgm + keyset cursor + React panel); merged to dev (commit 3294ad0), tag pending. Registry previously misattributed this to GDI-1002 / FR-E.2.5 / v0.53.0 — corrected during 2026-05-15 evening drift sweep.
+      release_tag: v0.55.0
+      shipped_at: "2026-05-15T17:01:43Z"
+      note: FR-E.2.1 moderator search (pg_trgm + keyset cursor + React panel). Co-shipped with FR-E.1.4 / V56 on v0.55.0 — release title names FR-E.1.4 only.
     - version: V954
       section: E
       epic: GDI-1013
       fr: FR-E.2.1
+      release_tag: v0.55.0
       paired_with: V54
-      shipped_at: "2026-05-15T16:16:13Z"
-      note: V954__moderation_search_test_grants.sql (test-fixture); tag pending — see V54 row.
+      shipped_at: "2026-05-15T17:01:43Z"
+      note: V954__moderation_search_test_grants.sql (test-fixture)
+    - version: V56
+      section: E
+      epic: GDI-1002
+      fr: FR-E.1.4
+      release_tag: v0.55.0
+      shipped_at: "2026-05-15T17:01:43Z"
+      note: FR-E.1.4 Publication Decision Gate — auto-publish vs hold; pipeline hook + moderator override endpoint + PublicationStatusBadge UI + publication.decided.v1 event.
+    - version: V956
+      section: E
+      epic: GDI-1002
+      fr: FR-E.1.4
+      release_tag: v0.55.0
+      paired_with: V56
+      shipped_at: "2026-05-15T17:01:43Z"
+      note: V956__publication_decisions_test_grants.sql (test-fixture)
   reserved:
     - version: V23
       section: A
@@ -732,7 +749,7 @@ releases:
   #     (read-only GET endpoint; no migration; existing moderations table)
   #   - v0.53.0 (2026-05-15T14:51:46Z) — E / GDI-1009 / FR-E.2.5 — Observation / Moderation Code Taxonomy
   #     (tag-only promotion; V55 was already in v0.52.0; no new migration)
-  current_main: v0.54.0 # last canonical semver tag (FR-D.3 / GDI-925). Subsequent dev merges (GDI-1013 / FR-E.2.1 / V54, GDI-927 / FR-E.1.3 / V47) ship via deploy-dispatch SHA, tag pending.
+  current_main: v0.55.0 # last canonical semver tag (FR-E.1.4 / GDI-1002, co-ships FR-E.2.1 / GDI-1013). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -908,6 +925,7 @@ pillars:
       - FR-E.1.1
       - FR-E.1.2
       - FR-E.1.3
+      - FR-E.1.4
       - FR-E.2.1
       - FR-E.2.5
       - FR-E.2.7
