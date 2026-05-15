@@ -275,6 +275,11 @@ flyway:
       epic: GDI-928
       release_tag: v0.49.0
       shipped_at: "2026-05-15T03:13:58Z"
+    - version: V40
+      section: H
+      epic: GDI-886
+      release_tag: v0.45.0
+      shipped_at: "2026-05-15T03:22:17Z"
   reserved:
     - version: V23
       section: A
@@ -290,13 +295,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-14T14:41:42Z"
       expires_at: "2026-05-16T14:41:42Z"
-    - version: V40
-      section: H
-      epic: GDI-886
-      fr: FR-H.4
-      status: reserved
-      reserved_at: "2026-05-14T14:42:06Z"
-      expires_at: "2026-05-16T14:42:06Z"
     - version: V940
       section: H
       epic: GDI-886
@@ -768,9 +766,9 @@ pillars:
     status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs:
+    in_flight_frs: []
+    shipped_frs:
       - FR-H.4
-    shipped_frs: []
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
