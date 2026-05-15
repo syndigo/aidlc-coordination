@@ -451,6 +451,11 @@ flyway:
       epic: GDI-1009
       release_tag: v0.53.0
       shipped_at: "2026-05-15T14:52:39Z"
+    - version: V45
+      section: D
+      epic: GDI-925
+      release_tag: v0.54.0
+      shipped_at: "2026-05-15T16:16:08Z"
   reserved:
     - version: V23
       section: A
@@ -473,13 +478,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V45
-      section: D
-      epic: GDI-925
-      fr: FR-D.3
-      status: reserved
-      reserved_at: "2026-05-14T20:45:32Z"
-      expires_at: "2026-05-15T20:45:32Z"
     - version: V945
       section: D
       epic: GDI-925
@@ -885,6 +883,7 @@ pillars:
     shipped_frs:
       - FR-D.2
       - FR-D.5
+      - FR-D.3
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
