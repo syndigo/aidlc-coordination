@@ -374,6 +374,13 @@ flyway:
       note: Dual-reservation by reserve.sh; actual migration shipped as V51 in v0.47.0
       reserved_at: "2026-05-14T22:27:47Z"
       released_at: "2026-05-15T03:25:00Z"
+    - version: V53
+      section: E
+      epic: GDI-982
+      fr: FR-E.1.2
+      status: reserved
+      reserved_at: "2026-05-15T03:26:05Z"
+      expires_at: "2026-05-17T03:26:05Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
