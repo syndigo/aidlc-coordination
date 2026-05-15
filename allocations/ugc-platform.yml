@@ -444,28 +444,59 @@ flyway:
     - version: V55
       section: E
       epic: GDI-1009
-      release_tag: v0.53.0
-      shipped_at: "2026-05-15T14:52:34Z"
+      fr: FR-E.2.5
+      release_tag: v0.52.0
+      shipped_at: "2026-05-15T14:22:30Z"
+      note: First appears in v0.52.0; v0.53.0 is a tag-only promotion of the same SHA (no new migration). See releases.shipped comment block.
     - version: V955
       section: E
       epic: GDI-1009
-      release_tag: v0.53.0
-      shipped_at: "2026-05-15T14:52:39Z"
+      fr: FR-E.2.5
+      release_tag: v0.52.0
+      paired_with: V55
+      shipped_at: "2026-05-15T14:22:30Z"
+      note: V955__observation_codes_test_grants.sql (test-fixture)
     - version: V45
       section: D
       epic: GDI-925
+      fr: FR-D.3
       release_tag: v0.54.0
-      shipped_at: "2026-05-15T16:16:08Z"
+      shipped_at: "2026-05-15T14:35:19Z"
+    - version: V945
+      section: D
+      epic: GDI-925
+      fr: FR-D.3
+      release_tag: v0.54.0
+      paired_with: V45
+      shipped_at: "2026-05-15T14:35:19Z"
+      note: V945__question_routing_test_grants.sql (test-fixture)
     - version: V53
       section: E
       epic: GDI-982
+      fr: FR-E.1.2
       release_tag: v0.52.0
-      shipped_at: "2026-05-15T16:16:11Z"
+      shipped_at: "2026-05-15T14:22:30Z"
+    - version: V953
+      section: E
+      epic: GDI-982
+      fr: FR-E.1.2
+      release_tag: v0.52.0
+      paired_with: V53
+      shipped_at: "2026-05-15T14:22:30Z"
+      note: V953__authenticity_checks_test_grants.sql (test-fixture)
     - version: V54
       section: E
-      epic: GDI-1002
-      release_tag: v0.53.0
+      epic: GDI-1013
+      fr: FR-E.2.1
       shipped_at: "2026-05-15T16:16:13Z"
+      note: FR-E.2.1 moderator search (pg_trgm + keyset cursor + React panel); merged to dev (commit 3294ad0), tag pending. Registry previously misattributed this to GDI-1002 / FR-E.2.5 / v0.53.0 — corrected during 2026-05-15 evening drift sweep.
+    - version: V954
+      section: E
+      epic: GDI-1013
+      fr: FR-E.2.1
+      paired_with: V54
+      shipped_at: "2026-05-15T16:16:13Z"
+      note: V954__moderation_search_test_grants.sql (test-fixture); tag pending — see V54 row.
   reserved:
     - version: V23
       section: A
@@ -488,28 +519,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V945
-      section: D
-      epic: GDI-925
-      fr: FR-D.3
-      status: released_unused
-      note: Dual-reservation by reserve.sh; actual migration shipped as V45 (epic GDI-925)
-      reserved_at: "2026-05-14T20:45:34Z"
-      released_at: "2026-05-15T03:25:00Z"
-    - version: V953
-      section: E
-      epic: GDI-982
-      fr: FR-E.1.2
-      status: reserved
-      reserved_at: "2026-05-15T03:26:08Z"
-      expires_at: "2026-05-17T03:26:08Z"
-    - version: V954
-      section: E
-      epic: GDI-1002
-      fr: FR-E.1.4
-      status: reserved
-      reserved_at: "2026-05-15T04:04:51Z"
-      expires_at: "2026-05-17T04:04:51Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -717,7 +726,13 @@ releases:
   #   - v0.18.1 (2026-05-11T20:52:49Z) — / harness UI hot-fix — render product metadata
   #   - v0.20.0 (2026-05-11T23:12:32Z) — B widget — first real ugc-review-summary widget
   #   - v0.20.1 (2026-05-11T23:52:08Z) — C / FR-C.1.1+FR-C.2.4 — Schema.org JSON-LD on widget
-  current_main: v0.49.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
+  #
+  # Third-pass (drift sweep, 2026-05-15 evening):
+  #   - v0.51.0 (2026-05-15T06:33:08Z) — E / GDI-998 / FR-E.2.7 — Moderator audit log
+  #     (read-only GET endpoint; no migration; existing moderations table)
+  #   - v0.53.0 (2026-05-15T14:51:46Z) — E / GDI-1009 / FR-E.2.5 — Observation / Moderation Code Taxonomy
+  #     (tag-only promotion; V55 was already in v0.52.0; no new migration)
+  current_main: v0.54.0 # last canonical semver tag (FR-D.3 / GDI-925). Subsequent dev merges (GDI-1013 / FR-E.2.1 / V54, GDI-927 / FR-E.1.3 / V47) ship via deploy-dispatch SHA, tag pending.
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -888,12 +903,14 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: [FR-E.2.7]
+    in_flight_frs: []
     shipped_frs:
       - FR-E.1.1
-      - FR-E.1.3
-      - FR-E.2.5
       - FR-E.1.2
+      - FR-E.1.3
+      - FR-E.2.1
+      - FR-E.2.5
+      - FR-E.2.7
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -934,11 +951,12 @@ pillars:
     max_in_flight_frs: 8
   - letter: I
     name: Analytics, Insights & AI
-    status: not_started
+    status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
-    shipped_frs: []
+    shipped_frs:
+      - FR-I.1.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
