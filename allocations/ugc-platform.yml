@@ -756,8 +756,10 @@ releases:
       epic: GDI-998
       fr: FR-E.2.7
       proposed_tag: v0.51.0
-      anchor_sha: pending
+      anchor_sha: d1e4e65e6a68d46a1a1c52c1f23d8f9c4ee1c1f3
       reserved_at: "2026-05-15T03:50:00Z"
+      shipped_at: "2026-05-15T14:06:15Z"
+      status: shipped
     - section: E
       epic: GDI-1002
       proposed_tag: v0.52.0
