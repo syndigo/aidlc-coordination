@@ -609,9 +609,9 @@ single_writer_files:
     until: "2026-05-16T04:40:25Z"
     reason: released via release.sh
   - file: packages/edge-sdk/src/components/ugc-review-list.a11y.test.ts
-    held_by: GDI-1113
-    until: "2026-05-17T01:49:36Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-16T04:40:27Z"
+    reason: released via release.sh
   - file: packages/edge-sdk/demo/index.html
     held_by: GDI-1113
     until: "2026-05-17T01:49:38Z"
