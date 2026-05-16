@@ -604,6 +604,108 @@ flyway:
       paired_with: V61
       shipped_at: "2026-05-15T21:16:40Z"
       note: V961__moderation_worklists_grants.sql (test-fixture)
+    - version: V64
+      section: B
+      epic: GDI-1036
+      fr: FR-B.2.7
+      release_tag: v0.62.0
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: FR-B.2.7 Save & resume draft reviews — review_drafts schema.
+    - version: V964
+      section: B
+      epic: GDI-1036
+      fr: FR-B.2.7
+      release_tag: v0.62.0
+      paired_with: V64
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: V964__review_drafts_test_grants.sql (test-fixture)
+    - version: V65
+      section: B
+      epic: GDI-1076
+      fr: FR-B.2.6
+      release_tag: v0.62.0
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: FR-B.2.6 Demographics / reviewer profile (originally reserved V63/V963 by GDI-1076; bumped to V65/V965 because V63 was concurrently shipped by GDI-1054). Co-shipped in v0.62.0 alongside FR-B.2.7 / V64.
+    - version: V965
+      section: B
+      epic: GDI-1076
+      fr: FR-B.2.6
+      release_tag: v0.62.0
+      paired_with: V65
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: V965__reviewer_profiles_test_grants.sql (test-fixture)
+    - version: V67
+      section: E
+      epic: GDI-1036
+      fr: FR-E.1.5
+      release_tag: v0.62.0
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: V67__scope_type_enum_uppercase.sql — Hibernate/Postgres enum-case follow-on fix for FR-E.1.5 (v0.58.0/V62 created scope_type_enum with lowercase values; Hibernate 6 NAMED_ENUM passes uppercase Java enum names). Originally drafted on the GDI-1076 branch as V66 (PR #190); rebased onto dev and renumbered to V67 via the GDI-1036 path.
+    - version: V969
+      section: E
+      epic: GDI-1036
+      fr: FR-E.1.5
+      release_tag: v0.62.0
+      paired_with: V67
+      shipped_at: "2026-05-15T23:16:56Z"
+      note: V969__scope_type_enum_uppercase_grants.sql (test-fixture)
+    - version: V66
+      section: D
+      epic: GDI-899
+      fr: FR-D.5
+      release_tag: v0.63.0
+      shipped_at: "2026-05-16T00:46:27Z"
+      note: FR-D.5 Helpfulness voting on Q&A answers — answer_votes schema. Second implementation under the same FR-D.5 (original was V41 / GDI-899 tag-pending; this V66 is the canonical-trunk version that actually tagged).
+    - version: V966
+      section: D
+      epic: GDI-899
+      fr: FR-D.5
+      release_tag: v0.63.0
+      paired_with: V66
+      shipped_at: "2026-05-16T00:46:27Z"
+      note: V966__answer_votes_grants.sql (test-fixture)
+    - version: V68
+      section: E
+      epic: GDI-1086
+      fr: FR-E.1.6
+      release_tag: v0.64.0
+      shipped_at: "2026-05-16T01:34:08Z"
+      note: FR-E.1.6 Service-level moderation SLAs — moderations_sla_deadline column + pipeline stamping + queue breach detection.
+    - version: V968
+      section: E
+      epic: GDI-1086
+      fr: FR-E.1.6
+      release_tag: v0.64.0
+      paired_with: V68
+      shipped_at: "2026-05-16T01:34:08Z"
+      note: V968__moderations_sla_deadline_grants.sql (test-fixture)
+    - version: V69
+      section: E
+      epic: GDI-1086
+      fr: FR-E.1.6
+      release_tag: v0.64.0
+      shipped_at: "2026-05-16T01:34:08Z"
+      note: "Idempotent re-rename of scope_type_enum values (same fix as V67/V969); SLA migration set bundled it defensively in case the v0.62.0 V67 hadn't applied on the target DB."
+    - version: V70
+      section: E
+      epic: GDI-1086
+      fr: FR-E.1.6
+      release_tag: v0.64.0
+      shipped_at: "2026-05-16T01:34:08Z"
+      note: moderation_sla_configs lookup table — per-tier SLA durations.
+    - version: V970
+      section: E
+      epic: GDI-1086
+      fr: FR-E.1.6
+      release_tag: v0.64.0
+      paired_with: V70
+      shipped_at: "2026-05-16T01:34:08Z"
+      note: V970__moderation_sla_configs_grants.sql (test-fixture)
+    - version: V0
+      epic: GDI-1107
+      release_tag: v0.63.0
+      shipped_at: "2026-05-16T00:46:27Z"
+      note: "V0__test_bootstrap_roles.sql — test-only migration creating ugc_app + ugc_app_role if absent. Runs before all other migrations in test scope. Production roles are created by RDS param group / cluster init."
   reserved:
     - version: V23
       section: A
@@ -859,7 +961,12 @@ releases:
   #     the actual new migration is V61 / GDI-1055 / FR-E.2.3 (Moderator worklists).
   #     FR-D.4 already shipped in v0.32.1 and via V63 in v0.59.0; v0.60.0 may have
   #     re-cut as a back-port hygiene tag. Attributed to FR-E.2.3 per disk truth.
-  current_main: v0.60.0 # last canonical semver tag (FR-E.2.3 / GDI-1055 / V61 moderator worklists; release title mis-attributed to FR-D.4 Verified Answer Badging — see fourth-pass comment block). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  #
+  # Fifth-pass (drift sweep, 2026-05-16 morning, post v0.64.0):
+  #   - v0.61.0 (2026-05-15T21:55:44Z) — GDI-1093 — display-api CI/CD + EKS Deployment
+  #     (platform/infra release; no product FR; no new ugc-api migration. display-api
+  #     deployed to EKS dev; Dockerfile + GitHub Actions + ECR + IRSA + Valkey TLS.)
+  current_main: v0.64.0 # last canonical semver tag (FR-E.1.6 / GDI-1086 — service-level moderation SLAs / V68+V69+V70). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -993,6 +1100,8 @@ pillars:
       - FR-B.2.3
       - FR-B.2.4
       - FR-B.2.5
+      - FR-B.2.6
+      - FR-B.2.7
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
         reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
@@ -1050,6 +1159,7 @@ pillars:
       - FR-E.1.3
       - FR-E.1.4
       - FR-E.1.5
+      - FR-E.1.6
       - FR-E.2.1
       - FR-E.2.3
       - FR-E.2.5
