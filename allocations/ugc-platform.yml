@@ -617,7 +617,7 @@ single_writer_files:
     until: "2026-05-16T04:40:29Z"
     reason: released via release.sh
 releases:
-  current_main: v0.65.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
+  current_main: v0.66.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -661,11 +661,6 @@ releases:
     - section: D
       epic: GDI-899
       proposed_tag: v0.60.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: C
-      epic: GDI-1113
-      proposed_tag: v0.30.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
