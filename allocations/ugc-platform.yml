@@ -401,6 +401,15 @@ flyway:
       section: D
       epic: GDI-899
       fr: ""
+    - version: V67
+      section: E
+      epic: GDI-1036
+      fr: "FR-E.1.5"
+      status: shipped
+      reserved_at: "2026-05-15T23:04:00Z"
+      shipped_at: "2026-05-15T23:16:00Z"
+      release_tag: v0.62.0
+      note: rename scope_type_enum values to uppercase for Hibernate 6 NAMED_ENUM compatibility
       status: reserved
       reserved_at: "2026-05-15T21:14:19Z"
       expires_at: "2026-05-16T21:14:19Z"
@@ -587,6 +596,10 @@ single_writer_files:
     held_by: GDI-1080
     until: "2026-05-16T20:38:10Z"
     reason: reserved via reserve.sh
+  - file: packages/edge-sdk/src/components/ugc-review-list.ts
+    held_by: GDI-1113
+    until: "2026-05-17T01:49:07Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
@@ -594,7 +607,7 @@ releases:
     B: v0.29.x
     C: v0.30.x
     D: v0.32.x # shifted from v0.31.x — Section B's tab cut v0.31.0 first on 2026-05-13T19:46:30Z (GDI-708 race). GDI-709 re-cut as v0.32.0.
-    E: v0.61.x
+    E: v0.62.x
     F: v0.33.x
     G: v0.34.x
     H: v0.35.x
