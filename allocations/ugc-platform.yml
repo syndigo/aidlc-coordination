@@ -612,6 +612,10 @@ single_writer_files:
     held_by: GDI-1113
     until: "2026-05-17T01:49:36Z"
     reason: reserved via reserve.sh
+  - file: packages/edge-sdk/demo/index.html
+    held_by: GDI-1113
+    until: "2026-05-17T01:49:38Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.42.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
   next_per_section:
