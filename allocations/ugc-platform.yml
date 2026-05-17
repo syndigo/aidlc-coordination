@@ -933,6 +933,10 @@ single_writer_files:
     held_by: GDI-926
     until: "2026-05-15T20:47:07Z"
     reason: reserved via reserve.sh
+  - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/moderation/service/ModerationPipeline.kt
+    held_by: GDI-1162
+    until: "2026-05-18T18:21:10Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
