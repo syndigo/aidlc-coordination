@@ -817,7 +817,14 @@ model_registry:
       epic: GDI-708
       release_tag: v0.31.0
       shipped_at: "2026-05-13T19:47:25Z"
-  pending: []
+  pending:
+    - surface: qa-answer-draft
+      section: D
+      epic: GDI-1195
+      fr: ""
+      status: reserved
+      reserved_at: "2026-05-17T22:32:31Z"
+      expires_at: "2026-05-18T22:32:31Z"
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
