@@ -714,13 +714,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V71
-      section: C
-      epic: GDI-1152
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-17T17:49:00Z"
-      expires_at: "2026-05-18T17:49:00Z"
     - version: V72
       section: B
       epic: GDI-1158
