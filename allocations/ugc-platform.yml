@@ -706,6 +706,11 @@ flyway:
       release_tag: v0.63.0
       shipped_at: "2026-05-16T00:46:27Z"
       note: "V0__test_bootstrap_roles.sql — test-only migration creating ugc_app + ugc_app_role if absent. Runs before all other migrations in test scope. Production roles are created by RDS param group / cluster init."
+    - version: V72
+      section: B
+      epic: GDI-1158
+      release_tag: v0.71.0
+      shipped_at: "2026-05-17T20:14:03Z"
   reserved:
     - version: V43
       section: B
@@ -714,13 +719,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V72
-      section: B
-      epic: GDI-1158
-      fr: FR-B.4.2
-      status: reserved
-      reserved_at: "2026-05-17T18:16:53Z"
-      expires_at: "2026-05-18T18:16:53Z"
     - version: V73
       section: D
       epic: GDI-1162
