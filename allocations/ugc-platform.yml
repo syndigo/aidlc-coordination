@@ -739,13 +739,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V75
-      section: D
-      epic: GDI-1174
-      fr: FR-D.12
-      status: reserved
-      reserved_at: "2026-05-17T18:43:10Z"
-      expires_at: "2026-05-18T18:43:10Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -824,14 +817,7 @@ model_registry:
       epic: GDI-708
       release_tag: v0.31.0
       shipped_at: "2026-05-13T19:47:25Z"
-  pending:
-    - surface: question-intent-classify
-      section: D
-      epic: GDI-1174
-      fr: FR-D.12
-      status: reserved
-      reserved_at: "2026-05-17T18:43:16Z"
-      expires_at: "2026-05-18T18:43:16Z"
+  pending: []
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
@@ -859,17 +845,17 @@ single_writer_files:
   # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
   # coordination.touch_patterns[].file` updated in lockstep.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
-    held_by: GDI-1174
-    until: "2026-05-18T18:43:18Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-17T21:48:26Z"
+    reason: released via release.sh --all-for-epic
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: GDI-1174
-    until: "2026-05-18T18:43:20Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-17T21:48:26Z"
+    reason: released via release.sh --all-for-epic
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
-    held_by: GDI-1174
+    held_by: none
     note: |
       ⚠ GDI-692 retro: ALSO load-bearing append-list conflict class. Test
       fixtures (e.g., `containsExactlyInAnyOrder(...)`, `hasSize(N)`, per-
@@ -877,8 +863,8 @@ single_writer_files:
       two sessions add surfaces concurrently. Any reservation against
       ModelRegistry.kt SHOULD also reserve this file (paired lock).
     append_list_conflict_class: true
-    until: "2026-05-18T18:43:22Z"
-    reason: reserved via reserve.sh
+    until: "2026-05-17T21:48:26Z"
+    reason: released via release.sh --all-for-epic
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries
@@ -1026,11 +1012,6 @@ releases:
       epic: GDI-1028
       proposed_tag: v0.56.0
       anchor_sha: pending
-    - section: D
-      epic: GDI-1174
-      proposed_tag: v0.70.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
