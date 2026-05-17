@@ -730,7 +730,7 @@ flyway:
       released_at: "2026-05-14T23:00:00Z"
     - version: V57
       section: C
-      epic: GDI-PENDING
+      epic: GDI-1158
       fr: ""
       status: reserved
       reserved_at: "2026-05-15T17:53:38Z"
@@ -744,7 +744,7 @@ flyway:
       expires_at: "2026-05-18T17:49:00Z"
     - version: V72
       section: B
-      epic: GDI-PENDING
+      epic: GDI-1158
       fr: FR-B.4.2
       status: reserved
       reserved_at: "2026-05-17T18:16:53Z"
@@ -1018,7 +1018,7 @@ releases:
       proposed_tag: v0.52.0
       anchor_sha: pending
     - section: C
-      epic: GDI-PENDING
+      epic: GDI-1158
       proposed_tag: v0.56.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
@@ -1032,7 +1032,7 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: B
-      epic: GDI-PENDING
+      epic: GDI-1158
       proposed_tag: v0.69.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
