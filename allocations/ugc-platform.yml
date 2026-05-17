@@ -707,20 +707,6 @@ flyway:
       shipped_at: "2026-05-16T00:46:27Z"
       note: "V0__test_bootstrap_roles.sql — test-only migration creating ugc_app + ugc_app_role if absent. Runs before all other migrations in test scope. Production roles are created by RDS param group / cluster init."
   reserved:
-    - version: V23
-      section: A
-      epic: section-A-buffer
-      status: reserved
-      reserved_at: 2026-05-13T22:00:00Z
-      expires_at: 2026-05-15T22:00:00Z
-      note: Buffer for late-arriving Section A migration; release if unused by 2026-05-15
-    - version: V42
-      section: B
-      epic: GDI-907
-      fr: FR-B.2.8
-      status: reserved
-      reserved_at: "2026-05-14T15:38:26Z"
-      expires_at: "2026-05-16T03:38:26Z"
     - version: V43
       section: B
       epic: GDI-917
@@ -728,13 +714,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V57
-      section: C
-      epic: GDI-1158
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-15T17:53:38Z"
-      expires_at: "2026-05-16T17:53:38Z"
     - version: V71
       section: C
       epic: GDI-1152
@@ -789,12 +768,7 @@ flyway:
       - {version: V917, status: shipped, epic: pre-aidlc}
       - {version: V918, status: shipped, epic: pre-aidlc}
       - {version: V919, status: shipped, epic: pre-aidlc}
-    reserved:
-      # V920-V924 are paired 1:1 with V19-V23 (Section A's upcoming work).
-      - {version: V920, section: A, epic: section-A-FR-A.1.9-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-14T22:00:00Z'}
-      - {version: V921, section: A, epic: section-A-FR-A.1.8-epic, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
-      - {version: V922, section: A, epic: GDI-742, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
-      - {version: V924, section: A, epic: section-A-buffer, status: reserved, reserved_at: '2026-05-13T22:00:00Z', expires_at: '2026-05-15T22:00:00Z'}
+    reserved: []
     next_free: V925
 model_registry:
   # ModelRegistry.kt + Prompts.kt are the single-anchor surfaces. Edits to
@@ -846,14 +820,7 @@ model_registry:
       epic: GDI-708
       release_tag: v0.31.0
       shipped_at: "2026-05-13T19:47:25Z"
-  pending:
-    - surface: review-precheck
-      section: B
-      epic: GDI-907
-      fr: FR-B.2.8
-      status: reserved
-      reserved_at: "2026-05-14T15:38:47Z"
-      expires_at: "2026-05-16T03:38:47Z"
+  pending: []
 single_writer_files:
   # Files that only one section may edit at a time. The held_by value is an
   # epic key (matches model_registry.pending or flyway.reserved entries).
