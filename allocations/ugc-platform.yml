@@ -721,6 +721,11 @@ flyway:
       epic: GDI-1173
       release_tag: v0.72.0
       shipped_at: "2026-05-17T20:32:38Z"
+    - version: V73
+      section: D
+      epic: GDI-1162
+      release_tag: v0.73.0
+      shipped_at: "2026-05-17T20:39:58Z"
   reserved:
     - version: V43
       section: B
@@ -729,13 +734,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V73
-      section: D
-      epic: GDI-1162
-      fr: FR-D.6
-      status: reserved
-      reserved_at: "2026-05-17T18:21:14Z"
-      expires_at: "2026-05-18T18:21:14Z"
     - version: V75
       section: D
       epic: GDI-1174
