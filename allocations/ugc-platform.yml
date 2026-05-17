@@ -1070,11 +1070,6 @@ releases:
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: D
       epic: GDI-1173
-      proposed_tag: v0.74.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: D
-      epic: GDI-1173
       proposed_tag: v0.75.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
