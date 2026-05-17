@@ -899,9 +899,9 @@ single_writer_files:
     until: "2026-05-14T14:57:31Z"
     reason: released via release.sh --all-for-epic
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/service/ReviewService.kt
-    held_by: GDI-907
-    until: "2026-05-16T03:38:40Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-17T18:42:20Z"
+    reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/sampling/
     held_by: GDI-926
     until: "2026-05-15T20:47:03Z"
