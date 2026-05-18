@@ -709,28 +709,93 @@ flyway:
     - version: V72
       section: B
       epic: GDI-1158
+      fr: FR-B.4.2
       release_tag: v0.71.0
-      shipped_at: "2026-05-17T20:14:03Z"
+      shipped_at: "2026-05-17T20:13:39Z"
+      note: FR-B.4.2 Incentive Disclosure — incentive_disclosures schema. First appeared on disk in v0.69.0 commit range; canonical release-titled tag is v0.71.0.
+    - version: V972
+      section: B
+      epic: GDI-1158
+      fr: FR-B.4.2
+      release_tag: v0.71.0
+      paired_with: V72
+      shipped_at: "2026-05-17T20:13:39Z"
+      note: V972__incentive_disclosure_test_grants.sql (test-fixture)
     - version: V71
       section: C
       epic: GDI-1152
+      fr: FR-C.1.14
       release_tag: v0.72.0
-      shipped_at: "2026-05-17T20:20:39Z"
-    - version: V74
-      section: D
-      epic: GDI-1173
+      shipped_at: "2026-05-17T20:19:42Z"
+      note: FR-C.1.14 PII obfuscation for display surfaces — merchant_pii_policy schema. First appeared on disk in v0.70.0 commit range; canonical release-titled tag is v0.72.0.
+    - version: V971
+      section: C
+      epic: GDI-1152
+      fr: FR-C.1.14
       release_tag: v0.72.0
-      shipped_at: "2026-05-17T20:32:38Z"
+      paired_with: V71
+      shipped_at: "2026-05-17T20:19:42Z"
+      note: V971__merchant_pii_policy_grants.sql (test-fixture)
     - version: V73
       section: D
       epic: GDI-1162
+      fr: FR-D.6
       release_tag: v0.73.0
-      shipped_at: "2026-05-17T20:39:58Z"
+      shipped_at: "2026-05-17T20:55:16Z"
+      note: FR-D.6 Q&A moderation — moderations_content_type column. Co-shipped on v0.73.0 with V74/V75/V76 in a multi-FR-one-tag pattern (release title names FR-C.2.5 Inline SEO copy / GDI-1199 — UI-only with no migration of its own).
+    - version: V973
+      section: D
+      epic: GDI-1162
+      fr: FR-D.6
+      release_tag: v0.73.0
+      paired_with: V73
+      shipped_at: "2026-05-17T20:55:16Z"
+      note: V973__moderations_content_type_test_grants.sql (test-fixture)
+    - version: V74
+      section: D
+      epic: GDI-1173
+      fr: FR-D.8
+      release_tag: v0.74.0
+      shipped_at: "2026-05-17T20:55:33Z"
+      note: FR-D.8 Cross-product Q&A surfacing — qa_family_scoped_indexes. First appeared in v0.73.0 commit range; canonical release-titled tag is v0.74.0.
+    - version: V974
+      section: D
+      epic: GDI-1173
+      fr: FR-D.8
+      release_tag: v0.74.0
+      paired_with: V74
+      shipped_at: "2026-05-17T20:55:33Z"
+      note: V974__test_grants_qa_family.sql (test-fixture)
+    - version: V75
+      section: D
+      epic: GDI-1174
+      fr: FR-D.12
+      release_tag: v0.75.0
+      shipped_at: "2026-05-17T21:47:21Z"
+      note: FR-D.12 AI Question Intent Classification + Routing — question_intent_columns. Same V75 number has a duplicate (V75__product_insights_cache.sql / GDI-1148) sitting in the working tree as an untracked file — NOT on dev, NOT in any release; ignore until cleaned up.
+    - version: V975
+      section: D
+      epic: GDI-1174
+      fr: FR-D.12
+      release_tag: v0.75.0
+      paired_with: V75
+      shipped_at: "2026-05-17T21:47:21Z"
+      note: V975__question_intent_columns_grants.sql (test-fixture). V975__product_insights_test_grants.sql is the untracked-file duplicate alongside the V75 duplicate; ignored.
     - version: V76
       section: D
       epic: GDI-1185
-      release_tag: v0.73.0
-      shipped_at: "2026-05-17T20:43:53Z"
+      fr: FR-D.9
+      release_tag: v0.76.0
+      shipped_at: "2026-05-17T21:48:40Z"
+      note: FR-D.9 Q&A Solicitation by Email — qa_solicitations schema.
+    - version: V976
+      section: D
+      epic: GDI-1185
+      fr: FR-D.9
+      release_tag: v0.76.0
+      paired_with: V76
+      shipped_at: "2026-05-17T21:48:40Z"
+      note: V976__qa_solicitations_test_grants.sql (test-fixture)
   reserved:
     - version: V43
       section: B
@@ -980,7 +1045,27 @@ releases:
   #   - v0.61.0 (2026-05-15T21:55:44Z) — GDI-1093 — display-api CI/CD + EKS Deployment
   #     (platform/infra release; no product FR; no new ugc-api migration. display-api
   #     deployed to EKS dev; Dockerfile + GitHub Actions + ECR + IRSA + Valkey TLS.)
-  current_main: v0.73.0 # last canonical semver tag (FR-E.1.6 / GDI-1086 — service-level moderation SLAs / V68+V69+V70). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  #
+  # Sixth-pass (drift sweep, 2026-05-17 night, post v0.76.0):
+  #   - v0.65.0 (2026-05-16T03:52:07Z) — J / GDI-1080 / FR-J.3.3 — Entra SSO + JWT
+  #     resource server (no migration; Spring Security config + Entra ID integration)
+  #   - v0.66.0 (2026-05-16T04:35:25Z) — C / GDI-1113 / FR-C.1.2 — Edge SDK review-list
+  #     widget (UI-only — Edge SDK <ugc-review-list>; closes the "🟡 v0.8.0 SPA only"
+  #     gap that reopened C.1.2)
+  #   - v0.67.0 (2026-05-17T01:44:34Z) — — / GDI-1121 — PXC Reviews & UGC merchant
+  #     shell bootstrap (UI-only; merchant shell scaffolding)
+  #   - v0.68.0 (2026-05-17T19:11:10Z) — C / FR-C.1.12 — Side-by-side face-off display
+  #     (UI-only; no migration)
+  #   - v0.69.0 (2026-05-17T19:55:29Z) — C / FR-C.2.2 — Async / lazy loading for Edge
+  #     SDK (UI-only; the title's release. Also first-appearance of V72/FR-B.4.2 from
+  #     concurrent ship — V72 attributed to v0.71.0 per the title-canonical convention.)
+  #   - v0.70.0 (2026-05-17T20:10:11Z) — C / FR-C.2.6 — Mobile-first rendering for
+  #     Edge SDK (UI-only; the title's release. Also first-appearance of V71/FR-C.1.14
+  #     from concurrent ship — V71 attributed to v0.72.0 per title-canonical convention.)
+  #   - v0.73.0 (2026-05-17T20:55:16Z) — C / GDI-1199 / FR-C.2.5 — Inline SEO copy
+  #     (UI-only; the title's release. Also first-appearance of V73/V74/V75/V76 from
+  #     concurrent ships — those attributed to their title-canonical tags.)
+  current_main: v0.76.0 # last canonical semver tag (FR-D.9 / GDI-1185 — Q&A solicitation by email / V76+V976). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1119,13 +1204,14 @@ pillars:
     status: in_flight
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-B.1.4, FR-B.1.9]
-    in_flight_frs: [FR-B.2.8]
+    in_flight_frs: []
     shipped_frs:
       - FR-B.2.3
       - FR-B.2.4
       - FR-B.2.5
       - FR-B.2.6
       - FR-B.2.7
+      - FR-B.4.2
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
         reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
@@ -1149,7 +1235,12 @@ pillars:
       - FR-C.1.8
       - FR-C.1.9
       - FR-C.1.10
+      - FR-C.1.12
+      - FR-C.1.14
+      - FR-C.2.2
       - FR-C.2.4
+      - FR-C.2.5
+      - FR-C.2.6
     serial_chains:
       - chain: [FR-A.1.9, FR-C.1.18]
         reason: C.1.18 (reviews translation) consumes the A.1.9 translation anchor
@@ -1167,7 +1258,11 @@ pillars:
       - FR-D.3
       - FR-D.4
       - FR-D.5
+      - FR-D.6
       - FR-D.7
+      - FR-D.8
+      - FR-D.9
+      - FR-D.12
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
