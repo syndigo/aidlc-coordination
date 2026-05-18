@@ -863,6 +863,11 @@ flyway:
       paired_with: V81
       shipped_at: "2026-05-18T21:23:34Z"
       note: V981__review_topics_test_grants.sql (test-fixture)
+    - version: V82
+      section: I
+      epic: GDI-1243
+      release_tag: v0.85.0
+      shipped_at: "2026-05-18T23:39:02Z"
   reserved:
     - version: V43
       section: B
@@ -871,13 +876,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V82
-      section: B
-      epic: GDI-1248
-      fr: FR-B.1.2
-      status: reserved
-      reserved_at: "2026-05-18T20:12:20Z"
-      expires_at: "2026-05-19T20:12:20Z"
     - version: V83
       section: E
       epic: GDI-1267
