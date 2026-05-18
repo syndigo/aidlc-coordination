@@ -1061,7 +1061,7 @@ releases:
   #   - v0.73.0 (2026-05-17T20:55:16Z) — C / GDI-1199 / FR-C.2.5 — Inline SEO copy
   #     (UI-only; the title's release. Also first-appearance of V73/V74/V75/V76 from
   #     concurrent ships — those attributed to their title-canonical tags.)
-  current_main: v0.80.0 # last canonical semver tag (FR-D.9 / GDI-1185 — Q&A solicitation by email / V76+V976). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  current_main: v0.82.0 # last canonical semver tag (FR-D.9 / GDI-1185 — Q&A solicitation by email / V76+V976). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1110,11 +1110,6 @@ releases:
     - section: D
       epic: GDI-1228
       proposed_tag: v0.79.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: B
-      epic: GDI-1237
-      proposed_tag: v0.81.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
