@@ -796,6 +796,11 @@ flyway:
       paired_with: V76
       shipped_at: "2026-05-17T21:48:40Z"
       note: V976__qa_solicitations_test_grants.sql (test-fixture)
+    - version: V79
+      section: D
+      epic: GDI-1228
+      release_tag: v0.81.0
+      shipped_at: "2026-05-18T18:21:20Z"
   reserved:
     - version: V43
       section: B
@@ -804,13 +809,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V79
-      section: D
-      epic: GDI-1228
-      fr: FR-D.11
-      status: reserved
-      reserved_at: "2026-05-18T17:14:42Z"
-      expires_at: "2026-05-19T17:14:42Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -1251,6 +1249,7 @@ pillars:
       - FR-D.8
       - FR-D.9
       - FR-D.12
+      - FR-D.11
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
