@@ -811,7 +811,7 @@ flyway:
       released_at: "2026-05-14T23:00:00Z"
     - version: V80
       section: B
-      epic: GDI-PENDING
+      epic: GDI-1237
       fr: FR-B.4.1
       status: reserved
       reserved_at: "2026-05-18T18:49:51Z"
@@ -1115,7 +1115,7 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: B
-      epic: GDI-PENDING
+      epic: GDI-1237
       proposed_tag: v0.81.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
