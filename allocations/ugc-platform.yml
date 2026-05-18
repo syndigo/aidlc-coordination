@@ -922,9 +922,9 @@ single_writer_files:
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: none
-    until: "2026-05-18T17:08:16Z"
-    reason: released via release.sh --all-for-epic
+    held_by: GDI-1222
+    until: "2026-05-19T17:08:28Z"
+    reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
     held_by: none
