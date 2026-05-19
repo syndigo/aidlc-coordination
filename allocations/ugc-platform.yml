@@ -1510,7 +1510,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.109.0 # last canonical semver tag (FR-B.2.2 schema half / GDI-1335 — fly_by_reviews / V98 + V998). Section D complete (13/13). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  current_main: v0.109.1 # last canonical semver tag (FR-B.2.2 schema half / GDI-1335 — fly_by_reviews / V98 + V998). Section D complete (13/13). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
   # Ninth-pass (drift sweep, 2026-05-19 night, post v0.108.0):
   #   - v0.94.0 (2026-05-19T01:23:46Z) — C / FR-C.1.17 — Aspect-rating snapshot (UI/AI; no migration)
   #   - v0.99.0 (2026-05-19T03:01:27Z) — B / GDI-1326 / FR-B.2.1 — Write-a-Review open submission (closes the 🟡 from §10; no migration)
@@ -1575,11 +1575,6 @@ releases:
     - section: C
       epic: GDI-1389
       proposed_tag: v0.109.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: B
-      epic: GDI-1399
-      proposed_tag: v0.110.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: E
