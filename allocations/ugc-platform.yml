@@ -1186,6 +1186,11 @@ flyway:
       epic: GDI-1438
       release_tag: v0.115.0
       shipped_at: "2026-05-19T21:27:22Z"
+    - version: V1006
+      section: E
+      epic: GDI-1438
+      release_tag: v0.115.0
+      shipped_at: "2026-05-19T21:27:28Z"
   reserved:
     - version: V43
       section: B
@@ -1252,13 +1257,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-19T20:24:09Z"
       expires_at: "2026-05-20T20:24:09Z"
-    - version: V1006
-      section: E
-      epic: GDI-1438
-      fr: FR-E.3.8
-      status: reserved
-      reserved_at: "2026-05-19T20:30:25Z"
-      expires_at: "2026-05-20T20:30:25Z"
     - version: V100
       section: F
       epic: GDI-1450
