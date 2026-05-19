@@ -906,6 +906,36 @@ flyway:
       paired_with: V85
       shipped_at: "2026-05-19T00:39:15Z"
       note: V985__email_ratings_test_grants.sql (test-fixture)
+    - version: V83
+      section: I
+      epic: GDI-1258
+      fr: FR-I.2.3
+      release_tag: v0.84.0
+      shipped_at: "2026-05-18T23:34:06Z"
+      note: V83__review_pros_cons.sql — original FR-I.2.3 file. Kept on dev alongside the GDI-1248 renumbered duplicate at V89. Flyway will fail-on-checksum if both run on a fresh DB; product-side dedup tracked separately.
+    - version: V983
+      section: I
+      epic: GDI-1258
+      fr: FR-I.2.3
+      release_tag: v0.84.0
+      paired_with: V83
+      shipped_at: "2026-05-18T23:34:06Z"
+      note: V983__review_pros_cons_test_grants.sql (test-fixture for the original V83)
+    - version: V84
+      section: E
+      epic: GDI-1275
+      fr: FR-E.2.2
+      release_tag: v0.88.0
+      shipped_at: "2026-05-19T00:27:36Z"
+      note: V84__content_channel.sql — Channel-based content grouping for moderator UI. Disk also has V84__review_theme_tags.sql which was renumbered to V86 by GDI-1248; the V84 review_theme_tags file is the rebase artifact left behind.
+    - version: V984
+      section: E
+      epic: GDI-1275
+      fr: FR-E.2.2
+      release_tag: v0.88.0
+      paired_with: V84
+      shipped_at: "2026-05-19T00:27:36Z"
+      note: V984__content_channel_test_grants.sql (test-fixture)
     - version: V86
       section: I
       epic: GDI-1271
