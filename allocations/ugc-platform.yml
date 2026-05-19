@@ -1034,13 +1034,6 @@ flyway:
       # rebase for review_theme_tags renumbering (FR-I.2.4). GDI-1283 still needs a slot.
       # V88 was reserved for GDI-1303/FR-E.2.6 but ended up being used by GDI-1248 for
       # multi_product_sessions (FR-B.1.2). GDI-1303 still needs a slot.
-    - version: V90
-      section: F
-      epic: GDI-1283
-      fr: FR-F.1.2
-      status: reserved
-      reserved_at: "2026-05-19T01:34:47Z"
-      expires_at: "2026-05-20T01:34:47Z"
     - version: V91
       section: B
       epic: GDI-1335
