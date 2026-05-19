@@ -1027,6 +1027,11 @@ flyway:
       epic: GDI-1337
       release_tag: v0.100.0
       shipped_at: "2026-05-19T03:08:28Z"
+    - version: V92
+      section: E
+      epic: GDI-1336
+      release_tag: v0.101.0
+      shipped_at: "2026-05-19T03:40:49Z"
   reserved:
     - version: V43
       section: B
@@ -1046,13 +1051,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-19T02:30:56Z"
       expires_at: "2026-05-20T02:30:56Z"
-    - version: V92
-      section: E
-      epic: GDI-1336
-      fr: FR-E.3.2
-      status: reserved
-      reserved_at: "2026-05-19T02:32:29Z"
-      expires_at: "2026-05-20T02:32:29Z"
     - version: V93
       section: F
       epic: GDI-1360
