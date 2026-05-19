@@ -275,18 +275,21 @@ When the PR merges and `v0.28.0` is tagged:
 
 ```sh
 $ cd ~/Projects/aidlc-coordination
+# As of 2026-05-19, pillar-block updates are default-on. Pass --fr so the
+# pillar block picks up the shipped FR automatically (skipping --fr triggers
+# a warning and skips the pillar-block hooks for that call).
 $ ./scripts/release.sh --resource flyway --section A \
-    --epic section-A-FR-A.1.9-epic --id V19 \
+    --epic section-A-FR-A.1.9-epic --id V19 --fr FR-A.1.9 \
     --status shipped --release-tag v0.28.0
 
 $ ./scripts/release.sh --resource model-registry --section A \
-    --epic section-A-FR-A.1.9-epic --id catalog-locale-translation \
+    --epic section-A-FR-A.1.9-epic --id catalog-locale-translation --fr FR-A.1.9 \
     --status shipped --release-tag v0.28.0
 
 $ ./scripts/release.sh --resource file-lock --section A \
     --epic section-A-FR-A.1.9-epic \
     --id services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/ModelRegistry.kt \
-    --status released
+    --status released --no-update-pillars-block   # file-locks don't carry an FR
 
 # Clean up the per-epic worktree (GDI-728).
 # Refuses if the worktree is dirty — commit/push first if so.

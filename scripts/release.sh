@@ -68,13 +68,22 @@ DRY_RUN=0
 # append). Mutually exclusive with --resource and --all-for-epic modes.
 # Audit finding 6 in reports/contention-audit-2026-05-14.md.
 SWEEP_EXPIRED=0
-# D-016 Day-2: --update-pillars-block opt-in flag fires three hooks that
-# bring pillars[]/anchor_dependencies/releases.in_flight in sync with the
-# per-resource edit this call is making. Opt-in for one release cycle to
-# de-risk the rollout (audit findings 1, 2, 5 in
-# reports/contention-audit-2026-05-14.md). --fr is required when the flag
-# is set so the pillar-block hook knows which FR id to move.
-UPDATE_PILLARS=0
+# D-016 Day-2 (default-on as of 2026-05-19, gameplan §8.17): pillar-block
+# update fires three hooks that bring pillars[]/anchor_dependencies/
+# releases.in_flight in sync with the per-resource edit this call is
+# making. Was opt-in via --update-pillars-block from 2026-05-14 to
+# 2026-05-19; flipped to default-on because operator-omitted hook was the
+# most frequent drift class across the §8.12–§8.16 windows. Opt out with
+# --no-update-pillars-block (use case: bootstrap migrations, recovery
+# from a stuck state, or any ship where the pillar/anchor/in_flight
+# blocks should NOT be touched).
+#
+# --fr is required when UPDATE_PILLARS=1 so the pillar-block hook knows
+# which FR id to move from in_flight_frs to shipped_frs. If --fr is
+# missing, the script warns and skips the hooks (does NOT fail the
+# release) — preserves callers that omit --fr by oversight while still
+# nudging them toward the right shape.
+UPDATE_PILLARS=1
 FR=""
 
 print_help() {
@@ -123,12 +132,14 @@ Optional:
                               "swept via --all-for-epic after Stage 10").
   --product <name>            Default: ugc-platform
   --fr <FR-X.Y.Z>             Functional requirement id. Required when
-                              --update-pillars-block is set; otherwise
-                              recorded in the commit message only.
-  --update-pillars-block      D-016 Day-2 opt-in: also reconcile pillars[],
-                              anchor_dependencies[], and releases.in_flight[]
-                              to reflect this release. Three hooks fire
-                              after the per-resource edit:
+                              pillar-block updates are enabled (the default;
+                              see --no-update-pillars-block). Without --fr,
+                              the pillar-block hooks are skipped with a warning
+                              and the per-resource edit still applies.
+  --update-pillars-block      DEFAULT-ON as of 2026-05-19 (gameplan §8.17).
+                              Reconciles pillars[], anchor_dependencies[], and
+                              releases.in_flight[] to reflect this release.
+                              Three hooks fire after the per-resource edit:
                                 1. move --fr from
                                    pillars[<section>].in_flight_frs to
                                    pillars[<section>].shipped_frs (on shipped)
@@ -140,7 +151,14 @@ Optional:
                                 3. for flyway/model-registry shipped
                                    resources, drop matching releases.in_flight
                                    entry (where epic+release-tag match).
-                              See reports/contention-audit-2026-05-14.md.
+                              Flag is now a no-op (kept for backward
+                              compatibility with callers that pass it
+                              explicitly). See reports/contention-audit-
+                              2026-05-14.md and gameplan §8.17.
+  --no-update-pillars-block   Skip the three D-016 Day-2 hooks listed above.
+                              Use for bootstrap migrations, recovery from a
+                              stuck state, or any ship where the pillar/
+                              anchor/in_flight blocks should NOT be touched.
   --dry-run                   Print the diff that WOULD apply (or, in
                               --all-for-epic mode, the planned sweep), then
                               exit 0 without editing or committing. Use to
@@ -183,7 +201,8 @@ while [ $# -gt 0 ]; do
     --all-for-epic) ALL_FOR_EPIC="$2"; shift 2 ;;
     --sweep-expired) SWEEP_EXPIRED=1; shift ;;
     --dry-run)  DRY_RUN=1; shift ;;
-    --update-pillars-block) UPDATE_PILLARS=1; shift ;;
+    --update-pillars-block) UPDATE_PILLARS=1; shift ;;       # default-on as of 2026-05-19; flag kept for back-compat
+    --no-update-pillars-block) UPDATE_PILLARS=0; shift ;;     # opt out of the D-016 Day-2 hooks
     --fr)       FR="$2"; shift 2 ;;
     --json)     EMIT_JSON=1; shift ;;
     --help|-h)  print_help; exit 0 ;;
@@ -440,15 +459,25 @@ for var_name in RESOURCE SECTION EPIC ID STATUS; do
   fi
 done
 
-# D-016 Day-2: --update-pillars-block requires --fr so the pillar-block
-# hook knows which FR id to move between in_flight_frs and shipped_frs.
-# Without --fr we'd have to guess which FR this resource backed, and
-# guessing was the original bug (pillar block stayed empty for months).
+# D-016 Day-2: pillar-block update requires --fr so the hook knows which
+# FR id to move between in_flight_frs and shipped_frs. Without --fr we'd
+# have to guess which FR this resource backed, and guessing was the
+# original bug (pillar block stayed empty for months).
+#
+# As of 2026-05-19 (gameplan §8.17, default-on flip): missing --fr is a
+# WARN that disables the hooks for this call, not a fatal error. Rationale:
+# default-on means every release.sh invocation now hits this check, and
+# breaking pre-existing callers that omit --fr would block ships during
+# the transition. The warn-and-skip preserves the per-resource edit
+# (which is the operator's explicit intent) and surfaces the gap loudly
+# so the next call can be improved.
 if [ "$UPDATE_PILLARS" = "1" ] && [ -z "$FR" ]; then
-  log_err "--update-pillars-block requires --fr <FR-X.Y.Z>"
-  log_err "  The pillar-block hook needs the FR id to move it from"
-  log_err "  pillars[<section>].in_flight_frs to .shipped_frs."
-  exit 2
+  log_warn "pillar-block update is default-on but --fr was not provided"
+  log_warn "  Skipping the three D-016 Day-2 hooks for this call."
+  log_warn "  Pass --fr <FR-X.Y.Z> next time so pillars[<section>].shipped_frs"
+  log_warn "  picks up the FR automatically. Or pass --no-update-pillars-block"
+  log_warn "  if you intentionally don't want the hooks to fire."
+  UPDATE_PILLARS=0
 fi
 
 case "$STATUS" in

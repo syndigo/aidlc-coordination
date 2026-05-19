@@ -1499,6 +1499,117 @@ the operator should:
 
 ---
 
+## D-028 (2026-05-19) — `release.sh --update-pillars-block` flipped to default-on; missing `--fr` warns instead of fails
+
+### Status
+
+Accepted. Implemented in `scripts/release.sh` (UPDATE_PILLARS default
+flipped to 1; new `--no-update-pillars-block` opt-out flag added;
+missing-`--fr` check downgraded from `exit 2` to a `log_warn` that
+disables the hooks for that one call). Doc updates in `docs/parallel-session-
+playbook.md` (example calls now show `--fr` explicitly and
+`--no-update-pillars-block` on the file-lock example).
+
+### Context
+
+D-016 Day-2 introduced `--update-pillars-block` as an opt-in flag on
+`release.sh` to reconcile `pillars[]`, `anchor_dependencies[]`, and
+`releases.in_flight[]` after a shipped/released call. The opt-in posture
+was intentional — we wanted one release cycle of evidence before flipping
+the default, to avoid bricking callers that hadn't been updated.
+
+Five days of evidence (§8.12 through §8.16 windows; ~50 ships in
+~110 hours; up to 8 concurrent pillar tabs) show that **operator-omitted
+hook is the single most frequent drift class**. Pattern in every sweep:
+
+- `flyway.shipped` rows land (because `release.sh` always writes them)
+- `pillars[<section>].shipped_frs` does NOT update (because the operator
+  omitted the opt-in flag)
+- `audit-registry-drift.sh` doesn't catch this (no drift check exists
+  for pillar-block-vs-flyway-shipped consistency)
+- The next gameplan sweep finds the gap manually and flips the FR rows
+  by hand
+
+The Pillar A + Pillar B verifications (`reports/pillar-a-validation-
+2026-05-17.md`, `reports/pillar-b-validation-2026-05-17.md`) both passed
+on the source side but only because the verifier reconstructed the FR-to-
+release mapping from the gameplan. The registry's `pillars[].shipped_frs`
+would have been incomplete as a source of truth.
+
+### Decision
+
+Two changes in `scripts/release.sh`:
+
+1. **Flip the default.** `UPDATE_PILLARS=1` is now the initial value. Every
+   `release.sh` invocation (shipped, released, or abandoned) runs the
+   three D-016 Day-2 hooks unless explicitly opted out.
+
+2. **Add `--no-update-pillars-block`.** Opt-out flag for the use cases
+   where the hooks should NOT fire: bootstrap migrations, recovery from a
+   stuck state, file-lock releases (which don't carry an FR), or any
+   ship where the operator deliberately wants `pillars[]` untouched.
+
+3. **Downgrade the missing-`--fr` check from fatal to warn.** Previously,
+   `UPDATE_PILLARS=1 && -z FR` was `exit 2`. With default-on, every
+   pre-existing caller that omits `--fr` would suddenly fail. The
+   warn-and-skip preserves the per-resource edit (the operator's explicit
+   intent) and surfaces the gap loudly via `log_warn` so the next call
+   can be improved. The hooks are simply disabled for that one call.
+
+### Why now (not five days ago)
+
+The opt-in posture was the right call for one release cycle — it let us
+gather evidence on how often operators omitted the flag (most of the
+time) and how the drift surfaced (silently, until manual sweeps caught
+it). Flipping the default earlier would have introduced a behavior
+change without the evidence to justify it. Flipping it now is well-
+supported: gameplan §8.17 documents the trigger event (10 releases in
+one overnight window producing 13 pillar-block-vs-flyway-shipped drift
+items in the manual sweep).
+
+### Alternatives considered
+
+- **Add a drift-check for pillar-block-vs-flyway-shipped consistency.**
+  Would catch the gap but doesn't prevent it. The default-on flip
+  prevents the gap from existing in the first place. Both could coexist;
+  a follow-up ADR could add the drift check as belt-and-suspenders.
+- **Make `--fr` always required.** Stricter, but breaks file-lock and
+  release-tag callers that legitimately don't have an FR (those resources
+  aren't tied to a specific section feature). Rejected — too disruptive.
+- **Keep opt-in but make it default-on per-resource (e.g., default-on for
+  flyway, default-off for file-lock).** Cleaner but requires per-resource
+  semantics in the script's flag-parsing layer. Rejected as
+  over-engineering for the size of the population.
+
+### Consequences
+
+- Every future `release.sh --status shipped` will update `pillars[]`
+  automatically. The most common drift class is closed.
+- Operators who pass `--fr` see no behavior change (they were already
+  hitting the hooks via `--update-pillars-block`).
+- Operators who omit `--fr` see a new WARN line; the per-resource edit
+  still applies; the pillar block doesn't update for that call. Next
+  call with `--fr` brings the block back in sync.
+- The `--update-pillars-block` flag becomes a no-op for forward callers
+  but is retained for backward compatibility — pillar tabs that still
+  pass it won't break.
+- One residual drift class remains: the gameplan in `~/Projects/
+  powerreviews/gameplan.md` lives outside any git repo writable from
+  pillar tabs, so there's no script that can update §10 tracker rows on
+  a release. Periodic manual sweeps remain the steady state for that.
+
+### References
+
+- `scripts/release.sh` (UPDATE_PILLARS=1 default, --no-update-pillars-block
+  handler, warn-and-skip on missing --fr)
+- `docs/parallel-session-playbook.md` (example calls updated)
+- Trigger evidence: `~/Projects/powerreviews/gameplan.md` §8.17
+- Sibling: D-016 (the original Day-2 introduction this supersedes the
+  opt-in posture of), D-024 (drift checker — does not yet cover
+  pillar-block-vs-flyway-shipped consistency; potential follow-up).
+
+---
+
 ## How to add an ADR
 
 ```sh
