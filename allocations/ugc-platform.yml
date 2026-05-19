@@ -878,6 +878,11 @@ flyway:
       epic: GDI-1275
       release_tag: v0.88.0
       shipped_at: "2026-05-19T00:28:06Z"
+    - version: V87
+      section: F
+      epic: GDI-1292
+      release_tag: v0.89.0
+      shipped_at: "2026-05-19T00:38:18Z"
   reserved:
     - version: V43
       section: B
@@ -900,13 +905,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-18T23:54:51Z"
       expires_at: "2026-05-19T23:54:51Z"
-    - version: V87
-      section: F
-      epic: GDI-1292
-      fr: FR-F.1.5
-      status: reserved
-      reserved_at: "2026-05-19T00:01:22Z"
-      expires_at: "2026-05-20T00:01:22Z"
     - version: V88
       section: E
       epic: GDI-1303
@@ -1440,6 +1438,7 @@ pillars:
     in_flight_frs: []
     shipped_frs:
       - FR-F.1.5.1
+      - FR-F.1.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
