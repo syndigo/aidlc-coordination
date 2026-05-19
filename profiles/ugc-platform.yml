@@ -119,3 +119,31 @@ orchestration:
   # which is already enforced. Revisit if rebase contention becomes a real
   # bottleneck (likely around 12+ pillars).
   max_concurrent_pillars_in_flight: 8
+
+known_issues:
+  # GDI-1335 retro — Flyway reservation goes stale during extended CI.
+  # reserve.sh runs at Phase 0.6 but the migration file isn't written until
+  # Stage 4. On active branches (8+ parallel pillars), intervening merges
+  # claim the reserved version. GDI-1335 experienced 5 renames (V91->V98).
+  - id: flyway-reservation-timing
+    stage: "4"
+    severity: medium
+    summary: >
+      Reserve Flyway version at Stage 4 start (just before writing migration),
+      not at Phase 0.6. On active branches, the gap between reservation and use
+      allows sibling tabs to claim intervening versions. Run reserve.sh
+      immediately before creating the migration file.
+    discovered_in: GDI-1335
+
+  # GDI-1335 retro — git rebase --continue does not validate that conflict
+  # markers have been fully removed from staged files. Squash merge after
+  # a partial rebase can ship files containing <<<<<<</>>>>>>>/======= markers.
+  - id: conflict-marker-pre-push-gate
+    stage: "5"
+    severity: high
+    summary: >
+      Before pushing, run: grep -rn '<<<<<<< \|>>>>>>> \|=======$' on all
+      staged files. git rebase --continue does not catch leftover conflict
+      markers from partially resolved rebases. Add this as a pre-push check
+      in Stage 5.
+    discovered_in: GDI-1335
