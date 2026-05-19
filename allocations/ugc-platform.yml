@@ -1017,36 +1017,130 @@ flyway:
       paired_with: V89
       shipped_at: "2026-05-18T23:34:06Z"
       note: V989__review_pros_cons_test_grants.sql (test-fixture). Second V989 on disk; sibling of V989 above.
-    - version: V88
+    # V90-V97 batch (2026-05-19 overnight, 15 releases v0.94.0-v0.108.0).
+    # The pillar tab that ran release.sh for FR-E.2.6 / GDI-1303 wrote
+    # --id V88 by mistake (V88 is multi_product_sessions / GDI-1248); the
+    # actual on-disk file is V90__keyword_alert_rules.sql. Same wrong-V<n>
+    # pattern as the V81 / V54 / V83 cases from §8.13-§8.17. The V88 row
+    # below is replaced with the correct V90 attribution.
+    - version: V90
       section: E
       epic: GDI-1303
+      fr: FR-E.2.6
       release_tag: v0.95.0
-      shipped_at: "2026-05-19T02:24:08Z"
+      shipped_at: "2026-05-19T02:23:52Z"
+      note: V90__keyword_alert_rules.sql — keyword alert rules schema for moderator notifications. First half of the FR-E.2.6 ship (continued in V93 keyword_alert_matches / v0.100.0).
+    - version: V990
+      section: E
+      epic: GDI-1303
+      fr: FR-E.2.6
+      release_tag: v0.95.0
+      paired_with: V90
+      shipped_at: "2026-05-19T02:23:52Z"
+      note: V990__keyword_alert_rules_test_grants.sql (test-fixture)
+    - version: V92
+      section: F
+      epic: GDI-1283
+      fr: FR-F.1.2
+      release_tag: v0.97.0
+      shipped_at: "2026-05-19T02:53:20Z"
+      note: V92__outbound_syndication.sql — Outbound Syndication (brand → retailers) schema. Registry previously had V92 attributed to GDI-1336/FR-E.3.2; on disk V92 is GDI-1283/FR-F.1.2. Corrected.
+    - version: V91
+      section: F
+      epic: GDI-1331
+      fr: FR-F.1.6
+      release_tag: v0.98.0
+      shipped_at: "2026-05-19T02:56:50Z"
+      note: V91__product_matches_override_statuses.sql — first half of FR-F.1.6 Match Override (confirm/reject/override statuses on product_matches). Second half in V95 match_overrides / v0.102.0.
     - version: V93
       section: E
       epic: GDI-1337
+      fr: FR-E.2.6
       release_tag: v0.100.0
-      shipped_at: "2026-05-19T03:08:28Z"
-    - version: V92
+      shipped_at: "2026-05-19T03:08:00Z"
+      note: V93__keyword_alert_matches.sql — second half of FR-E.2.6 (severity + match persistence + UI). Pairs with V90 from v0.95.0.
+    - version: V993
+      section: E
+      epic: GDI-1337
+      fr: FR-E.2.6
+      release_tag: v0.100.0
+      paired_with: V93
+      shipped_at: "2026-05-19T03:08:00Z"
+      note: V993__keyword_alert_matches_test_grants.sql (test-fixture)
+    - version: V94
       section: E
       epic: GDI-1336
+      fr: FR-E.3.2
       release_tag: v0.101.0
-      shipped_at: "2026-05-19T03:40:49Z"
+      shipped_at: "2026-05-19T03:40:32Z"
+      note: V94__review_disclosure_type.sql — FTC/CMA disclosure badges. Opens Section E.3 (Regulatory). Previously the V92 row in this registry was mis-attributed to GDI-1336; that's now corrected and V94 is the real GDI-1336 row.
+    - version: V994
+      section: E
+      epic: GDI-1336
+      fr: FR-E.3.2
+      release_tag: v0.101.0
+      paired_with: V94
+      shipped_at: "2026-05-19T03:40:32Z"
+      note: V994__review_disclosure_type_test_grants.sql (test-fixture)
     - version: V95
       section: F
       epic: GDI-1365
+      fr: FR-F.1.6
       release_tag: v0.102.0
-      shipped_at: "2026-05-19T03:42:43Z"
+      shipped_at: "2026-05-19T03:41:52Z"
+      note: V95__match_overrides.sql — Manual product-match corrections schema. Second half of FR-F.1.6 (first half was V91 / GDI-1331 / v0.98.0).
+    - version: V995
+      section: F
+      epic: GDI-1365
+      fr: FR-F.1.6
+      release_tag: v0.102.0
+      paired_with: V95
+      shipped_at: "2026-05-19T03:41:52Z"
+      note: V995__match_overrides_test_grants.sql (test-fixture)
     - version: V97
       section: E
       epic: GDI-1378
+      fr: FR-E.2.9
       release_tag: v0.106.0
-      shipped_at: "2026-05-19T04:36:05Z"
+      shipped_at: "2026-05-19T04:35:32Z"
+      note: V97__intent_alert_mode.sql — AI intent-level alerts (adds intent_alert_mode column to keyword_alert_rules from V90). Same-version collision with V97__review_locale_summaries.sql (FR-C.1.18 / GDI-1322 / v0.96.0); Flyway sorts alphabetically (intent_alert_mode runs first).
     - version: V96
       section: E
       epic: GDI-1374
+      fr: FR-E.3.1
       release_tag: v0.107.0
-      shipped_at: "2026-05-19T04:45:52Z"
+      shipped_at: "2026-05-19T04:45:35Z"
+      note: V96__authenticity_policies.sql — Authenticity Policy Enforcement (rules engine for fake-review detection). Same-version collision with V96__personalization_configs.sql (FR-C.1.16 / GDI-1372 / v0.108.0); Flyway sorts alphabetically (authenticity_policies runs first).
+    - version: V996
+      section: E
+      epic: GDI-1374
+      fr: FR-E.3.1
+      release_tag: v0.107.0
+      paired_with: V96
+      shipped_at: "2026-05-19T04:45:35Z"
+      note: V996__authenticity_policies_test_grants.sql (test-fixture)
+    - version: V97
+      section: C
+      epic: GDI-1322
+      fr: FR-C.1.18
+      release_tag: v0.96.0
+      shipped_at: "2026-05-19T02:38:31Z"
+      note: V97__review_locale_summaries.sql — Locale- and segment-aware AI summary cache table (FORCE RLS, corpus-version auto-refresh). Originally V91 in v0.96.0; renumbered through V94 (v0.103.0) and finally V97 via successive rebases. Same-version sibling of the V97 intent_alert_mode above.
+    - version: V997
+      section: C
+      epic: GDI-1322
+      fr: FR-C.1.18
+      release_tag: v0.96.0
+      paired_with: V97
+      shipped_at: "2026-05-19T02:38:31Z"
+      note: V997__review_locale_summaries_test_grants.sql (test-fixture; originally V991, renumbered through V994 and V995 to V997 in the same rebase chain as V97 prod).
+    - version: V96
+      section: C
+      epic: GDI-1372
+      fr: FR-C.1.16
+      release_tag: v0.108.0
+      shipped_at: "2026-05-19T04:47:07Z"
+      note: V96__personalization_configs.sql — AI personalized review surfacing (per-tenant personalization config + scoring). Same-version sibling of the V96 authenticity_policies above.
   reserved:
     - version: V43
       section: B
@@ -1059,13 +1153,11 @@ flyway:
       # rebase for review_theme_tags renumbering (FR-I.2.4). GDI-1283 still needs a slot.
       # V88 was reserved for GDI-1303/FR-E.2.6 but ended up being used by GDI-1248 for
       # multi_product_sessions (FR-B.1.2). GDI-1303 still needs a slot.
-    - version: V91
-      section: B
-      epic: GDI-1335
-      fr: FR-B.2.2
-      status: reserved
-      reserved_at: "2026-05-19T02:30:56Z"
-      expires_at: "2026-05-20T02:30:56Z"
+      # V91 was reserved for GDI-1335/FR-B.2.2 (Fly-By Reviews) but ended up
+      # being used by GDI-1331's V91__product_matches_override_statuses.sql
+      # (FR-F.1.6 / v0.98.0). FR-B.2.2 / Fly-By Reviews actually shipped as
+      # v0.104.0 (UI-only, no migration); the GDI-1335 epic was retired in
+      # favor of GDI-1353. No active V91 reservation needed.
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -1347,7 +1439,13 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.108.0 # last canonical semver tag (FR-E.2.8 / GDI-1304 — moderator productivity reporting / V89+V989). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending). Section D complete (13/13).
+  current_main: v0.108.0 # last canonical semver tag (FR-C.1.16 / GDI-1372 — AI personalized review surfacing / V96 personalization_configs). Section D complete (13/13). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  # Ninth-pass (drift sweep, 2026-05-19 night, post v0.108.0):
+  #   - v0.94.0 (2026-05-19T01:23:46Z) — C / FR-C.1.17 — Aspect-rating snapshot (UI/AI; no migration)
+  #   - v0.99.0 (2026-05-19T03:01:27Z) — B / GDI-1326 / FR-B.2.1 — Write-a-Review open submission (closes the 🟡 from §10; no migration)
+  #   - v0.103.0 (2026-05-19T03:41:54Z) — C / FR-C.1.15 — Semantic review search (UI/AI; no migration)
+  #   - v0.104.0 (2026-05-19T03:44:30Z) — B / GDI-1353 / FR-B.2.2 — Fly-By Reviews (UI-only; no migration. GDI-1335 epic retired in favor of GDI-1353.)
+  #   - v0.105.0 (2026-05-19T04:34:13Z) — F / FR-F.1.7 — Syndication Badging (FTC compliance) (UI/service; no migration)
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1493,7 +1591,10 @@ pillars:
     fr_backlog: [FR-B.1.4, FR-B.1.9]
     in_flight_frs: []
     shipped_frs:
+      - FR-B.1.2
       - FR-B.1.6
+      - FR-B.2.1
+      - FR-B.2.2
       - FR-B.2.3
       - FR-B.2.4
       - FR-B.2.5
@@ -1529,6 +1630,10 @@ pillars:
       - FR-C.1.12
       - FR-C.1.13
       - FR-C.1.14
+      - FR-C.1.15
+      - FR-C.1.16
+      - FR-C.1.17
+      - FR-C.1.18
       - FR-C.2.2
       - FR-C.2.3
       - FR-C.2.4
@@ -1581,8 +1686,12 @@ pillars:
       - FR-E.2.3
       - FR-E.2.4
       - FR-E.2.5
+      - FR-E.2.6
       - FR-E.2.7
       - FR-E.2.8
+      - FR-E.2.9
+      - FR-E.3.1
+      - FR-E.3.2
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -1593,8 +1702,13 @@ pillars:
     fr_backlog: [FR-F.1.5.1]
     in_flight_frs: []
     shipped_frs:
-      - FR-F.1.5.1
+      - FR-F.1.1
+      - FR-F.1.2
       - FR-F.1.5
+      - FR-F.1.5.1
+      - FR-F.1.6
+      - FR-F.1.7
+      - FR-F.2.2
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
