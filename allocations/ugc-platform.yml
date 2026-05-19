@@ -1383,6 +1383,11 @@ releases:
       proposed_tag: v0.96.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
+    - section: F
+      epic: GDI-1331
+      proposed_tag: v0.90.x
+      anchor_sha: pending
+      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
