@@ -873,6 +873,11 @@ flyway:
       epic: GDI-1267
       release_tag: v0.87.0
       shipped_at: "2026-05-19T00:26:59Z"
+    - version: V84
+      section: E
+      epic: GDI-1275
+      release_tag: v0.88.0
+      shipped_at: "2026-05-19T00:28:06Z"
   reserved:
     - version: V43
       section: B
@@ -881,13 +886,6 @@ flyway:
       status: released_unused
       reserved_at: "2026-05-14T18:18:18Z"
       released_at: "2026-05-14T23:00:00Z"
-    - version: V84
-      section: E
-      epic: GDI-1275
-      fr: FR-E.2.2
-      status: reserved
-      reserved_at: "2026-05-18T23:45:30Z"
-      expires_at: "2026-05-19T23:45:30Z"
     - version: V85
       section: B
       epic: GDI-1277
