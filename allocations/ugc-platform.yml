@@ -1174,7 +1174,7 @@ releases:
   #     migration — fix-forward on existing V25/V26 schema. Flips D.1 🟡→✅.)
   #   - v0.82.2 (2026-05-18T20:40:52Z) — D / — / D-022 gap close — Q&A Merchant
   #     Management Page (UI-only; closes the merchant-side admin gap for Section D)
-  current_main: v0.88.0 # last canonical semver tag (FR-I.2.2 / GDI-1253 — topic extraction real-time AI / V81+V981). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending). Section D now complete (13/13).
+  current_main: v0.91.0 # last canonical semver tag (FR-I.2.2 / GDI-1253 — topic extraction real-time AI / V81+V981). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending). Section D now complete (13/13).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1233,11 +1233,6 @@ releases:
     - section: F
       epic: GDI-1292
       proposed_tag: v0.84.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: C
-      epic: GDI-1299
-      proposed_tag: v0.87.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: E
