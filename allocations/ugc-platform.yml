@@ -1156,6 +1156,11 @@ flyway:
       paired_with: V98
       shipped_at: "2026-05-19T05:27:27Z"
       note: V998__fly_by_reviews_test_grants.sql (test-fixture)
+    - version: V102
+      section: E
+      epic: GDI-1409
+      release_tag: v0.111.0
+      shipped_at: "2026-05-19T20:04:11Z"
   reserved:
     - version: V43
       section: B
@@ -1201,13 +1206,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-19T18:44:10Z"
       expires_at: "2026-05-20T18:44:10Z"
-    - version: V102
-      section: E
-      epic: GDI-1409
-      fr: FR-E.3.5
-      status: reserved
-      reserved_at: "2026-05-19T18:45:56Z"
-      expires_at: "2026-05-20T18:45:56Z"
     - version: V1002
       section: E
       epic: GDI-1409
@@ -1787,6 +1785,7 @@ pillars:
       - FR-E.2.9
       - FR-E.3.1
       - FR-E.3.2
+      - FR-E.3.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
