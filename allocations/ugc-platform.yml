@@ -1206,6 +1206,11 @@ flyway:
       epic: GDI-1404
       release_tag: v0.118.0
       shipped_at: "2026-05-19T22:07:44Z"
+    - version: V999
+      section: E
+      epic: GDI-1404
+      release_tag: v0.118.0
+      shipped_at: "2026-05-19T22:07:53Z"
   reserved:
     - version: V43
       section: B
@@ -1223,13 +1228,6 @@ flyway:
       # (FR-F.1.6 / v0.98.0). FR-B.2.2 / Fly-By Reviews actually shipped as
       # v0.104.0 (UI-only, no migration); the GDI-1335 epic was retired in
       # favor of GDI-1353. No active V91 reservation needed.
-    - version: V999
-      section: E
-      epic: GDI-1404
-      fr: FR-E.3.4
-      status: reserved
-      reserved_at: "2026-05-19T18:44:10Z"
-      expires_at: "2026-05-20T18:44:10Z"
     - version: V103
       section: E
       epic: GDI-1416
