@@ -1017,6 +1017,11 @@ flyway:
       paired_with: V89
       shipped_at: "2026-05-18T23:34:06Z"
       note: V989__review_pros_cons_test_grants.sql (test-fixture). Second V989 on disk; sibling of V989 above.
+    - version: V88
+      section: E
+      epic: GDI-1303
+      release_tag: v0.95.0
+      shipped_at: "2026-05-19T02:24:08Z"
   reserved:
     - version: V43
       section: B
