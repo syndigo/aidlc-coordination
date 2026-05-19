@@ -1171,6 +1171,11 @@ flyway:
       epic: GDI-1401
       release_tag: v0.111.1
       shipped_at: "2026-05-19T20:28:57Z"
+    - version: V100
+      section: E
+      epic: GDI-1401
+      release_tag: v0.111.1
+      shipped_at: "2026-05-19T20:29:16Z"
   reserved:
     - version: V43
       section: B
@@ -1789,6 +1794,7 @@ pillars:
       - FR-E.3.1
       - FR-E.3.2
       - FR-E.3.5
+      - FR-E.3.3
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
