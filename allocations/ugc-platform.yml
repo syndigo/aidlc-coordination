@@ -866,28 +866,98 @@ flyway:
     - version: V82
       section: I
       epic: GDI-1243
+      fr: FR-I.1.2
       release_tag: v0.85.0
-      shipped_at: "2026-05-18T23:39:02Z"
+      shipped_at: "2026-05-18T23:34:52Z"
+      note: "V82__report_definitions.sql — Report Library schema. Note: V82__review_pros_cons.sql (FR-I.2.3 / GDI-1258 / v0.84.0) also exists on disk at the same version number; Flyway resolves alphabetically (report_definitions runs first). The pros/cons file is attributed under V83 below."
+    - version: V982
+      section: I
+      epic: GDI-1243
+      fr: FR-I.1.2
+      release_tag: v0.85.0
+      paired_with: V82
+      shipped_at: "2026-05-18T23:34:52Z"
+      note: V982__report_definitions_test_grants.sql (test-fixture)
     - version: V83
-      section: E
-      epic: GDI-1267
-      release_tag: v0.87.0
-      shipped_at: "2026-05-19T00:26:59Z"
+      section: I
+      epic: GDI-1258
+      fr: FR-I.2.3
+      release_tag: v0.84.0
+      shipped_at: "2026-05-18T23:34:06Z"
+      note: "V83__review_pros_cons.sql — Pros/cons extraction (real-time AI). File was duplicated as V82__review_pros_cons.sql in the GDI-1258 PR and V85__review_pros_cons.sql in a later rebase; this V83 entry is the canonical-trunk attribution. The other two are filename duplicates Flyway will checksum-conflict on if both run; product-side cleanup tracked separately."
+    - version: V983
+      section: I
+      epic: GDI-1258
+      fr: FR-I.2.3
+      release_tag: v0.84.0
+      paired_with: V83
+      shipped_at: "2026-05-18T23:34:06Z"
+      note: V983__review_pros_cons_test_grants.sql (test-fixture)
+    - version: V84
+      section: I
+      epic: GDI-1271
+      fr: FR-I.2.4
+      release_tag: v0.86.0
+      shipped_at: "2026-05-19T00:19:38Z"
+      note: "V84__review_theme_tags.sql — Adjective/theme tagging (real-time AI). Same-version collision with V84__content_channel.sql (FR-E.2.2 / GDI-1275 / v0.88.0); Flyway resolves alphabetically (content_channel first). The content_channel V84 is attributed below."
+    - version: V984
+      section: I
+      epic: GDI-1271
+      fr: FR-I.2.4
+      release_tag: v0.86.0
+      paired_with: V84
+      shipped_at: "2026-05-19T00:19:38Z"
+      note: V984__review_theme_tags_test_grants.sql (test-fixture). Same-version collision with V984__content_channel_test_grants.sql.
     - version: V84
       section: E
       epic: GDI-1275
+      fr: FR-E.2.2
       release_tag: v0.88.0
-      shipped_at: "2026-05-19T00:28:06Z"
+      shipped_at: "2026-05-19T00:27:36Z"
+      note: "V84__content_channel.sql — Channel-based content grouping for moderator UI. Second V84 (collides with V84__review_theme_tags.sql above)."
+    - version: V984
+      section: E
+      epic: GDI-1275
+      fr: FR-E.2.2
+      release_tag: v0.88.0
+      paired_with: V84
+      shipped_at: "2026-05-19T00:27:36Z"
+      note: V984__content_channel_test_grants.sql (test-fixture). Second V984.
     - version: V87
       section: F
       epic: GDI-1292
+      fr: FR-F.1.5
       release_tag: v0.89.0
-      shipped_at: "2026-05-19T00:38:18Z"
+      shipped_at: "2026-05-19T00:37:21Z"
+      note: FR-F.1.5 Product Matching Engine — deterministic product matching (no AI; AI elevation already shipped as FR-F.1.5.1 in v0.42.0). product_matches schema.
+    - version: V987
+      section: F
+      epic: GDI-1292
+      fr: FR-F.1.5
+      release_tag: v0.89.0
+      paired_with: V87
+      shipped_at: "2026-05-19T00:37:21Z"
+      note: V987__product_matches_test_grants.sql (test-fixture)
     - version: V89
       section: E
       epic: GDI-1304
+      fr: FR-E.2.8
       release_tag: v0.92.0
-      shipped_at: "2026-05-19T01:08:03Z"
+      shipped_at: "2026-05-19T01:07:37Z"
+      note: FR-E.2.8 Moderator productivity reporting — moderation_report_indexes (analytics indexes on existing moderations).
+    - version: V989
+      section: E
+      epic: GDI-1304
+      fr: FR-E.2.8
+      release_tag: v0.92.0
+      paired_with: V89
+      shipped_at: "2026-05-19T01:07:37Z"
+      note: V989__moderation_report_indexes_test_grants.sql (test-fixture)
+    - version: V82
+      section: B
+      epic: GDI-1248
+      release_tag: v0.93.0
+      shipped_at: "2026-05-19T01:16:00Z"
   reserved:
     - version: V43
       section: B
@@ -1172,7 +1242,26 @@ releases:
   #     migration — fix-forward on existing V25/V26 schema. Flips D.1 🟡→✅.)
   #   - v0.82.2 (2026-05-18T20:40:52Z) — D / — / D-022 gap close — Q&A Merchant
   #     Management Page (UI-only; closes the merchant-side admin gap for Section D)
-  current_main: v0.92.0 # last canonical semver tag (FR-I.2.2 / GDI-1253 — topic extraction real-time AI / V81+V981). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending). Section D now complete (13/13).
+  #
+  # Eighth-pass (drift sweep, 2026-05-19 morning, post v0.92.0):
+  #   - v0.87.0 (2026-05-19T00:26:59Z) — E / GDI-1267 / FR-E.2.4 — Bulk Moderation
+  #     Actions (UI/service-layer; the V83 file in this tag's tree is a rebased
+  #     duplicate of GDI-1258's V82__review_pros_cons.sql, NOT a new schema for
+  #     FR-E.2.4. Bulk moderation needed no new table.)
+  #   - v0.90.0 (2026-05-19T00:39:15Z) — B / GDI-1277 / FR-B.1.6 — In-Email Review
+  #     Submission (UI/email-template ship; no new migration on disk)
+  #   - v0.91.0 (2026-05-19T00:44:55Z) — C / GDI-1299 / FR-C.1.11 — Combined AI
+  #     summary + pros/cons display (UI-only; consumes FR-I.2.3 + FR-I.2.4 outputs;
+  #     promotes §10 C.1.11 from 🟡 → ✅)
+  #
+  # Known same-version-number collisions on disk at v0.89.0+ (product cleanup tracked
+  # separately):
+  #   - V82__report_definitions.sql + V82__review_pros_cons.sql
+  #   - V84__content_channel.sql + V84__review_theme_tags.sql
+  #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
+  # Flyway resolves these alphabetically at runtime; the registry attributes each
+  # file to its canonical-trunk first-tag (which may differ from the lexical order).
+  current_main: v0.92.0 # last canonical semver tag (FR-E.2.8 / GDI-1304 — moderator productivity reporting / V89+V989). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending). Section D complete (13/13).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
@@ -1323,6 +1412,7 @@ pillars:
     fr_backlog: [FR-B.1.4, FR-B.1.9]
     in_flight_frs: []
     shipped_frs:
+      - FR-B.1.6
       - FR-B.2.3
       - FR-B.2.4
       - FR-B.2.5
@@ -1354,6 +1444,7 @@ pillars:
       - FR-C.1.8
       - FR-C.1.9
       - FR-C.1.10
+      - FR-C.1.11
       - FR-C.1.12
       - FR-C.1.13
       - FR-C.1.14
@@ -1405,9 +1496,12 @@ pillars:
       - FR-E.1.5
       - FR-E.1.6
       - FR-E.2.1
+      - FR-E.2.2
       - FR-E.2.3
+      - FR-E.2.4
       - FR-E.2.5
       - FR-E.2.7
+      - FR-E.2.8
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -1455,7 +1549,10 @@ pillars:
     in_flight_frs: []
     shipped_frs:
       - FR-I.1.1
+      - FR-I.1.2
       - FR-I.2.2
+      - FR-I.2.3
+      - FR-I.2.4
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
