@@ -1444,6 +1444,11 @@ flyway:
       paired_with: V118
       shipped_at: "2026-05-20T18:04:34Z"
       note: V1180__network_status_test_grants.sql (test-fixture)
+    - version: V119
+      section: B
+      epic: GDI-1506
+      release_tag: v0.129.0
+      shipped_at: "2026-05-20T19:07:03Z"
   reserved:
     - version: V43
       section: B
@@ -1478,13 +1483,6 @@ flyway:
       # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
       # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
       # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
-    - version: V119
-      section: B
-      epic: GDI-1506
-      fr: FR-B.3.5
-      status: reserved
-      reserved_at: "2026-05-20T18:02:31Z"
-      expires_at: "2026-05-21T18:02:31Z"
     - version: V120
       section: F
       epic: GDI-1513
