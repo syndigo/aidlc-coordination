@@ -1423,20 +1423,11 @@ flyway:
       # V109 was reserved for GDI-1469 / FR-B.2.8 (Section B) but actually ended
       # up holding the Section E / FR-E.3.6 content_retention_policies schema
       # (per disk, GDI-1416). GDI-1469 / FR-B.2.8 still needs a slot.
-    - version: V113
-      section: B
-      epic: GDI-1497
-      fr: FR-B.4.4
-      status: reserved
-      reserved_at: "2026-05-20T15:09:31Z"
-      expires_at: "2026-05-21T15:09:31Z"
-    - version: V114
-      section: F
-      epic: GDI-1498
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T15:24:16Z"
-      expires_at: "2026-05-21T15:24:16Z"
+      # V113/V114 reservations removed 2026-05-20 (eleventh-pass sweep). Both
+      # were stale wrong-slot picks: GDI-1497/FR-B.4.4 shipped as V118
+      # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
+      # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
+      # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
     - version: V119
       section: B
       epic: GDI-1506
