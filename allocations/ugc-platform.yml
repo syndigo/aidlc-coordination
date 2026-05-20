@@ -1474,6 +1474,31 @@ flyway:
       epic: GDI-1513
       release_tag: v0.134.0
       shipped_at: "2026-05-20T19:32:19Z"
+    - version: V1020
+      section: F
+      epic: GDI-1513
+      release_tag: v0.134.0
+      shipped_at: "2026-05-20T19:32:21Z"
+    - version: V121
+      section: G
+      epic: GDI-1514
+      fr: FR-G.1.3
+      release_tag: v0.131.0
+      shipped_at: "2026-05-20T19:17:00Z"
+      note: V121__sampling_campaigns.sql — 3 tables (sampling_campaigns, sampling_campaign_products, sampling_campaign_criteria) with RLS. Campaign CRUD + state machine (DRAFT/ACTIVE/PAUSED/CLOSED).
+    - version: V1021
+      section: G
+      epic: GDI-1514
+      fr: FR-G.1.3
+      release_tag: v0.131.0
+      paired_with: V121
+      shipped_at: "2026-05-20T19:17:00Z"
+      note: V1021__sampling_campaigns_test_grants.sql (test-fixture)
+    - version: V124
+      section: B
+      epic: GDI-1537
+      release_tag: v0.135.0
+      shipped_at: "2026-05-20T20:01:58Z"
   reserved:
     - version: V43
       section: B
@@ -1508,34 +1533,6 @@ flyway:
       # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
       # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
       # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
-    - version: V1020
-      section: F
-      epic: GDI-1513
-      fr: FR-F.2.1
-      status: reserved
-      reserved_at: "2026-05-20T18:15:19Z"
-      expires_at: "2026-05-21T18:15:19Z"
-    - version: V121
-      section: G
-      epic: GDI-1514
-      fr: FR-G.1.3
-      status: reserved
-      reserved_at: "2026-05-20T18:19:08Z"
-      expires_at: "2026-05-21T18:19:08Z"
-    - version: V1021
-      section: G
-      epic: GDI-1514
-      fr: FR-G.1.3
-      status: reserved
-      reserved_at: "2026-05-20T18:19:13Z"
-      expires_at: "2026-05-21T18:19:13Z"
-    - version: V124
-      section: B
-      epic: GDI-1537
-      fr: FR-B.1.10
-      status: reserved
-      reserved_at: "2026-05-20T19:14:24Z"
-      expires_at: "2026-05-21T19:14:24Z"
     - version: V1024
       section: E
       epic: GDI-1536
@@ -1838,7 +1835,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.133.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
+  current_main: v0.134.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
   # Eleventh-pass (drift sweep, 2026-05-20, post v0.128.0):
   #   - v0.119.0 (2026-05-20T00:25:41Z) — E / GDI-1416 / FR-E.3.6 — Content
   #     Retention Policies. No NEW migration: the schema (V109 content_retention_
@@ -1932,11 +1929,6 @@ releases:
     - section: B
       epic: GDI-NEW
       proposed_tag: v0.128.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: F
-      epic: GDI-1513
-      proposed_tag: v0.124.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: B
@@ -2185,6 +2177,7 @@ pillars:
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
+      - FR-G.1.3
       - FR-G.2.1
     blocked_on: []
     ship_frequency: unlimited
