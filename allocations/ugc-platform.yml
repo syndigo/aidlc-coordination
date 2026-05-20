@@ -1444,66 +1444,137 @@ flyway:
       paired_with: V118
       shipped_at: "2026-05-20T18:04:34Z"
       note: V1180__network_status_test_grants.sql (test-fixture)
+    # ----- v0.129-v0.140 batch (2026-05-20, twelfth-pass reconciliation) ------
+    # Heavy rebase churn: V-numbers were shuffled across many branches and
+    # pillar-tab release.sh calls recorded several wrong (V122/V123/V120/V124/
+    # V127 etc.). Canonical attribution below = on-disk version + filename-owner
+    # epic + the release whose title names the FR. D-029 prevents collision
+    # reservations going forward; release.sh wrong---id writes are the residue.
     - version: V119
       section: B
       epic: GDI-1506
+      fr: FR-B.3.5
       release_tag: v0.129.0
       shipped_at: "2026-05-20T19:07:03Z"
-    - version: V122
-      section: E
-      epic: GDI-1515
-      release_tag: v0.130.0
-      shipped_at: "2026-05-20T19:13:58Z"
-    - version: V1022
-      section: E
-      epic: GDI-1515
-      release_tag: v0.130.0
-      shipped_at: "2026-05-20T19:14:00Z"
-    - version: V123
-      section: G
-      epic: GDI-1530
-      release_tag: v0.133.0
-      shipped_at: "2026-05-20T19:30:41Z"
-    - version: V1230
-      section: G
-      epic: GDI-1530
-      release_tag: v0.133.0
-      shipped_at: "2026-05-20T19:30:44Z"
-    - version: V120
-      section: F
-      epic: GDI-1513
-      release_tag: v0.134.0
-      shipped_at: "2026-05-20T19:32:19Z"
-    - version: V1020
-      section: F
-      epic: GDI-1513
-      release_tag: v0.134.0
-      shipped_at: "2026-05-20T19:32:21Z"
+      note: V119__fraud_scoring.sql — FR-B.3.5 AI fraud-signal scoring.
+    - version: V1019
+      section: B
+      epic: GDI-1506
+      fr: FR-B.3.5
+      release_tag: v0.129.0
+      paired_with: V119
+      shipped_at: "2026-05-20T19:07:03Z"
+      note: V1019__fraud_scoring_test_grants.sql (test-fixture)
     - version: V121
       section: G
       epic: GDI-1514
       fr: FR-G.1.3
       release_tag: v0.131.0
-      shipped_at: "2026-05-20T19:17:00Z"
-      note: V121__sampling_campaigns.sql — 3 tables (sampling_campaigns, sampling_campaign_products, sampling_campaign_criteria) with RLS. Campaign CRUD + state machine (DRAFT/ACTIVE/PAUSED/CLOSED).
+      shipped_at: "2026-05-20T19:16:36Z"
+      note: V121__sampling_campaigns.sql — FR-G.1.3 Sampling Campaign Creation. 3 tables (sampling_campaigns, _products, _criteria) with RLS; CRUD + state machine. **Opens Pillar G.**
     - version: V1021
       section: G
       epic: GDI-1514
       fr: FR-G.1.3
       release_tag: v0.131.0
       paired_with: V121
-      shipped_at: "2026-05-20T19:17:00Z"
+      shipped_at: "2026-05-20T19:16:36Z"
       note: V1021__sampling_campaigns_test_grants.sql (test-fixture)
-    - version: V124
+    - version: V123
+      section: G
+      epic: GDI-1530
+      fr: FR-G.2.1
+      release_tag: v0.133.0
+      shipped_at: "2026-05-20T19:30:26Z"
+      note: V123__creator_discovery.sql — FR-G.2.1 Creator Discovery (vetted creator database + search).
+    - version: V1230
+      section: G
+      epic: GDI-1530
+      fr: FR-G.2.1
+      release_tag: v0.133.0
+      paired_with: V123
+      shipped_at: "2026-05-20T19:30:26Z"
+      note: V1230__creator_discovery_test_grants.sql (test-fixture)
+    - version: V120
+      section: F
+      epic: GDI-1513
+      fr: FR-F.2.1
+      release_tag: v0.134.0
+      shipped_at: "2026-05-20T19:31:48Z"
+      note: V120__google_shopping_feed_configs.sql — FR-F.2.1 Google Shopping / PLA Product Review Feed.
+    - version: V1020
+      section: F
+      epic: GDI-1513
+      fr: FR-F.2.1
+      release_tag: v0.134.0
+      paired_with: V120
+      shipped_at: "2026-05-20T19:31:48Z"
+      note: V1020__google_shopping_feed_configs_test_grants.sql (test-fixture)
+    - version: V126
       section: B
       epic: GDI-1537
+      fr: FR-B.1.10
       release_tag: v0.135.0
-      shipped_at: "2026-05-20T20:01:58Z"
+      shipped_at: "2026-05-20T20:01:54Z"
+      note: V126__rating_prefill.sql — FR-B.1.10 AI In-Email Rating Prefill. (Disk also has V129__rating_prefill.sql — a rebase-renumber duplicate of the same content.)
+    - version: V1260
+      section: B
+      epic: GDI-1537
+      fr: FR-B.1.10
+      release_tag: v0.135.0
+      paired_with: V126
+      shipped_at: "2026-05-20T20:01:54Z"
+      note: V1260__rating_prefill_test_grants.sql (test-fixture)
+    - version: V125
+      section: F
+      epic: GDI-1543
+      fr: FR-F.2.3
+      release_tag: v0.136.0
+      shipped_at: "2026-05-20T20:28:42Z"
+      note: V125__amazon_review_feed_configs.sql — FR-F.2.3 Amazon Syndication channel (config half).
+    - version: V1250
+      section: F
+      epic: GDI-1543
+      fr: FR-F.2.3
+      release_tag: v0.136.0
+      paired_with: V125
+      shipped_at: "2026-05-20T20:28:42Z"
+      note: V1250__amazon_review_feed_configs_test_grants.sql (test-fixture)
+    - version: V128
+      section: G
+      epic: GDI-1555
+      fr: FR-G.1.4
+      release_tag: v0.138.0
+      shipped_at: "2026-05-20T21:24:26Z"
+      note: V128__sampling_fulfillments.sql — FR-G.1.4 Sampling Campaign Fulfillment options.
+    - version: V1280
+      section: G
+      epic: GDI-1555
+      fr: FR-G.1.4
+      release_tag: v0.138.0
+      paired_with: V128
+      shipped_at: "2026-05-20T21:24:26Z"
+      note: V1280__sampling_fulfillments_test_grants.sql (test-fixture)
     - version: V127
       section: F
       epic: GDI-1552
-      release_tag: v0.140.0
-      shipped_at: "2026-05-20T21:40:14Z"
+      fr: FR-F.2.3
+      release_tag: v0.139.0
+      shipped_at: "2026-05-20T21:39:23Z"
+      note: V127__amazon_feed.sql — FR-F.2.3 Amazon Product Review Syndication (feed half; co-epic with V125's config half). v0.140.0 re-cuts the same SHA with no new migration.
+    - version: V129
+      section: B
+      epic: GDI-1537
+      fr: FR-B.1.10
+      release_tag: v0.135.0
+      paired_with: V126
+      shipped_at: "2026-05-20T20:01:54Z"
+      note: V129__rating_prefill.sql — rebase-renumber duplicate of V126__rating_prefill.sql; same content (FR-B.1.10). Flyway resolves both; product-side dedup tracked separately.
+    - version: V125
+      section: E
+      epic: GDI-1536
+      release_tag: v0.141.0
+      shipped_at: "2026-05-20T22:30:49Z"
   reserved:
     - version: V43
       section: B
@@ -1545,13 +1616,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T19:14:34Z"
       expires_at: "2026-05-21T19:14:34Z"
-    - version: V125
-      section: E
-      epic: GDI-1536
-      fr: FR-E.3.4
-      status: reserved
-      reserved_at: "2026-05-20T19:15:09Z"
-      expires_at: "2026-05-21T19:15:09Z"
     - version: V1025
       section: E
       epic: GDI-1536
