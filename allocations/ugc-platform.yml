@@ -2253,7 +2253,7 @@ pillars:
     max_in_flight_frs: 8
   - letter: B
     name: Content Collection
-    status: in_flight
+    status: complete
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-B.1.4, FR-B.1.9]
     in_flight_frs: []
