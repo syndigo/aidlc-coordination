@@ -1863,7 +1863,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.136.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
+  current_main: v0.137.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
   # Eleventh-pass (drift sweep, 2026-05-20, post v0.128.0):
   #   - v0.119.0 (2026-05-20T00:25:41Z) — E / GDI-1416 / FR-E.3.6 — Content
   #     Retention Policies. No NEW migration: the schema (V109 content_retention_
@@ -1967,11 +1967,6 @@ releases:
     - section: F
       epic: GDI-1543
       proposed_tag: v0.134.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: B
-      epic: GDI-1551
-      proposed_tag: v0.136.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: F
