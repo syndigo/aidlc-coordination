@@ -1641,9 +1641,9 @@ single_writer_files:
   # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
   # coordination.touch_patterns[].file` updated in lockstep.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
-    held_by: GDI-NEW
-    until: "2026-05-21T19:13:07Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-20T19:14:17Z"
+    reason: released via release.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
     held_by: GDI-NEW
