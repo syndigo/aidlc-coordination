@@ -1459,6 +1459,11 @@ flyway:
       epic: GDI-1515
       release_tag: v0.130.0
       shipped_at: "2026-05-20T19:14:00Z"
+    - version: V123
+      section: G
+      epic: GDI-1530
+      release_tag: v0.133.0
+      shipped_at: "2026-05-20T19:30:41Z"
   reserved:
     - version: V43
       section: B
@@ -1521,13 +1526,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T18:19:13Z"
       expires_at: "2026-05-21T18:19:13Z"
-    - version: V123
-      section: G
-      epic: GDI-1530
-      fr: FR-G.2.1
-      status: reserved
-      reserved_at: "2026-05-20T18:30:48Z"
-      expires_at: "2026-05-21T18:30:48Z"
     - version: V1230
       section: G
       epic: GDI-1530
@@ -2195,6 +2193,7 @@ pillars:
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
+      - FR-G.2.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
