@@ -1469,6 +1469,11 @@ flyway:
       epic: GDI-1530
       release_tag: v0.133.0
       shipped_at: "2026-05-20T19:30:44Z"
+    - version: V120
+      section: F
+      epic: GDI-1513
+      release_tag: v0.134.0
+      shipped_at: "2026-05-20T19:32:19Z"
   reserved:
     - version: V43
       section: B
@@ -1503,13 +1508,6 @@ flyway:
       # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
       # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
       # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
-    - version: V120
-      section: F
-      epic: GDI-1513
-      fr: FR-F.2.1
-      status: reserved
-      reserved_at: "2026-05-20T18:15:14Z"
-      expires_at: "2026-05-21T18:15:14Z"
     - version: V1020
       section: F
       epic: GDI-1513
@@ -2174,6 +2172,7 @@ pillars:
       - FR-F.1.9
       - FR-F.1.8
       - FR-F.1.10
+      - FR-F.2.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
