@@ -1610,6 +1610,125 @@ items in the manual sweep).
 
 ---
 
+## D-029 (2026-05-20) — `reserve.sh` blocks Flyway version collisions instead of warning
+
+### Status
+
+Accepted. Implemented in `scripts/reserve.sh` (new `flyway_version_in_use()`
+function + blocking gate + `--force-flyway-version` escape hatch). Doc update
+in `docs/parallel-session-playbook.md`.
+
+### Context
+
+Running many parallel pillar tabs against one product repo produced a
+recurring, escalating failure: two epics on separate branches independently
+pick the same Flyway version number. When both merge to `dev`, the repo has
+two `V<n>__*.sql` files and **Flyway hard-fails on boot** ("found more than
+one migration with version N").
+
+This was patched as a symptom at least six times — gameplan §8.13 through
+§8.19 document V44, V54, V81, V82-V89, V96/V97, V103, V112 collisions, each
+reconciled by hand after the fact. On **2026-05-20 it caused a real dev
+outage**: V112 was grabbed by both GDI-1428 (sub_processor_disclosure) and
+GDI-1439 (rejection_reasons); both merged; the `ugc-api` deployment
+crash-looped on boot and no new image could roll out for hours. The fix
+(PR #314) renumbered one file to V113 — but that is again a symptom fix.
+
+`reserve.sh` already had a Flyway drift check (the GDI-770 retro), but it
+was structurally too weak to prevent this:
+
+1. **Opt-in** — only ran when `--product-repo-path` was passed. Most
+   operators omit it.
+2. **Disk-only** — scanned the product repo for an existing `V<n>__*.sql`
+   file. It did not consult the registry, so a version already in
+   `flyway.shipped` (shipped, file possibly renamed/moved) or
+   `flyway.reserved` (reserved on another branch, file not yet written)
+   was invisible.
+3. **Advisory** — it only `log_warn`'d and proceeded. Warnings in a
+   fast-moving multi-tab workflow get scrolled past.
+
+### Decision
+
+Add a **registry-aware, blocking, unconditional** Flyway version-collision
+gate to `reserve.sh`:
+
+- For `--resource flyway`, after the same-epic idempotency check, scan
+  **both `flyway.shipped[]` and `flyway.reserved[]`** for the requested
+  version, across **all epics**.
+- If the version appears anywhere, **refuse with `exit 3`** and a message
+  that names the holding epic + state (shipped/reserved) and points the
+  operator at `audit-registry-drift.sh` to find a free version.
+- The escape hatch is `--force-flyway-version`: logs a loud WARN and
+  proceeds. It exists for the one legitimate case — recovering a version
+  slot abandoned by a dead tab — and makes the operator explicitly
+  responsible for renumbering their migration file.
+
+The gate runs *after* `already_held_same_epic` (so an epic re-reserving its
+own already-recorded version is still a clean idempotent no-op) and *before*
+`held_by_other_epic` (the older, weaker reserved-only check, kept for
+non-flyway resources).
+
+### Why blocking, not warning
+
+The whole point of the coordination registry is to make resource collisions
+*impossible*, not *visible after the fact*. Every other hard contention in
+the registry — `held_by_other_epic`, the D-016 pillar guards — is a blocking
+`exit 3`. The Flyway check being advisory was the anomaly, and it is exactly
+the resource that caused a production-class outage. A warning that has been
+ignored six times is not a control.
+
+### Why scan `flyway.shipped` too, not just `flyway.reserved`
+
+The 2026-05-20 outage's V112 was a *shipped* collision: GDI-1428 had already
+shipped V112 to `flyway.shipped` when GDI-1439 reserved V112. The old
+`held_by_other_epic` check only looked at `flyway.reserved`, so it saw
+nothing. A version that has shipped is *more* permanently taken than one
+that is merely reserved — it must be in scope.
+
+### Alternatives considered
+
+- **Auto-assign the next free version instead of taking `--id`.** Cleaner in
+  theory (operator never picks a number), but a larger change to the
+  reserve.sh contract and every caller, and it removes the operator's
+  ability to deliberately claim a specific slot. Deferred — the blocking
+  gate solves the outage class without a contract change.
+- **Keep it a warning but make it default-on (drop the `--product-repo-path`
+  requirement).** Rejected — a default-on warning is still a warning, and
+  the evidence (six ignored warnings) says warnings do not hold under
+  multi-tab load.
+- **A CI check on the product repo that fails the build on duplicate
+  versions.** Useful as defense-in-depth and worth adding separately, but
+  it catches the collision at *merge* time, after two branches have already
+  diverged — costly to untangle. The reserve.sh gate catches it at
+  *reservation* time, before the second epic writes a single line.
+
+### Consequences
+
+- A pillar tab that tries to reserve an already-used Flyway version now
+  fails fast with a clear message, before any migration file is written.
+  The operator picks the next free number and proceeds.
+- The `--force-flyway-version` path is the audited record of every
+  deliberate slot re-use; it should be rare.
+- The old GDI-770 disk-drift warning (still gated on `--product-repo-path`)
+  is retained as a secondary signal — it can catch an on-disk file that the
+  registry somehow missed — but it is no longer the primary control.
+- Does not retroactively fix the existing duplicate files on `dev` (V82-V112
+  rebase artifacts) — those are a separate product-side cleanup. D-029
+  prevents *new* collisions.
+
+### References
+
+- `scripts/reserve.sh` (`flyway_version_in_use()`, the gate block, the
+  `--force-flyway-version` flag)
+- `docs/parallel-session-playbook.md` (flyway-version-collision-gate note)
+- Outage evidence: `syndigo/ugc-platform` PR #314 (the 2026-05-20 V112 fix);
+  gameplan §8.13-§8.19 (the six prior hand-patched collisions)
+- Sibling: D-024 (`audit-registry-drift.sh` — the after-the-fact detector
+  this gate makes mostly unnecessary for the flyway-version case), D-016
+  (the pillar guards, whose blocking `exit 3` posture this matches).
+
+---
+
 ## How to add an ADR
 
 ```sh

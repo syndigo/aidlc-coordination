@@ -435,6 +435,16 @@ $ ./scripts/reserve.sh --resource flyway --section C \
     --epic GDI-740 --id V24 --fr FR-C.1.18 --ttl-hours 24
 ```
 
+> **Flyway version-collision gate (D-029).** `reserve.sh --resource flyway`
+> REFUSES (`exit 3`) any version already in `flyway.shipped` or
+> `flyway.reserved` — held by any epic. This is the hard stop that prevents
+> the duplicate-migration pileups that caused the 2026-05-20 dev outage
+> (two epics both grabbed V112, Flyway hard-failed on boot). To pick a free
+> version, read the tail of `flyway.shipped` + `flyway.reserved` in
+> `allocations/<product>.yml`, or run `audit-registry-drift.sh`. The only
+> override is `--force-flyway-version`, for recovering a slot abandoned by a
+> dead tab — it logs a loud WARN and makes you responsible for renumbering.
+
 ---
 
 ## Tips

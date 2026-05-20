@@ -42,6 +42,12 @@ EMIT_JSON=0
 DRY_RUN=0
 PRODUCT_REPO_PATH=""
 BYPASS_PILLAR_CHECKS=0
+# D-029: the Flyway version-collision gate. reserve.sh refuses to reserve a
+# flyway version that is already in flyway.shipped or flyway.reserved (held by
+# ANY epic). --force-flyway-version is the escape hatch for the rare case
+# where the operator genuinely intends to re-use a number (e.g. recovering a
+# slot abandoned by a dead tab). It logs a loud WARN and proceeds.
+FORCE_FLYWAY_VERSION=0
 
 print_help() {
   cat <<'USAGE'
@@ -71,6 +77,15 @@ Optional:
                               ship-window serial_with peers). Use only when
                               recovering from a stuck state -- the orchestrator
                               personas should never set this. Logs a WARN.
+  --force-flyway-version      D-029: override the Flyway version-collision gate.
+                              By default, reserving a flyway version that is
+                              already in flyway.shipped or flyway.reserved (held
+                              by ANY epic) is REFUSED with exit 3 -- this is the
+                              hard stop that prevents the V82-V112 duplicate-
+                              migration pileups (gameplan §8.13-§8.19, the
+                              2026-05-20 dev outage). Pass this flag only to
+                              recover a slot abandoned by a dead tab; it logs a
+                              loud WARN and proceeds. flyway resource only.
   --json                      Emit structured JSON on stdout
   --dry-run                   Plan only; do not edit/commit/push
   --help, --version
@@ -90,6 +105,7 @@ while [ $# -gt 0 ]; do
     --dry-run)  DRY_RUN=1; shift ;;
     --product-repo-path) PRODUCT_REPO_PATH="$2"; shift 2 ;;
     --bypass-pillar-checks) BYPASS_PILLAR_CHECKS=1; shift ;;
+    --force-flyway-version) FORCE_FLYWAY_VERSION=1; shift ;;
     --help|-h)  print_help; exit 0 ;;
     --version)  print_version; exit 0 ;;
     *) log_err "Unknown argument: $1"; print_help; exit 2 ;;
@@ -224,6 +240,36 @@ held_by_other_epic() {
     return 1
   fi
   printf '%s' "$held_epic"
+  return 0
+}
+
+# ----- D-029: Flyway version-collision gate ---------------------------------
+# The held_by_other_epic check above only looks at flyway.reserved, and only
+# blocks when a DIFFERENT epic holds the SAME reservation row. It does NOT
+# catch the collision class that caused the V82-V112 pileups and the
+# 2026-05-20 dev outage: two epics independently picking the same Flyway
+# version on separate branches, where one has already SHIPPED (so it's in
+# flyway.shipped, not flyway.reserved) or where the same epic re-reserves.
+#
+# This gate is stricter and unconditional for `--resource flyway`:
+#   - scans flyway.shipped[] AND flyway.reserved[] for the version
+#   - blocks if the version appears ANYWHERE, regardless of which epic
+#   - exit 3 unless --force-flyway-version is passed
+#
+# Returns: prints "shipped:<epic>" or "reserved:<epic>" if the version is
+# taken; prints nothing and returns 1 if the version is free.
+flyway_version_in_use() {
+  used=""
+  used="$(yq -r "
+    [
+      ((.flyway.shipped // [])[]   | select(.version == \"$ID\") | \"shipped:\"  + (.epic // \"unknown\")),
+      ((.flyway.reserved // [])[]  | select(.version == \"$ID\") | \"reserved:\" + (.epic // \"unknown\"))
+    ] | .[0] // \"\"
+  " "$YML" 2>/dev/null)"
+  if [ -z "$used" ] || [ "$used" = "null" ]; then
+    return 1
+  fi
+  printf '%s' "$used"
   return 0
 }
 
@@ -379,6 +425,36 @@ if already_held_same_epic; then
     emit_json "reserved" "idempotent — already held by $EPIC"
   fi
   exit 0
+fi
+
+# D-029: Flyway version-collision gate. Runs only for --resource flyway, and
+# only after the same-epic idempotency check above (so an epic re-reserving
+# its own already-recorded version is still a clean no-op). Blocks if the
+# version is in flyway.shipped or flyway.reserved under ANY epic.
+if [ "$RESOURCE" = "flyway" ]; then
+  fv_use="$(flyway_version_in_use || true)"
+  if [ -n "$fv_use" ]; then
+    fv_state="${fv_use%%:*}"
+    fv_epic="${fv_use#*:}"
+    if [ "$FORCE_FLYWAY_VERSION" = "1" ]; then
+      log_warn "Flyway version $ID is already $fv_state by $fv_epic"
+      log_warn "  --force-flyway-version set; proceeding anyway."
+      log_warn "  You are responsible for renumbering your migration file to"
+      log_warn "  avoid a duplicate-version Flyway boot failure."
+    else
+      log_err "Flyway version collision: $ID is already $fv_state by $fv_epic"
+      log_err "  Reserving a version that is already shipped or reserved would"
+      log_err "  produce a duplicate-version migration — Flyway hard-fails on"
+      log_err "  boot (see the 2026-05-20 dev outage; gameplan §8.13-§8.19)."
+      log_err "  Pick the next free version. Check flyway.shipped + flyway.reserved"
+      log_err "  in allocations/$PRODUCT.yml, or run audit-registry-drift.sh."
+      log_err "  Override only to recover a dead tab's slot: --force-flyway-version"
+      if [ "$EMIT_JSON" = "1" ]; then
+        emit_json "wait" "flyway-version-collision: $ID $fv_state by $fv_epic"
+      fi
+      exit 3
+    fi
+  fi
 fi
 
 other_holder="$(held_by_other_epic || true)"
