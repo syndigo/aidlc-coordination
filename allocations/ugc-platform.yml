@@ -1725,13 +1725,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T22:43:41Z"
       expires_at: "2026-05-21T22:43:41Z"
-    - version: V136
-      section: E
-      epic: GDI-E17
-      fr: FR-E.1.7
-      status: reserved
-      reserved_at: "2026-05-20T22:44:42Z"
-      expires_at: "2026-05-21T22:44:42Z"
     - version: V1036
       section: E
       epic: GDI-1577
