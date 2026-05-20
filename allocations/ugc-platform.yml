@@ -1332,6 +1332,11 @@ flyway:
       epic: GDI-1416
       release_tag: v0.119.0
       shipped_at: "2026-05-20T00:26:12Z"
+    - version: V1003
+      section: E
+      epic: GDI-1416
+      release_tag: v0.119.0
+      shipped_at: "2026-05-20T00:26:14Z"
   reserved:
     - version: V43
       section: B
