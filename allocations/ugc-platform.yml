@@ -1373,6 +1373,13 @@ flyway:
       # V109 was reserved for GDI-1469 / FR-B.2.8 (Section B) but actually ended
       # up holding the Section E / FR-E.3.6 content_retention_policies schema
       # (per disk, GDI-1416). GDI-1469 / FR-B.2.8 still needs a slot.
+    - version: V112
+      section: E
+      epic: GDI-1479
+      fr: FR-E.3.7
+      status: reserved
+      reserved_at: "2026-05-20T00:39:19Z"
+      expires_at: "2026-05-21T00:39:19Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
