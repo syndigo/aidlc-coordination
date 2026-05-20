@@ -1628,21 +1628,10 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T20:08:56Z"
       expires_at: "2026-05-21T20:08:56Z"
-    - version: V128
-      section: G
-      epic: GDI-1555
-      fr: FR-G.1.4
-      release_tag: v0.138.0
-      shipped_at: "2026-05-20T21:23:42Z"
-      note: FR-G.1.4 fulfillment_shipments + coupon_pools + coupon_codes tables
-    - version: V1028
-      section: G
-      epic: GDI-1555
-      fr: FR-G.1.4
-      release_tag: v0.138.0
-      paired_with: V128
-      shipped_at: "2026-05-20T21:23:42Z"
-      note: V1028__fulfillment_test_grants.sql (test-fixture)
+      # V128/V1028 were written into flyway.reserved with release_tag+shipped_at
+      # by a release.sh call that targeted the wrong array. FR-G.1.4 (GDI-1555)
+      # is correctly recorded in flyway.shipped above as V128__sampling_fulfillments.
+      # Removed here 2026-05-20 (twelfth-pass sweep).
     - version: V129
       section: J
       epic: GDI-1535
@@ -1966,7 +1955,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.141.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
+  current_main: v0.142.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
   # Eleventh-pass (drift sweep, 2026-05-20, post v0.128.0):
   #   - v0.119.0 (2026-05-20T00:25:41Z) — E / GDI-1416 / FR-E.3.6 — Content
   #     Retention Policies. No NEW migration: the schema (V109 content_retention_
@@ -2075,11 +2064,6 @@ releases:
     - section: F
       epic: GDI-1552
       proposed_tag: v0.135.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: B
-      epic: GDI-1568
-      proposed_tag: v0.140.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: F
