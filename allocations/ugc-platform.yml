@@ -1374,6 +1374,11 @@ flyway:
       epic: GDI-1468
       release_tag: v0.125.0
       shipped_at: "2026-05-20T15:01:13Z"
+    - version: V109
+      section: B
+      epic: GDI-1469
+      release_tag: v0.126.0
+      shipped_at: "2026-05-20T16:23:27Z"
   reserved:
     - version: V43
       section: B
@@ -1885,6 +1890,7 @@ pillars:
       - FR-B.4.1
       - FR-B.4.2
       - FR-B.4.3
+      - FR-B.2.8
     serial_chains:
       - chain: [FR-A.1.9, FR-B.1.9]
         reason: B.1.9 (Edge SDK preview-translate) consumes the A.1.9 translation anchor
