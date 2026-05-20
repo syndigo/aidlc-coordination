@@ -1287,6 +1287,13 @@ flyway:
       fr: FR-E.3.6
       shipped_at: "2026-05-19T22:30:00Z"
       note: V109__content_retention_policies.sql — Content retention policies (tenant-configurable review-retention rules). Merged to dev (commit 07cab7a7), tag pending. Same epic GDI-1416 as FR-C.1.19 / V103 dwell_qa_configs (v0.113.0) — the epic spans two FRs across two sections (C + E).
+    - version: V1009
+      section: E
+      epic: GDI-1416
+      fr: FR-E.3.6
+      paired_with: V109
+      shipped_at: "2026-05-19T22:30:00Z"
+      note: V1009__content_retention_test_grants.sql (test-fixture; tag pending alongside V109)
     # Rebase artifacts on disk at v0.118.0+ — same-version duplicates of earlier
     # canonical ships. Recorded so the drift checker recognizes them; product-side
     # dedup tracked separately:
@@ -1363,20 +1370,9 @@ flyway:
       # (GDI-1450) and data_subject_requests (GDI-1404). GDI-1439 still needs a slot.
       # V108 reservation (GDI-1468) — V108 on disk is the omnibus rebase artifact;
       # GDI-1468 still needs a slot.
-    - version: V109
-      section: B
-      epic: GDI-1469
-      fr: FR-B.2.8
-      status: reserved
-      reserved_at: "2026-05-19T22:06:38Z"
-      expires_at: "2026-05-20T22:06:38Z"
-    - version: V1009
-      section: B
-      epic: GDI-1469
-      fr: FR-B.2.8
-      status: reserved
-      reserved_at: "2026-05-19T22:06:46Z"
-      expires_at: "2026-05-20T22:06:46Z"
+      # V109 was reserved for GDI-1469 / FR-B.2.8 (Section B) but actually ended
+      # up holding the Section E / FR-E.3.6 content_retention_policies schema
+      # (per disk, GDI-1416). GDI-1469 / FR-B.2.8 still needs a slot.
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -1933,10 +1929,11 @@ pillars:
       - FR-E.2.9
       - FR-E.3.1
       - FR-E.3.2
-      - FR-E.3.5
       - FR-E.3.3
-      - FR-E.3.8
       - FR-E.3.4
+      - FR-E.3.5
+      - FR-E.3.6
+      - FR-E.3.8
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
