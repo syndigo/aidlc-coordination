@@ -1334,66 +1334,116 @@ flyway:
       paired_with: V105
       shipped_at: "2026-05-19T21:41:30Z"
       note: V111__inbound_syndication.sql — rebase duplicate of V105 (inbound_syndication); same content.
-    - version: V103
-      section: E
-      epic: GDI-1416
-      release_tag: v0.119.0
-      shipped_at: "2026-05-20T00:26:12Z"
-    - version: V1003
-      section: E
-      epic: GDI-1416
-      release_tag: v0.119.0
-      shipped_at: "2026-05-20T00:26:14Z"
-    - version: V104
-      section: E
-      epic: GDI-1428
-      release_tag: v0.120.0
-      shipped_at: "2026-05-20T00:44:19Z"
-    - version: V1004
-      section: E
-      epic: GDI-1428
-      release_tag: v0.120.0
-      shipped_at: "2026-05-20T00:44:21Z"
-    - version: V105
+    # ----- v0.119-v0.128 batch (2026-05-20, eleventh-pass reconciliation) -----
+    # Pillar-tab release.sh calls wrote wrong V-numbers (V103/V104/V105/V108/
+    # V109/V112/V116). Canonical attribution below: V<n> = on-disk version,
+    # epic = file's first-commit owner, release_tag = the release whose title
+    # names the FR. D-029 prevents this class going forward.
+    - version: V113
       section: E
       epic: GDI-1439
+      fr: FR-E.3.9
       release_tag: v0.121.0
-      shipped_at: "2026-05-20T01:14:11Z"
-    - version: V112
+      shipped_at: "2026-05-20T01:13:43Z"
+      note: V113__rejection_reasons.sql — Shopper-Side Rejection Explainability. V113 is the renumbered slot from PR #314; FR-E.3.9 is the owning FR, v0.121.0 the release-titled tag.
+    - version: V1013
+      section: E
+      epic: GDI-1439
+      fr: FR-E.3.9
+      release_tag: v0.121.0
+      paired_with: V113
+      shipped_at: "2026-05-20T01:13:43Z"
+      note: V1013__rejection_reasons_test_grants.sql (test-fixture)
+    - version: V114
       section: E
       epic: GDI-1479
+      fr: FR-E.3.7
       release_tag: v0.122.0
-      shipped_at: "2026-05-20T02:08:57Z"
-    - version: V1012
+      shipped_at: "2026-05-20T02:08:29Z"
+      note: V114__sub_processor_disclosure.sql — FR-E.3.7 Sub-Processor Disclosure (platform-scoped).
+    - version: V115
       section: E
       epic: GDI-1479
+      fr: FR-E.3.7
       release_tag: v0.122.0
-      shipped_at: "2026-05-20T02:08:59Z"
-    - version: V108
+      shipped_at: "2026-05-20T02:08:29Z"
+      note: V115__sub_processor_platform_scope.sql — platform-scope columns; co-shipped with V114.
+    - version: V1041
+      section: E
+      epic: GDI-1479
+      fr: FR-E.3.7
+      release_tag: v0.122.0
+      paired_with: V114
+      shipped_at: "2026-05-20T02:08:29Z"
+      note: V1041__sub_processor_disclosure_test_grants.sql (test-fixture)
+    - version: V1042
+      section: E
+      epic: GDI-1479
+      fr: FR-E.3.7
+      release_tag: v0.122.0
+      paired_with: V114
+      shipped_at: "2026-05-20T02:08:29Z"
+      note: V1042__sub_processor_change_log_test_grants.sql (test-fixture)
+    - version: V117
       section: F
       epic: GDI-1468
+      fr: FR-F.1.8
       release_tag: v0.125.0
-      shipped_at: "2026-05-20T15:01:13Z"
-    - version: V109
-      section: B
-      epic: GDI-1469
-      release_tag: v0.126.0
-      shipped_at: "2026-05-20T16:23:27Z"
-    - version: V1009
-      section: B
-      epic: GDI-1469
-      release_tag: v0.126.0
-      shipped_at: "2026-05-20T16:23:30Z"
+      shipped_at: "2026-05-20T15:00:23Z"
+      note: V117__syndication_refresh_cadence.sql — FR-F.1.8 Syndication Refresh Cadence. First commit mislabeled GDI-1469 from a rebase; disk + v0.125.0 title confirm GDI-1468.
+    - version: V1170
+      section: F
+      epic: GDI-1468
+      fr: FR-F.1.8
+      release_tag: v0.125.0
+      paired_with: V117
+      shipped_at: "2026-05-20T15:00:23Z"
+      note: V1170__refresh_cadence_test_grants.sql (test-fixture)
     - version: V116
       section: B
+      epic: GDI-1469
+      fr: FR-B.2.8
+      release_tag: v0.126.0
+      shipped_at: "2026-05-20T16:22:50Z"
+      note: V116__content_pre_check.sql — FR-B.2.8 AI Content Pre-Check Classifier (profanity + spam).
+    - version: V1016
+      section: B
+      epic: GDI-1469
+      fr: FR-B.2.8
+      release_tag: v0.126.0
+      paired_with: V116
+      shipped_at: "2026-05-20T16:22:50Z"
+      note: V1016__content_pre_check_test_grants.sql (test-fixture)
+    - version: V118
+      section: B
       epic: GDI-1497
+      fr: FR-B.4.4
       release_tag: v0.127.0
-      shipped_at: "2026-05-20T17:11:55Z"
+      shipped_at: "2026-05-20T17:11:37Z"
+      note: V118__disclosure_phrasings.sql — FR-B.4.4 AI Incentive-Disclosure Localization. Same-version collision with V118__syndication_network_status.sql (alphabetical sort runs disclosure_phrasings first).
+    - version: V1018
+      section: B
+      epic: GDI-1497
+      fr: FR-B.4.4
+      release_tag: v0.127.0
+      paired_with: V118
+      shipped_at: "2026-05-20T17:11:37Z"
+      note: V1018__disclosure_phrasings_test_grants.sql (test-fixture)
     - version: V118
       section: F
       epic: GDI-1498
+      fr: FR-F.1.10
       release_tag: v0.128.0
-      shipped_at: "2026-05-20T18:05:15Z"
+      shipped_at: "2026-05-20T18:04:34Z"
+      note: V118__syndication_network_status.sql — FR-F.1.10 Network status controls. Same-version sibling of V118__disclosure_phrasings.sql above.
+    - version: V1180
+      section: F
+      epic: GDI-1498
+      fr: FR-F.1.10
+      release_tag: v0.128.0
+      paired_with: V118
+      shipped_at: "2026-05-20T18:04:34Z"
+      note: V1180__network_status_test_grants.sql (test-fixture)
   reserved:
     - version: V43
       section: B
@@ -1477,6 +1527,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T18:20:35Z"
       expires_at: "2026-05-21T18:20:35Z"
+    - version: V123
+      section: G
+      epic: GDI-1530
+      fr: FR-G.2.1
+      status: reserved
+      reserved_at: "2026-05-20T18:30:48Z"
+      expires_at: "2026-05-21T18:30:48Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
