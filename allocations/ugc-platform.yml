@@ -1156,61 +1156,182 @@ flyway:
       paired_with: V98
       shipped_at: "2026-05-19T05:27:27Z"
       note: V998__fly_by_reviews_test_grants.sql (test-fixture)
+    # V99-V108 batch (2026-05-19 evening; 10 releases v0.109.1-v0.118.0).
+    # Several rows below were previously written with wrong V<n> attributions
+    # by pillar-tab release.sh calls (the same wrong-epic / wrong-V<n> pattern
+    # documented in §8.18). Rewritten 2026-05-19 to match canonical disk truth:
+    # canonical V<n> = first commit's owning epic + first containing tag.
+    - version: V99
+      section: E
+      epic: GDI-1401
+      fr: FR-E.3.3
+      release_tag: v0.111.1
+      shipped_at: "2026-05-19T20:27:03Z"
+      note: V99__authenticity_policies.sql — EU Omnibus Directive Compliance (omnibus_verification_policies + selective publication detection). Same content was rebased to V104 and V108 in later branches; canonical is V99 / v0.111.1.
+    - version: V999
+      section: E
+      epic: GDI-1401
+      fr: FR-E.3.3
+      release_tag: v0.111.1
+      paired_with: V99
+      shipped_at: "2026-05-19T20:27:03Z"
+      note: V999__dsr_test_bootstrap.sql (test-fixture). Note the filename mismatch — the test grant for V99 was bundled with the GDI-1404 DSR bootstrap; paired here for completeness.
+    - version: V101
+      section: E
+      epic: GDI-1409
+      fr: FR-E.3.5
+      release_tag: v0.111.0
+      shipped_at: "2026-05-19T20:03:24Z"
+      note: V101__review_locale_summaries.sql — Right to Be Forgotten propagation. (review_locale_summaries content was renumbered yet again — originally V91 / v0.96.0 → V94 → V97 → V101. The V101 file is the canonical disk version on dev as of v0.118.0.)
+    - version: V1001
+      section: E
+      epic: GDI-1409
+      fr: FR-E.3.5
+      release_tag: v0.111.0
+      paired_with: V101
+      shipped_at: "2026-05-19T20:03:24Z"
+      note: V1001__review_locale_summaries_test_grants.sql (test-fixture; renumbered along with V101)
     - version: V102
       section: E
       epic: GDI-1409
+      fr: FR-E.3.5
       release_tag: v0.111.0
-      shipped_at: "2026-05-19T20:04:11Z"
+      shipped_at: "2026-05-19T20:03:24Z"
+      note: V102__deletion_propagation.sql — propagation pipeline + soft-delete flags for the right-to-be-forgotten workflow. Pairs with V101 in the same v0.111.0 ship.
     - version: V1002
       section: E
       epic: GDI-1409
+      fr: FR-E.3.5
       release_tag: v0.111.0
-      shipped_at: "2026-05-19T20:04:14Z"
-    - version: V100
-      section: E
-      epic: GDI-1401
-      release_tag: v0.111.1
-      shipped_at: "2026-05-19T20:28:57Z"
-    - version: V100
-      section: E
-      epic: GDI-1401
-      release_tag: v0.111.1
-      shipped_at: "2026-05-19T20:29:16Z"
-    - version: V99
+      paired_with: V102
+      shipped_at: "2026-05-19T20:03:24Z"
+      note: V1002__deletion_propagation_test_grants.sql (test-fixture)
+    - version: V103
       section: C
-      epic: GDI-1389
+      epic: GDI-1416
+      fr: FR-C.1.19
       release_tag: v0.113.0
-      shipped_at: "2026-05-19T20:31:32Z"
+      shipped_at: "2026-05-19T20:31:13Z"
+      note: V103__dwell_qa_configs.sql — Dwell-based Q&A surfacing. **This is the FR that completes Section C (26/26 ✅).** Registry previously had V99 / GDI-1389 / v0.113.0 attribution — corrected to V103 / GDI-1416 per disk truth. V107__dwell_qa_configs.sql is a later rebase duplicate.
+    - version: V105
+      section: F
+      epic: GDI-1450
+      fr: FR-F.1.3
+      release_tag: v0.116.0
+      shipped_at: "2026-05-19T21:41:30Z"
+      note: V105__inbound_syndication.sql — Inbound syndication (retailer ← brands). Co-shipped V103__dwell_qa_configs.sql + V104__personalization_configs.sql as rebase artifacts. Canonical V<n> for inbound syndication is V105.
+    - version: V1003
+      section: F
+      epic: GDI-1450
+      fr: FR-F.1.3
+      release_tag: v0.116.0
+      paired_with: V105
+      shipped_at: "2026-05-19T21:41:30Z"
+      note: V1003__inbound_syndication_test_grants.sql (test-fixture)
     - version: V106
       section: E
       epic: GDI-1438
+      fr: FR-E.3.8
       release_tag: v0.115.0
-      shipped_at: "2026-05-19T21:27:22Z"
+      shipped_at: "2026-05-19T21:26:45Z"
+      note: V106__security_events.sql — Information Security Policy enforcement (security event log + audit trail).
     - version: V1006
       section: E
       epic: GDI-1438
+      fr: FR-E.3.8
       release_tag: v0.115.0
-      shipped_at: "2026-05-19T21:27:28Z"
-    - version: V100
-      section: F
-      epic: GDI-1450
-      release_tag: v0.116.0
-      shipped_at: "2026-05-19T21:41:55Z"
+      paired_with: V106
+      shipped_at: "2026-05-19T21:26:45Z"
+      note: V1006__security_events_test_grants.sql (test-fixture)
     - version: V107
       section: F
       epic: GDI-1451
+      fr: FR-F.1.9
       release_tag: v0.117.0
-      shipped_at: "2026-05-19T21:58:58Z"
-    - version: V101
+      shipped_at: "2026-05-19T21:58:27Z"
+      note: V107__syndication_gate.sql — Moderation gating for syndication (block syndication of REJECTED reviews). Same-version collision with V107__dwell_qa_configs.sql (rebase artifact of V103). Alphabetical sort runs dwell_qa_configs first.
+    - version: V1007
+      section: F
+      epic: GDI-1451
+      fr: FR-F.1.9
+      release_tag: v0.117.0
+      paired_with: V107
+      shipped_at: "2026-05-19T21:58:27Z"
+      note: V1007__syndication_gate_test_grants.sql (test-fixture)
+    - version: V105
       section: E
       epic: GDI-1404
+      fr: FR-E.3.4
       release_tag: v0.118.0
-      shipped_at: "2026-05-19T22:07:44Z"
-    - version: V999
+      shipped_at: "2026-05-19T22:06:43Z"
+      note: V105__data_subject_requests.sql — GDPR/CCPA Data Subject Request workflow. Same-version sibling of V105__inbound_syndication.sql; alphabetical sort runs data_subject_requests first.
+    - version: V1008
       section: E
       epic: GDI-1404
+      fr: FR-E.3.4
       release_tag: v0.118.0
-      shipped_at: "2026-05-19T22:07:53Z"
+      paired_with: V105
+      shipped_at: "2026-05-19T22:06:43Z"
+      note: V1008__omnibus_test_grants.sql (test-fixture; filename references omnibus due to bundled fixture setup; the test bootstrap for DSR is in V999__dsr_test_bootstrap.sql).
+    - version: V1040
+      section: E
+      epic: GDI-1404
+      fr: FR-E.3.4
+      release_tag: v0.118.0
+      paired_with: V105
+      shipped_at: "2026-05-19T22:06:43Z"
+      note: V1040__omnibus_test_grants.sql — second omnibus_test_grants file at a non-adjacent V-number; same content as V1008 (rebase artifact).
+    - version: V109
+      section: E
+      epic: GDI-1416
+      fr: FR-E.3.6
+      shipped_at: "2026-05-19T22:30:00Z"
+      note: V109__content_retention_policies.sql — Content retention policies (tenant-configurable review-retention rules). Merged to dev (commit 07cab7a7), tag pending. Same epic GDI-1416 as FR-C.1.19 / V103 dwell_qa_configs (v0.113.0) — the epic spans two FRs across two sections (C + E).
+    # Rebase artifacts on disk at v0.118.0+ — same-version duplicates of earlier
+    # canonical ships. Recorded so the drift checker recognizes them; product-side
+    # dedup tracked separately:
+    #   V104__omnibus_verification_policies.sql — duplicate of V99 (GDI-1401/v0.111.1)
+    #   V108__personalization_configs.sql — duplicate of V96 (GDI-1372/v0.108.0)
+    #   V108__omnibus_verification_policies.sql — duplicate of V99
+    #   V110__data_subject_requests.sql — duplicate of V105 (GDI-1404/v0.118.0)
+    #   V111__inbound_syndication.sql — duplicate of V105 (GDI-1450/v0.116.0)
+    - version: V104
+      section: E
+      epic: GDI-1401
+      fr: FR-E.3.3
+      release_tag: v0.111.1
+      paired_with: V99
+      shipped_at: "2026-05-19T20:27:03Z"
+      note: V104__omnibus_verification_policies.sql — rebase duplicate of V99; same content; first appeared at this V-number in a later branch.
+    - version: V108
+      section: C
+      epic: GDI-1372
+      fr: FR-C.1.16
+      release_tag: v0.108.0
+      paired_with: V96
+      shipped_at: "2026-05-19T04:47:07Z"
+      note: V108__personalization_configs.sql — rebase duplicate of V96; same content.
+    - version: V110
+      section: E
+      epic: GDI-1404
+      fr: FR-E.3.4
+      release_tag: v0.118.0
+      paired_with: V105
+      shipped_at: "2026-05-19T22:06:43Z"
+      note: V110__data_subject_requests.sql — rebase duplicate of V105 (data_subject_requests); same content.
+    - version: V111
+      section: F
+      epic: GDI-1450
+      fr: FR-F.1.3
+      release_tag: v0.116.0
+      paired_with: V105
+      shipped_at: "2026-05-19T21:41:30Z"
+      note: V111__inbound_syndication.sql — rebase duplicate of V105 (inbound_syndication); same content.
+    - version: V103
+      section: E
+      epic: GDI-1416
+      release_tag: v0.119.0
+      shipped_at: "2026-05-20T00:26:12Z"
   reserved:
     - version: V43
       section: B
@@ -1228,48 +1349,15 @@ flyway:
       # (FR-F.1.6 / v0.98.0). FR-B.2.2 / Fly-By Reviews actually shipped as
       # v0.104.0 (UI-only, no migration); the GDI-1335 epic was retired in
       # favor of GDI-1353. No active V91 reservation needed.
-    - version: V103
-      section: E
-      epic: GDI-1416
-      fr: FR-E.3.6
-      status: reserved
-      reserved_at: "2026-05-19T18:58:52Z"
-      expires_at: "2026-05-20T18:58:52Z"
-    - version: V1003
-      section: E
-      epic: GDI-1416
-      fr: FR-E.3.6
-      status: reserved
-      reserved_at: "2026-05-19T18:58:58Z"
-      expires_at: "2026-05-20T18:58:58Z"
-    - version: V104
-      section: E
-      epic: GDI-1428
-      fr: FR-E.3.7
-      status: reserved
-      reserved_at: "2026-05-19T19:33:33Z"
-      expires_at: "2026-05-20T19:33:33Z"
-    - version: V1004
-      section: E
-      epic: GDI-1428
-      fr: FR-E.3.7
-      status: reserved
-      reserved_at: "2026-05-19T19:33:36Z"
-      expires_at: "2026-05-20T19:33:36Z"
-    - version: V105
-      section: E
-      epic: GDI-1439
-      fr: FR-E.3.9
-      status: reserved
-      reserved_at: "2026-05-19T20:24:09Z"
-      expires_at: "2026-05-20T20:24:09Z"
-    - version: V108
-      section: F
-      epic: GDI-1468
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-19T22:06:09Z"
-      expires_at: "2026-05-20T22:06:09Z"
+      # V103 was reserved for GDI-1416 / FR-E.3.6 (Section E) but actually ended
+      # up holding the Section C / FR-C.1.19 dwell_qa_configs schema (per disk).
+      # GDI-1416 / FR-E.3.6 may still need a slot — verify next session.
+      # V104 reservation (GDI-1428 / FR-E.3.7) — V104 on disk is the omnibus
+      # rebase artifact (GDI-1401 content), not GDI-1428. GDI-1428 still needs a slot.
+      # V105 reservation (GDI-1439 / FR-E.3.9) — V105 on disk is BOTH inbound_syndication
+      # (GDI-1450) and data_subject_requests (GDI-1404). GDI-1439 still needs a slot.
+      # V108 reservation (GDI-1468) — V108 on disk is the omnibus rebase artifact;
+      # GDI-1468 still needs a slot.
     - version: V109
       section: B
       epic: GDI-1469
@@ -1565,7 +1653,17 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.117.0 # last canonical semver tag (FR-B.2.2 schema half / GDI-1335 — fly_by_reviews / V98 + V998). Section D complete (13/13). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  current_main: v0.118.0 # last canonical semver tag (FR-E.3.4 / GDI-1404 — GDPR/CCPA Data Subject Request Workflow / V105 + V1008+V1040). Three pillars complete: A (12/12), C (26/26), D (13/13). Remaining dev-only ship: FR-E.1.3 / V47 / GDI-927 (tag pending).
+  # Tenth-pass (drift sweep, 2026-05-19 night #2, post v0.118.0):
+  #   - v0.109.1 (2026-05-19T18:59:10Z) — B / GDI-1399 / FR-B.2.12 — Demographic
+  #     auto-fill suggestions (UI-only; retrieval-only on existing reviewer-profile
+  #     endpoint; +200B gz)
+  #   - v0.110.0 (2026-05-19T19:27:27Z) — — / GDI-1396 — Merchant Dashboard +
+  #     Social Proof Overhaul (UI/dashboard; no FR; no migration)
+  #   - v0.112.0 (2026-05-19T20:26:26Z) — — / GDI-1429 — Social Proof Tab upgrade
+  #     + Dashboard 404 fix (UI/dashboard; no migration)
+  #   - v0.114.0 (2026-05-19T20:44:40Z) — — / GDI-1443 — Storefront Preview upgrade
+  #     + Dashboard 400 fix (UI/dashboard; no migration)
   # Ninth-pass (drift sweep, 2026-05-19 night, post v0.108.0):
   #   - v0.94.0 (2026-05-19T01:23:46Z) — C / FR-C.1.17 — Aspect-rating snapshot (UI/AI; no migration)
   #   - v0.99.0 (2026-05-19T03:01:27Z) — B / GDI-1326 / FR-B.2.1 — Write-a-Review open submission (closes the 🟡 from §10; no migration)
@@ -1736,6 +1834,7 @@ pillars:
       - FR-B.2.5
       - FR-B.2.6
       - FR-B.2.7
+      - FR-B.2.12
       - FR-B.4.1
       - FR-B.4.2
       - FR-B.4.3
@@ -1747,7 +1846,7 @@ pillars:
     max_in_flight_frs: 8
   - letter: C
     name: Content Display
-    status: not_started
+    status: complete
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: [FR-C.1.10, FR-C.1.11, FR-C.1.12, FR-C.1.13, FR-C.1.14, FR-C.1.15, FR-C.1.16, FR-C.1.17, FR-C.1.18, FR-C.1.19, FR-C.2.2, FR-C.2.3, FR-C.2.5, FR-C.2.6]
     in_flight_frs: []
