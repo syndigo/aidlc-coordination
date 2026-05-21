@@ -1636,6 +1636,11 @@ flyway:
       epic: GDI-1577
       release_tag: v0.146.0
       shipped_at: "2026-05-21T00:22:48Z"
+    - version: V1037
+      section: E
+      epic: GDI-1577
+      release_tag: v0.146.0
+      shipped_at: "2026-05-21T00:22:50Z"
   reserved:
     - version: V43
       section: B
@@ -1751,13 +1756,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T22:45:12Z"
       expires_at: "2026-05-21T22:45:12Z"
-    - version: V1037
-      section: E
-      epic: GDI-1577
-      fr: FR-E.3.5
-      status: reserved
-      reserved_at: "2026-05-20T22:45:40Z"
-      expires_at: "2026-05-21T22:45:40Z"
     - version: V138
       section: F
       epic: GDI-1576
