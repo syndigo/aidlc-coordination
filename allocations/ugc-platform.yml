@@ -1641,6 +1641,11 @@ flyway:
       epic: GDI-1577
       release_tag: v0.146.0
       shipped_at: "2026-05-21T00:22:50Z"
+    - version: V139
+      section: E
+      epic: GDI-1594
+      release_tag: v0.147.0
+      shipped_at: "2026-05-21T18:25:59Z"
   reserved:
     - version: V43
       section: B
@@ -1770,13 +1775,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T23:08:41Z"
       expires_at: "2026-05-21T23:08:41Z"
-    - version: V139
-      section: E
-      epic: GDI-1594
-      fr: FR-E.1.8
-      status: reserved
-      reserved_at: "2026-05-21T18:06:23Z"
-      expires_at: "2026-05-22T18:06:23Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
