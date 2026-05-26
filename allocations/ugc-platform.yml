@@ -1905,7 +1905,7 @@ single_writer_files:
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
-    held_by: none
+    held_by: GDI-1598
     note: |
       ⚠ GDI-692 retro: ALSO load-bearing append-list conflict class. Test
       fixtures (e.g., `containsExactlyInAnyOrder(...)`, `hasSize(N)`, per-
@@ -1913,8 +1913,8 @@ single_writer_files:
       two sessions add surfaces concurrently. Any reservation against
       ModelRegistry.kt SHOULD also reserve this file (paired lock).
     append_list_conflict_class: true
-    until: "2026-05-18T18:09:16Z"
-    reason: released via release.sh --all-for-epic
+    until: "2026-05-28T23:37:48Z"
+    reason: reserved via reserve.sh
   - file: docs/decisions.md
     held_by: none
     note: Append-safe at the section level — each section appends ADR-X-NNN entries
