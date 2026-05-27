@@ -260,6 +260,15 @@ flyway:
       release_tag: v0.60.0
       shipped_at: "2026-05-15T21:16:41Z"
       note: test-fixture grants for moderation_worklists
+    - version: V156
+      section: H
+      epic: GDI-1608
+      fr: FR-H.6
+      status: shipped
+      release_tag: v0.148.0-dev
+      reserved_at: "2026-05-26T00:00:00Z"
+      shipped_at: "2026-05-27T02:19:15Z"
+      note: visual_ugc_assets moderation_status column + CHECK constraint + composite index (tenant_id, moderation_status)
   reserved:
     - version: V21
       section: A
@@ -427,6 +436,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T22:48:52Z"
       expires_at: "2026-05-21T22:48:52Z"
+    - version: V157
+      section: H
+      epic: GDI-PENDING
+      fr: FR-H.7
+      status: reserved
+      reserved_at: "2026-05-27T02:56:33Z"
+      expires_at: "2026-05-28T02:56:33Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -801,11 +817,11 @@ pillars:
     max_in_flight_frs: 2
   - letter: H
     name: Social & Visual UGC
-    status: not_started
+    status: in_flight
     owner_persona: personas/pillar-orchestrator.md
-    fr_backlog: []
+    fr_backlog: [FR-H.7, FR-H.8, FR-H.14]
     in_flight_frs: []
-    shipped_frs: []
+    shipped_frs: [FR-H.6]
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 2
