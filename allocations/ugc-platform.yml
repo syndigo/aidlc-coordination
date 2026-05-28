@@ -2289,9 +2289,11 @@ releases:
       anchor_sha: pending
     - section: G
       epic: GDI-1670
-      proposed_tag: v0.153.x
+      fr: FR-G.1.5
+      proposed_tag: v0.153.0
       anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
+      stage9_resolved_at: "2026-05-28T02:34:20Z"
+      note: band-intent resolved by next-tag.sh at Stage 9; tag anchors to post-merge commit on dev
     - section: H
       epic: GDI-1675
       proposed_tag: v0.163.x
