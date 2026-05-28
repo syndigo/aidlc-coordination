@@ -2006,9 +2006,9 @@ single_writer_files:
     until: "2026-05-17T18:42:20Z"
     reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/sampling/
-    held_by: none
-    until: "2026-05-28T01:24:43Z"
-    reason: released via release.sh
+    held_by: GDI-1670
+    until: "2026-05-31T01:24:52Z"
+    reason: reserved via reserve.sh
   - file: services/ugc-api/src/main/resources/db/migration/
     held_by: none
     until: "2026-05-15T14:03:13Z"
