@@ -1651,6 +1651,11 @@ flyway:
       epic: GDI-1675
       release_tag: v0.163.0
       shipped_at: "2026-05-28T03:25:01Z"
+    - version: V161
+      section: G
+      epic: GDI-1670
+      release_tag: v0.164.0
+      shipped_at: "2026-05-28T03:35:10Z"
   reserved:
     - version: V43
       section: B
@@ -1822,13 +1827,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-28T00:25:24Z"
       expires_at: "2026-05-29T00:25:24Z"
-    - version: V161
-      section: G
-      epic: GDI-1670
-      fr: FR-G.1.5
-      status: reserved
-      reserved_at: "2026-05-28T01:24:09Z"
-      expires_at: "2026-05-29T01:24:09Z"
     - version: V1161
       section: G
       epic: GDI-1670
