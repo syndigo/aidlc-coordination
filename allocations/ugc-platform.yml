@@ -2004,9 +2004,9 @@ single_writer_files:
     until: "2026-05-17T18:42:20Z"
     reason: released via release.sh
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/sampling/
-    held_by: GDI-1670
-    until: "2026-05-31T01:24:52Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-05-28T03:35:07Z"
+    reason: released via release.sh
   - file: services/ugc-api/src/main/resources/db/migration/
     held_by: none
     until: "2026-05-15T14:03:13Z"
@@ -2519,6 +2519,7 @@ pillars:
       - FR-G.1.3
       - FR-G.1.4
       - FR-G.2.1
+      - FR-G.1.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
