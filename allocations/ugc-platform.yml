@@ -1656,6 +1656,11 @@ flyway:
       epic: GDI-1670
       release_tag: v0.164.0
       shipped_at: "2026-05-28T03:35:10Z"
+    - version: V164
+      section: G
+      epic: GDI-1691
+      release_tag: v0.165.0
+      shipped_at: "2026-05-30T20:44:54Z"
   reserved:
     - version: V43
       section: B
@@ -1841,13 +1846,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-28T01:41:51Z"
       expires_at: "2026-05-29T01:41:51Z"
-    - version: V164
-      section: G
-      epic: GDI-1691
-      fr: FR-G.1.6
-      status: reserved
-      reserved_at: "2026-05-30T18:54:28Z"
-      expires_at: "2026-05-31T18:54:28Z"
     - version: V1164
       section: G
       epic: GDI-1691
@@ -2582,7 +2580,7 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: [FR-G.1.6]
+    in_flight_frs: []
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
@@ -2591,6 +2589,7 @@ pillars:
       - FR-G.1.5
       - FR-G.1.7
       - FR-G.2.1
+      - FR-G.1.6
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -2650,10 +2649,10 @@ pillars:
     serial_with: []
 stats:
   computed_at: "2026-05-30T20:00:00Z"
-  complete_pillar_count: 5  # A, B, C, D, E
-  in_flight_pillar_count: 5  # F, G, H, I, J
+  complete_pillar_count: 5 # A, B, C, D, E
+  in_flight_pillar_count: 5 # F, G, H, I, J
   in_flight_section_count: 5
-  longest_ttl_expiry: "2026-05-31T19:52:56Z"  # GDI-1710 J.1.10 reservation
+  longest_ttl_expiry: "2026-05-31T19:52:56Z" # GDI-1710 J.1.10 reservation
   blocked_pillars: []
   frs_shipped: 151
   frs_partial: 15
