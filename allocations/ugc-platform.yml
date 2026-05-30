@@ -1558,7 +1558,6 @@ flyway:
     - version: V127
       section: F
       epic: GDI-1552
-<<<<<<< Updated upstream
       fr: FR-F.2.3
       release_tag: v0.139.0
       shipped_at: "2026-05-20T21:39:23Z"
@@ -1657,15 +1656,6 @@ flyway:
       epic: GDI-1670
       release_tag: v0.164.0
       shipped_at: "2026-05-28T03:35:10Z"
-=======
-      release_tag: v0.140.0
-      shipped_at: "2026-05-20T21:40:14Z"
-    - version: V1026
-      section: F
-      epic: GDI-1552
-      release_tag: v0.140.0
-      shipped_at: "2026-05-20T21:40:17Z"
->>>>>>> Stashed changes
   reserved:
     - version: V43
       section: B
@@ -1707,7 +1697,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-20T19:14:34Z"
       expires_at: "2026-05-21T19:14:34Z"
-<<<<<<< Updated upstream
     - version: V1026
       section: F
       epic: GDI-1552
@@ -1722,44 +1711,6 @@ flyway:
       # V129 was reserved for GDI-1535 (Section J) but V129 on disk is
       # rating_prefill.sql — the rebase-renumber duplicate of V126 (GDI-1537/
       # FR-B.1.10), recorded in flyway.shipped above. GDI-1535 still needs a slot.
-=======
-    - version: V125
-      section: E
-      epic: GDI-1536
-      fr: FR-E.3.4
-      status: reserved
-      reserved_at: "2026-05-20T19:15:09Z"
-      expires_at: "2026-05-21T19:15:09Z"
-    - version: V1025
-      section: E
-      epic: GDI-1536
-      fr: FR-E.3.4
-      status: reserved
-      reserved_at: "2026-05-20T19:15:11Z"
-      expires_at: "2026-05-21T19:15:11Z"
-    - version: V128
-      section: G
-      epic: GDI-1555
-      fr: FR-G.1.4
-      release_tag: v0.138.0
-      shipped_at: "2026-05-20T21:23:42Z"
-      note: FR-G.1.4 fulfillment_shipments + coupon_pools + coupon_codes tables
-    - version: V1028
-      section: G
-      epic: GDI-1555
-      fr: FR-G.1.4
-      release_tag: v0.138.0
-      paired_with: V128
-      shipped_at: "2026-05-20T21:23:42Z"
-      note: V1028__fulfillment_test_grants.sql (test-fixture)
-    - version: V129
-      section: J
-      epic: GDI-1535
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T21:07:05Z"
-      expires_at: "2026-05-21T21:07:05Z"
->>>>>>> Stashed changes
     - version: V130
       section: J
       epic: GDI-1535
@@ -2171,7 +2122,6 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-<<<<<<< Updated upstream
   current_main: v0.164.0 # last canonical semver tag. FR-G.1.5 completion tracking shipped. Three pillars complete: A, C, D. Section G opened (G.1.3/G.1.4/G.1.5/G.2.1 + earlier). NOTE: v0.119+ tags exist but are NOT deployed to dev — dev rollout still blocked on GDI-1491 (Flyway V84 schema divergence; old pods 9cff2e09 serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
@@ -2186,9 +2136,6 @@ releases:
   #     Review Syndication; re-cut of the v0.139.0 SHA, no new migration.
   #   - v0.141.0 (2026-05-20T21:xx) — E / GDI-1536 / FR-E.3.4 — GDPR/CCPA DSR
   #     enhancements to existing DSR infra (E.3.4 already shipped; no migration).
-=======
-  current_main: v0.140.0 # last canonical semver tag (FR-F.1.10 / GDI-1498 — network status controls). Three pillars complete: A, C, D. NOTE: v0.119-v0.128 tags exist but are NOT deployed to dev — dev rollout blocked on GDI-1491 (Flyway V84 schema divergence; old pods still serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
->>>>>>> Stashed changes
   # Eleventh-pass (drift sweep, 2026-05-20, post v0.128.0):
   #   - v0.119.0 (2026-05-20T00:25:41Z) — E / GDI-1416 / FR-E.3.6 — Content
   #     Retention Policies. No NEW migration: the schema (V109 content_retention_
@@ -2294,7 +2241,6 @@ releases:
       proposed_tag: v0.134.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-<<<<<<< Updated upstream
     - section: F
       epic: GDI-1552
       proposed_tag: v0.135.x
@@ -2331,8 +2277,6 @@ releases:
       proposed_tag: v0.154.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-=======
->>>>>>> Stashed changes
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
