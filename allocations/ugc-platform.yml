@@ -2178,7 +2178,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.164.0 # last canonical semver tag. FR-G.1.5 completion tracking shipped. Three pillars complete: A, C, D. Section G opened (G.1.3/G.1.4/G.1.5/G.2.1 + earlier). NOTE: v0.119+ tags exist but are NOT deployed to dev — dev rollout still blocked on GDI-1491 (Flyway V84 schema divergence; old pods 9cff2e09 serving). Dev-only ship still pending: FR-E.1.3 / V47 / GDI-927.
+  current_main: v0.164.0 # last canonical semver tag as of 2026-05-30. Five pillars complete: A, B, C, D, E. Active reservations at v0.165.x (G.1.6 / H.x / I.1.6 / J.1.10). GDI-1491 dev deploy UNBLOCKED (resolved 2026-05-20). Stage/prod promotion still gated on V124/V120 duplicate reconciliation.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -2412,9 +2412,9 @@ profile_ref: profiles/ugc-platform.yml
 pillars:
   - letter: A
     name: Product Catalog Management
-    status: not_started
+    status: complete
     owner_persona: personas/pillar-orchestrator.md
-    fr_backlog: [FR-A.1.12]
+    fr_backlog: []
     in_flight_frs: []
     shipped_frs: [FR-A.1.1, FR-A.1.2, FR-A.1.3, FR-A.1.4, FR-A.1.5, FR-A.1.6, FR-A.1.7, FR-A.1.8, FR-A.1.9, FR-A.1.10, FR-A.1.11, FR-A.1.12]
     blocked_on: []
@@ -2514,7 +2514,7 @@ pillars:
     max_in_flight_frs: 8
   - letter: E
     name: Moderation & Governance
-    status: in_progress
+    status: complete
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
@@ -2525,6 +2525,8 @@ pillars:
       - FR-E.1.4
       - FR-E.1.5
       - FR-E.1.6
+      - FR-E.1.7
+      - FR-E.1.8
       - FR-E.2.1
       - FR-E.2.2
       - FR-E.2.3
@@ -2534,6 +2536,9 @@ pillars:
       - FR-E.2.7
       - FR-E.2.8
       - FR-E.2.9
+      - FR-E.2.10
+      - FR-E.2.11
+      - FR-E.2.12
       - FR-E.3.1
       - FR-E.3.2
       - FR-E.3.3
@@ -2548,25 +2553,27 @@ pillars:
     max_in_flight_frs: 8
   - letter: F
     name: Syndication & Distribution
-    status: not_started
+    status: in_progress
     owner_persona: personas/pillar-orchestrator.md
-    fr_backlog: [FR-F.1.5.1]
-    in_flight_frs: []
+    fr_backlog: []
+    in_flight_frs: [FR-F.4.1]
     shipped_frs:
       - FR-F.1.1
       - FR-F.1.2
+      - FR-F.1.3
+      - FR-F.1.4
       - FR-F.1.5
       - FR-F.1.5.1
       - FR-F.1.6
       - FR-F.1.7
-      - FR-F.2.2
-      - FR-F.1.3
-      - FR-F.1.9
       - FR-F.1.8
+      - FR-F.1.9
       - FR-F.1.10
       - FR-F.1.11
       - FR-F.2.1
+      - FR-F.2.2
       - FR-F.2.3
+      - FR-F.2.4
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
@@ -2575,26 +2582,29 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
+    in_flight_frs: [FR-G.1.6]
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
       - FR-G.1.3
       - FR-G.1.4
-      - FR-G.2.1
       - FR-G.1.5
+      - FR-G.1.7
+      - FR-G.2.1
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
   - letter: H
     name: Social & Visual UGC
-    status: in_flight
+    status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
     shipped_frs:
       - FR-H.4
       - FR-H.5
+      - FR-H.6
+      - FR-H.7
       - FR-H.9
     blocked_on: []
     ship_frequency: unlimited
@@ -2604,10 +2614,11 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
+    in_flight_frs: [FR-I.1.6]
     shipped_frs:
       - FR-I.1.1
       - FR-I.1.2
+      - FR-I.1.3
       - FR-I.2.2
       - FR-I.2.3
       - FR-I.2.4
@@ -2616,18 +2627,35 @@ pillars:
     max_in_flight_frs: 8
   - letter: J
     name: Platform Services
-    status: not_started
+    status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: []
-    shipped_frs: []
+    in_flight_frs: [FR-J.1.10]
+    shipped_frs:
+      - FR-J.1.9
+      - FR-J.1.11
+      - FR-J.1.13
+      - FR-J.3.3
+      - FR-J.6.4
+      - FR-J.7.1
+      - FR-J.7.2
+      - FR-J.7.3
+      - FR-J.7.5
+      - FR-J.7.6
+      - FR-J.7.7
+      - FR-J.7.8
     blocked_on: []
-    ship_frequency: every_4h
+    ship_frequency: unlimited
     max_in_flight_frs: 8
     serial_with: []
 stats:
-  computed_at: "2026-05-14T18:03:57Z"
-  in_flight_pillar_count: 2
-  in_flight_section_count: 2
-  longest_ttl_expiry: "2026-05-16T14:42:08Z"
+  computed_at: "2026-05-30T20:00:00Z"
+  complete_pillar_count: 5  # A, B, C, D, E
+  in_flight_pillar_count: 5  # F, G, H, I, J
+  in_flight_section_count: 5
+  longest_ttl_expiry: "2026-05-31T19:52:56Z"  # GDI-1710 J.1.10 reservation
   blocked_pillars: []
+  frs_shipped: 151
+  frs_partial: 15
+  frs_open: 89
+  total_frs: 255
