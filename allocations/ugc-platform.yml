@@ -1661,6 +1661,11 @@ flyway:
       epic: GDI-1691
       release_tag: v0.165.0
       shipped_at: "2026-05-30T20:44:54Z"
+    - version: V1164
+      section: G
+      epic: GDI-1691
+      release_tag: v0.165.0
+      shipped_at: "2026-05-30T20:44:59Z"
   reserved:
     - version: V43
       section: B
@@ -1846,13 +1851,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-28T01:41:51Z"
       expires_at: "2026-05-29T01:41:51Z"
-    - version: V1164
-      section: G
-      epic: GDI-1691
-      fr: FR-G.1.6
-      status: reserved
-      reserved_at: "2026-05-30T18:54:30Z"
-      expires_at: "2026-05-31T18:54:30Z"
     - version: V165
       section: F
       epic: GDI-1692
