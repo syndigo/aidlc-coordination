@@ -1832,6 +1832,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-31T03:28:29Z"
       expires_at: "2026-06-01T03:28:29Z"
+    - version: V173
+      section: F
+      epic: GDI-TBD
+      fr: ""
+      status: reserved
+      reserved_at: "2026-05-31T21:27:53Z"
+      expires_at: "2026-06-01T21:27:53Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -2590,8 +2597,8 @@ pillars:
     serial_with: []
 stats:
   computed_at: "2026-05-31T18:00:00Z"
-  complete_pillar_count: 5  # A, B, C, D, E
-  in_flight_pillar_count: 5  # F, G, H, I, J
+  complete_pillar_count: 5 # A, B, C, D, E
+  in_flight_pillar_count: 5 # F, G, H, I, J
   in_flight_section_count: 5
   longest_ttl_expiry: "2026-06-03T00:28:51Z"
   blocked_pillars: []
