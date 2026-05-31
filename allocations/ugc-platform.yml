@@ -438,11 +438,20 @@ flyway:
       expires_at: "2026-05-21T22:48:52Z"
     - version: V157
       section: H
-      epic: GDI-PENDING
+      epic: GDI-1625
       fr: FR-H.7
-      status: reserved
+      status: shipped
       reserved_at: "2026-05-27T02:56:33Z"
-      expires_at: "2026-05-28T02:56:33Z"
+      shipped_at: "2026-05-27T19:40:08Z"
+      merge_sha: "5eaebb9b51f645fbe75e04504a780a4590fe188b"
+      pr: "syndigo/ugc-platform#395"
+    - version: V170
+      section: H
+      epic: GDI-1734
+      fr: FR-H.1
+      status: reserved
+      reserved_at: "2026-05-31T03:08:08Z"
+      expires_at: "2026-06-01T03:08:08Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
