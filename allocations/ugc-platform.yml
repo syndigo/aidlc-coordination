@@ -1860,13 +1860,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-31T21:37:14Z"
       expires_at: "2026-06-01T21:37:14Z"
-    - version: V173
-      section: F
-      epic: F5.1-pending
-      fr: FR-F.5.1
-      status: reserved
-      reserved_at: "2026-05-31T21:37:45Z"
-      expires_at: "2026-06-02T21:37:45Z"
     - version: V1173
       section: F
       epic: F5.1-pending
