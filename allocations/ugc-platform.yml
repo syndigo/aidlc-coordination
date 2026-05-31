@@ -1676,6 +1676,11 @@ flyway:
       epic: GDI-1701
       release_tag: v0.164.0
       shipped_at: "2026-05-31T02:32:32Z"
+    - version: V172
+      section: F
+      epic: GDI-1736
+      release_tag: v0.171.0
+      shipped_at: "2026-05-31T04:57:06Z"
   reserved:
     - version: V43
       section: B
@@ -2503,6 +2508,7 @@ pillars:
       - FR-F.2.2
       - FR-F.2.3
       - FR-F.2.4
+      - FR-F.2.5
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
