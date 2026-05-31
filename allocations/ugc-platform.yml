@@ -274,6 +274,11 @@ flyway:
       epic: GDI-1734
       release_tag: v0.169.0
       shipped_at: "2026-05-31T05:24:29Z"
+    - version: V1170
+      section: H
+      epic: GDI-1734
+      release_tag: v0.169.0
+      shipped_at: "2026-05-31T05:24:34Z"
   reserved:
     - version: V21
       section: A
@@ -450,13 +455,6 @@ flyway:
       shipped_at: "2026-05-27T19:40:08Z"
       merge_sha: "5eaebb9b51f645fbe75e04504a780a4590fe188b"
       pr: "syndigo/ugc-platform#395"
-    - version: V1170
-      section: H
-      epic: GDI-1734
-      fr: FR-H.1
-      status: reserved
-      reserved_at: "2026-05-31T03:08:10Z"
-      expires_at: "2026-06-01T03:08:10Z"
     - version: V171
       section: G
       epic: GDI-1735
