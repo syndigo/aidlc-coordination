@@ -1671,6 +1671,11 @@ flyway:
       epic: GDI-1701
       release_tag: v0.164.0
       shipped_at: "2026-05-31T02:30:54Z"
+    - version: V1166
+      section: I
+      epic: GDI-1701
+      release_tag: v0.164.0
+      shipped_at: "2026-05-31T02:32:32Z"
   reserved:
     - version: V43
       section: B
@@ -1870,13 +1875,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-30T18:58:45Z"
       expires_at: "2026-05-31T18:58:45Z"
-    - version: V1166
-      section: I
-      epic: GDI-1701
-      fr: FR-I.1.6
-      status: reserved
-      reserved_at: "2026-05-30T19:09:48Z"
-      expires_at: "2026-05-31T19:09:48Z"
     - version: V167
       section: J
       epic: GDI-1710
@@ -2637,7 +2635,7 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: [FR-I.1.6]
+    in_flight_frs: []
     shipped_frs:
       - FR-I.1.1
       - FR-I.1.2
@@ -2645,6 +2643,7 @@ pillars:
       - FR-I.2.2
       - FR-I.2.3
       - FR-I.2.4
+      - FR-I.1.6
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
