@@ -2549,7 +2549,7 @@ pillars:
     max_in_flight_frs: 8
   - letter: I
     name: Analytics, Insights & AI
-    status: complete
+    status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
     in_flight_frs: []
@@ -2589,8 +2589,13 @@ pillars:
     max_in_flight_frs: 8
     serial_with: []
 stats:
-  computed_at: "2026-05-31T02:51:53Z"
-  in_flight_pillar_count: 0
-  in_flight_section_count: 3
+  computed_at: "2026-05-31T18:00:00Z"
+  complete_pillar_count: 5  # A, B, C, D, E
+  in_flight_pillar_count: 5  # F, G, H, I, J
+  in_flight_section_count: 5
   longest_ttl_expiry: "2026-06-03T00:28:51Z"
   blocked_pillars: []
+  frs_shipped: 155
+  frs_partial: 15
+  frs_open: 85
+  total_frs: 255
