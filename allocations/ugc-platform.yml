@@ -1710,62 +1710,6 @@ flyway:
       # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
       # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
       # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
-    - version: V1024
-      section: E
-      epic: GDI-1536
-      fr: FR-E.3.4
-      status: reserved
-      reserved_at: "2026-05-20T19:14:34Z"
-      expires_at: "2026-05-21T19:14:34Z"
-    - version: V1026
-      section: F
-      epic: GDI-1552
-      fr: FR-F.2.3
-      status: reserved
-      reserved_at: "2026-05-20T20:08:56Z"
-      expires_at: "2026-05-21T20:08:56Z"
-      # V128/V1028 were written into flyway.reserved with release_tag+shipped_at
-      # by a release.sh call that targeted the wrong array. FR-G.1.4 (GDI-1555)
-      # is correctly recorded in flyway.shipped above as V128__sampling_fulfillments.
-      # Removed here 2026-05-20 (twelfth-pass sweep).
-      # V129 was reserved for GDI-1535 (Section J) but V129 on disk is
-      # rating_prefill.sql — the rebase-renumber duplicate of V126 (GDI-1537/
-      # FR-B.1.10), recorded in flyway.shipped above. GDI-1535 still needs a slot.
-    - version: V130
-      section: J
-      epic: GDI-1535
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T21:07:07Z"
-      expires_at: "2026-05-21T21:07:07Z"
-    - version: V131
-      section: J
-      epic: GDI-1535
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T21:07:09Z"
-      expires_at: "2026-05-21T21:07:09Z"
-    - version: V132
-      section: J
-      epic: GDI-1535
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T21:07:12Z"
-      expires_at: "2026-05-21T21:07:12Z"
-    - version: V133
-      section: J
-      epic: GDI-1535
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-20T21:07:14Z"
-      expires_at: "2026-05-21T21:07:14Z"
-    - version: V134
-      section: F
-      epic: GDI-1572
-      fr: FR-F.2.4
-      status: reserved
-      reserved_at: "2026-05-20T22:17:31Z"
-      expires_at: "2026-05-21T22:17:31Z"
     - version: V1030
       section: G
       epic: GDI-1575
@@ -1784,34 +1728,6 @@ flyway:
       shipped_at: "2026-05-20T23:23:25Z"
       release: v0.144.0
       note: reservation-only; actual migration shipped as V132
-    - version: V1036
-      section: E
-      epic: GDI-1577
-      fr: FR-E.3.5
-      status: reserved
-      reserved_at: "2026-05-20T22:45:12Z"
-      expires_at: "2026-05-21T22:45:12Z"
-    - version: V138
-      section: F
-      epic: GDI-1576
-      fr: FR-F.2.4
-      status: reserved
-      reserved_at: "2026-05-20T23:08:26Z"
-      expires_at: "2026-05-21T23:08:26Z"
-    - version: V1038
-      section: F
-      epic: GDI-1576
-      fr: FR-F.2.4
-      status: reserved
-      reserved_at: "2026-05-20T23:08:41Z"
-      expires_at: "2026-05-21T23:08:41Z"
-    - version: V153
-      section: F
-      epic: GDI-1601
-      fr: FR-F.1.4
-      status: reserved
-      reserved_at: "2026-05-27T00:15:47Z"
-      expires_at: "2026-05-28T00:15:47Z"
     - version: V154
       section: G
       epic: GDI-1607
@@ -1826,41 +1742,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-27T00:28:51Z"
       expires_at: "2026-06-03T00:28:51Z"
-    - version: V156
-      section: H
-      epic: GDI-1608
-      fr: FR-H.6
-      status: reserved
-      reserved_at: "2026-05-27T00:32:29Z"
-      expires_at: "2026-05-28T00:32:29Z"
-    - version: V159
-      section: F
-      epic: GDI-1665
-      fr: FR-F.2.4
-      status: reserved
-      reserved_at: "2026-05-28T00:25:14Z"
-      expires_at: "2026-05-29T00:25:14Z"
-    - version: V160
-      section: F
-      epic: GDI-1665
-      fr: FR-F.2.4
-      status: reserved
-      reserved_at: "2026-05-28T00:25:24Z"
-      expires_at: "2026-05-29T00:25:24Z"
-    - version: V1161
-      section: G
-      epic: GDI-1670
-      fr: FR-G.1.5
-      status: reserved
-      reserved_at: "2026-05-28T01:24:17Z"
-      expires_at: "2026-05-29T01:24:17Z"
-    - version: V163
-      section: I
-      epic: GDI-1676
-      fr: ""
-      status: reserved
-      reserved_at: "2026-05-28T01:41:51Z"
-      expires_at: "2026-05-29T01:41:51Z"
     - version: V165
       section: F
       epic: GDI-1692
