@@ -455,20 +455,26 @@ flyway:
       shipped_at: "2026-05-27T19:40:08Z"
       merge_sha: "5eaebb9b51f645fbe75e04504a780a4590fe188b"
       pr: "syndigo/ugc-platform#395"
-    - version: V171
+    - version: V173
       section: G
       epic: GDI-1735
-      fr: ""
-      status: reserved
+      fr: FR-G.2.2
+      status: shipped
       reserved_at: "2026-05-31T03:10:25Z"
-      expires_at: "2026-06-01T03:10:25Z"
-    - version: V1171
+      shipped_at: "2026-05-31T20:06:34Z"
+      release_tag: v0.170.0
+      merge_sha: "8e72d8bf23e2bbadef0dc4ad515652469f07cd29"
+      note: renumbered from V171 — V171 taken by translations migration merged to dev between reservation and PR push
+    - version: V1173
       section: G
       epic: GDI-1735
-      fr: ""
-      status: reserved
+      fr: FR-G.2.2
+      status: shipped
       reserved_at: "2026-05-31T03:10:27Z"
-      expires_at: "2026-06-01T03:10:27Z"
+      shipped_at: "2026-05-31T20:06:34Z"
+      release_tag: v0.170.0
+      merge_sha: "8e72d8bf23e2bbadef0dc4ad515652469f07cd29"
+      note: renumbered from V1171 — paired grants for V173
     - version: V172
       section: F
       epic: GDI-1736
@@ -483,6 +489,13 @@ flyway:
       status: reserved
       reserved_at: "2026-05-31T03:10:43Z"
       expires_at: "2026-06-01T03:10:43Z"
+    - version: V174
+      section: G
+      epic: GDI-1778
+      fr: FR-G.2.3
+      status: reserved
+      reserved_at: "2026-05-31T21:48:31Z"
+      expires_at: "2026-06-02T21:48:31Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -680,7 +693,7 @@ single_writer_files:
     until: "2026-05-16T04:40:29Z"
     reason: released via release.sh
 releases:
-  current_main: v0.169.0 # last canonical semver tag (cut by GDI-846/Section F). Subsequent deploys (GDI-770, GDI-856, GDI-824, GDI-858) ship via deploy-dispatch SHA without semver re-cut — see gameplan.md §8.11.
+  current_main: v0.170.0 # last canonical semver tag (cut by GDI-1735/Section G FR-G.2.2 Campaign Brief & Proposal Flow).
   next_per_section:
     A: v0.28.x
     B: v0.29.x
