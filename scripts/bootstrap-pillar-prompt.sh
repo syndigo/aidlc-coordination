@@ -59,7 +59,7 @@ Required:
 Optional:
   --product <name>              Default: ugc-platform
   --local-repo-path <path>      Local clone of the product repo. Defaults to
-                                /Users/nateembree/Projects/<product> if exists,
+                                \$HOME/Projects/<product> if exists,
                                 else the placeholder string is left in the
                                 rendered prompt for the operator to fill.
   --template <path>             Path to the bootstrap template. Defaults to
@@ -137,7 +137,7 @@ if [ ! -f "$TEMPLATE_PATH" ]; then
 fi
 
 if [ -z "$LOCAL_REPO_PATH" ]; then
-  default_path="/Users/nateembree/Projects/${PRODUCT}"
+  default_path="${HOME}/Projects/${PRODUCT}"
   if [ -d "$default_path" ]; then
     LOCAL_REPO_PATH="$default_path"
   else
