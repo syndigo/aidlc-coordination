@@ -58,10 +58,9 @@ Required:
 
 Optional:
   --product <name>              Default: ugc-platform
-  --local-repo-path <path>      Local clone of the product repo. Defaults to
-                                \$HOME/Projects/<product> if exists,
-                                else the placeholder string is left in the
-                                rendered prompt for the operator to fill.
+  --local-repo-path <path>      Local clone of the product repo. If omitted,
+                                a placeholder is left in the rendered prompt
+                                for the operator to fill.
   --template <path>             Path to the bootstrap template. Defaults to
                                 profiles/<product>.bootstrap-template.md.
   --with-drift-check            Run audit-registry-drift.sh and embed the
@@ -137,12 +136,7 @@ if [ ! -f "$TEMPLATE_PATH" ]; then
 fi
 
 if [ -z "$LOCAL_REPO_PATH" ]; then
-  default_path="${HOME}/Projects/${PRODUCT}"
-  if [ -d "$default_path" ]; then
-    LOCAL_REPO_PATH="$default_path"
-  else
-    LOCAL_REPO_PATH="<set-via---local-repo-path>"
-  fi
+  LOCAL_REPO_PATH="<set-via---local-repo-path>"
 fi
 
 # Confirm pillar exists in the allocation YAML.
