@@ -1392,13 +1392,13 @@ flyway:
       shipped_at: "2026-05-20T15:00:23Z"
       note: V117__syndication_refresh_cadence.sql — FR-F.1.8 Syndication Refresh Cadence. First commit mislabeled GDI-1469 from a rebase; disk + v0.125.0 title confirm GDI-1468.
     - version: V1170
-      section: F
-      epic: GDI-1468
-      fr: FR-F.1.8
-      release_tag: v0.125.0
-      paired_with: V117
-      shipped_at: "2026-05-20T15:00:23Z"
-      note: V1170__refresh_cadence_test_grants.sql (test-fixture)
+      section: H
+      epic: GDI-1734
+      fr: FR-H.2
+      release_tag: v0.169.0
+      paired_with: V170
+      shipped_at: "2026-05-31T12:00:00Z"
+      note: V1170__rights_request_workflow_test_grants.sql — grants for rights_requests + rights_request_templates tables (corrected from phantom GDI-1468 attribution on 2026-06-10 drift fix)
     - version: V116
       section: B
       epic: GDI-1469
@@ -1686,6 +1686,13 @@ flyway:
       epic: GDI-1736
       release_tag: v0.171.0
       shipped_at: "2026-05-31T04:57:08Z"
+    - version: V170
+      section: H
+      epic: GDI-1734
+      fr: FR-H.2
+      release_tag: v0.169.0
+      shipped_at: "2026-05-31T12:00:00Z"
+      note: V170__rights_request_workflow.sql — rights_request_templates + rights_requests tables with RLS + consent_record_hash (omitted from registry until 2026-06-10 drift fix)
     - version: V171
       section: J
       epic: GDI-1737
@@ -2663,6 +2670,7 @@ pillars:
     in_flight_frs: []
     shipped_frs:
       - FR-H.1
+      - FR-H.2
       - FR-H.4
       - FR-H.5
       - FR-H.6
