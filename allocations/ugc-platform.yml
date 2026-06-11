@@ -1979,16 +1979,20 @@ flyway:
       section: J
       epic: GDI-1911
       fr: FR-J.1.8
-      status: reserved
+      status: shipped
       reserved_at: "2026-06-11T16:09:18Z"
       expires_at: "2026-06-13T16:09:18Z"
+      shipped_at: "2026-06-11T23:06:11Z"
+      release_tag: v0.180.0
     - version: V1189
       section: J
       epic: GDI-1911
       fr: FR-J.1.8
-      status: reserved
+      status: shipped
       reserved_at: "2026-06-11T16:09:21Z"
       expires_at: "2026-06-13T16:09:21Z"
+      shipped_at: "2026-06-11T23:06:11Z"
+      release_tag: v0.180.0
     - version: V1190
       section: I
       epic: GDI-1910
