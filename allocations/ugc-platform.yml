@@ -1950,7 +1950,7 @@ flyway:
       expires_at: "2026-06-11T19:13:23Z"
     - version: V186
       section: F
-      epic: GDI-F26
+      epic: GDI-1902
       fr: ""
       status: reserved
       reserved_at: "2026-06-11T15:12:48Z"
@@ -2423,7 +2423,7 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: F
-      epic: GDI-F26
+      epic: GDI-1902
       proposed_tag: v0.177.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
