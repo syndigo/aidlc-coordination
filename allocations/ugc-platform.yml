@@ -2724,7 +2724,7 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: [FR-G.2.3]
+    in_flight_frs: []
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
@@ -2738,6 +2738,7 @@ pillars:
       - FR-G.1.9
       - FR-G.1.10
       - FR-G.2.2
+      - FR-G.2.3
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
