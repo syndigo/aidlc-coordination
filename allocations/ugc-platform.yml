@@ -1723,6 +1723,11 @@ flyway:
       epic: GDI-1771
       release_tag: v0.176.0
       shipped_at: "2026-06-11T05:04:43Z"
+    - version: V1185
+      section: F
+      epic: GDI-1771
+      release_tag: v0.176.0
+      shipped_at: "2026-06-11T05:04:55Z"
   reserved:
     - version: V43
       section: B
@@ -1929,13 +1934,6 @@ flyway:
       status: reserved
       reserved_at: "2026-06-10T17:43:29Z"
       expires_at: "2026-06-11T17:43:29Z"
-    - version: V1185
-      section: G
-      epic: GDI-1866
-      fr: G.2.3
-      status: reserved
-      reserved_at: "2026-06-10T18:08:55Z"
-      expires_at: "2026-06-11T18:08:55Z"
     - version: V185
       section: H
       epic: GDI-1878
