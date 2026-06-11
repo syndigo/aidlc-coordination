@@ -1930,7 +1930,7 @@ flyway:
     - version: V183
       section: G
       epic: GDI-1866
-      fr: FR-G.2.2
+      fr: FR-G.2.3
       status: reserved
       reserved_at: "2026-06-10T17:43:29Z"
       expires_at: "2026-06-11T17:43:29Z"
@@ -2673,7 +2673,7 @@ pillars:
     status: in_progress
     owner_persona: personas/pillar-orchestrator.md
     fr_backlog: []
-    in_flight_frs: [FR-G.1.9]
+    in_flight_frs: [FR-G.2.3]
     shipped_frs:
       - FR-G.1.1
       - FR-G.1.2
@@ -2684,6 +2684,9 @@ pillars:
       - FR-G.1.7
       - FR-G.2.1
       - FR-G.1.8
+      - FR-G.1.9
+      - FR-G.1.10
+      - FR-G.2.2
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
