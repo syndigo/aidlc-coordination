@@ -2288,7 +2288,11 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
+<<<<<<< Updated upstream
   current_main: v0.178.0 # last canonical semver tag as of 2026-05-30. Five pillars complete: A, B, C, D, E. Active reservations at v0.165.x (G.1.6 / H.x / I.1.6 / J.1.10). GDI-1491 dev deploy UNBLOCKED (resolved 2026-05-20). Stage/prod promotion still gated on V124/V120 duplicate reconciliation.
+=======
+  current_main: v0.35.1 # last canonical semver tag as of 2026-05-30. Five pillars complete: A, B, C, D, E. Active reservations at v0.165.x (G.1.6 / H.x / I.1.6 / J.1.10). GDI-1491 dev deploy UNBLOCKED (resolved 2026-05-20). Stage/prod promotion still gated on V124/V120 duplicate reconciliation.
+>>>>>>> Stashed changes
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -2760,7 +2764,11 @@ pillars:
       - FR-H.6
       - FR-H.7
       - FR-H.9
+<<<<<<< Updated upstream
       - FR-H.3
+=======
+      - FR-H.8
+>>>>>>> Stashed changes
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
