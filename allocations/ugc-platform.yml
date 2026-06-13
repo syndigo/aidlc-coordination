@@ -2008,32 +2008,39 @@ flyway:
       expires_at: "2026-06-12T16:14:08Z"
     - version: V191
       section: F
-      epic: NEW-GDI-F27
+      epic: GDI-1966
       fr: ""
       status: reserved
       reserved_at: "2026-06-13T20:47:33Z"
       expires_at: "2026-06-14T20:47:33Z"
     - version: V192
       section: F
-      epic: NEW-GDI-F27
+      epic: GDI-1966
       fr: ""
       status: reserved
       reserved_at: "2026-06-13T20:47:36Z"
       expires_at: "2026-06-14T20:47:36Z"
     - version: V1193
       section: F
-      epic: NEW-GDI-F27
+      epic: GDI-1966
       fr: ""
       status: reserved
       reserved_at: "2026-06-13T20:48:34Z"
       expires_at: "2026-06-14T20:48:34Z"
     - version: V1194
       section: F
-      epic: NEW-GDI-F27
+      epic: GDI-1966
       fr: ""
       status: reserved
       reserved_at: "2026-06-13T20:48:37Z"
       expires_at: "2026-06-14T20:48:37Z"
+    - version: V193
+      section: C
+      epic: GDI-1495
+      fr: ""
+      status: reserved
+      reserved_at: "2026-06-13T21:29:25Z"
+      expires_at: "2026-06-14T21:29:25Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -2147,12 +2154,12 @@ single_writer_files:
   # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
   # coordination.touch_patterns[].file` updated in lockstep.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
-    held_by: NEW-GDI-F27
+    held_by: GDI-1966
     until: "2026-06-14T20:47:28Z"
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: NEW-GDI-F27
+    held_by: GDI-1966
     until: "2026-06-14T20:47:31Z"
     reason: reserved via reserve.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
@@ -2522,7 +2529,7 @@ releases:
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: F
-      epic: NEW-GDI-F27
+      epic: GDI-1966
       proposed_tag: v0.182.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
