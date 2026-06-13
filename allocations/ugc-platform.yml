@@ -1748,15 +1748,18 @@ flyway:
       epic: GDI-1866
       release_tag: v0.178.0
       shipped_at: "2026-06-11T19:09:10Z"
+    - version: V1192
+      section: F
+      epic: GDI-1945
+      fr: FR-F.4.2
+      release_tag: v0.181.6
+      shipped_at: "2026-06-13T19:32:00Z"
+      note: Metafeed grants (GDI-1902/FR-F.2.6); renumbered V1186->V1190->V1192 to clear test-resource slot collisions.
     - version: V188
       section: I
       epic: GDI-1910
       release_tag: v0.181.0
-<<<<<<< Updated upstream
-      shipped_at: "2026-06-12T01:36:26Z"
-=======
       shipped_at: "2026-06-12T01:38:30Z"
->>>>>>> Stashed changes
   reserved:
     - version: V43
       section: B
@@ -1881,11 +1884,12 @@ flyway:
       expires_at: "2026-06-01T03:28:29Z"
     - version: V176
       section: F
-      epic: GDI-1772
+      epic: GDI-1945
       fr: FR-F.4.2
-      status: reserved
+      status: shipped
       reserved_at: "2026-05-31T21:38:21Z"
-      expires_at: "2026-06-01T21:38:21Z"
+      shipped_at: "2026-06-13T19:32:00Z"
+      release_tag: v0.181.6
     - version: V177
       section: F
       epic: F5.1-pending
@@ -2115,9 +2119,9 @@ single_writer_files:
   # Both `single_writer_files[].file` and `aidlc/shared/profiles/ugc-platform.yml
   # coordination.touch_patterns[].file` updated in lockstep.
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
-    held_by: GDI-1910
-    until: "2026-06-12T16:06:46Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-06-13T20:47:05Z"
+    reason: released via release.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
     held_by: GDI-1910
@@ -2290,11 +2294,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-<<<<<<< Updated upstream
-  current_main: v0.178.0 # last canonical semver tag as of 2026-05-30. Five pillars complete: A, B, C, D, E. Active reservations at v0.165.x (G.1.6 / H.x / I.1.6 / J.1.10). GDI-1491 dev deploy UNBLOCKED (resolved 2026-05-20). Stage/prod promotion still gated on V124/V120 duplicate reconciliation.
-=======
-  current_main: v0.35.1 # last canonical semver tag as of 2026-05-30. Five pillars complete: A, B, C, D, E. Active reservations at v0.165.x (G.1.6 / H.x / I.1.6 / J.1.10). GDI-1491 dev deploy UNBLOCKED (resolved 2026-05-20). Stage/prod promotion still gated on V124/V120 duplicate reconciliation.
->>>>>>> Stashed changes
+  current_main: v0.181.6 # updated 2026-06-13 — F / GDI-1945 / FR-F.4.2 — Display Config Without Collection.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -2766,11 +2766,8 @@ pillars:
       - FR-H.6
       - FR-H.7
       - FR-H.9
-<<<<<<< Updated upstream
       - FR-H.3
-=======
       - FR-H.8
->>>>>>> Stashed changes
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
