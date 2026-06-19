@@ -2053,6 +2053,30 @@ flyway:
       status: reserved
       reserved_at: "2026-06-15T18:25:48Z"
       expires_at: "2026-06-16T18:25:48Z"
+    - version: V9177
+      section: A
+      epic: GDI-2110
+      fr: ""
+      note: ai-insights role-grant migration (GRANT USAGE ON SCHEMA public TO insights_role) — follows V9176 dsa_ingestion pattern
+      status: shipped
+      reserved_at: "2026-06-18T00:00:00Z"
+      shipped_at: "2026-06-18T19:03:10Z"
+      release_tag: v0.195.0
+    - version: V9178
+      section: extraction
+      epic: GDI-2115
+      fr: ""
+      note: ai-insights Sprint 8 — GRANT SELECT/INSERT/UPDATE/DELETE on review_sentiment, review_aspect_scores TO insights_role
+      status: reserved
+      reserved_at: "2026-06-18T20:00:00Z"
+      expires_at: "2026-06-25T20:00:00Z"
+    - version: V9179
+      section: H
+      epic: sprint-10-moderation
+      fr: ""
+      status: reserved
+      reserved_at: "2026-06-19T04:00:59Z"
+      expires_at: "2026-06-20T04:00:59Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -2341,7 +2365,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.190.0 # updated 2026-06-13 — F / GDI-1945 / FR-F.4.2 — Display Config Without Collection.
+  current_main: v0.197.0 # updated 2026-06-18 — extraction / GDI-2118 / Sprint 9 — ai-insights read cutover + monolith drain.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -2560,6 +2584,22 @@ releases:
       proposed_tag: v0.19.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
+    - section: extraction
+      epic: GDI-2115
+      proposed_tag: v0.196.x
+      anchor_sha: pending
+      status: shipped
+      shipped_tag: v0.196.0
+      shipped_at: "2026-06-18T00:00:00Z"
+      note: ai-insights Sprint 8 — EventBridge-driven sentiment/aspect scoring (shadow mode); tag cut after PR #579 (ugc-platform) + #594 (global-devops-infra) merge + CI + tofu apply
+    - section: extraction
+      epic: GDI-2118
+      proposed_tag: v0.197.x
+      anchor_sha: c868c1ba
+      status: shipped
+      shipped_tag: v0.197.0
+      shipped_at: "2026-06-18T23:06:26Z"
+      note: ai-insights Sprint 9 — read cutover (GDI-2119 read endpoints + GDI-2120 SentimentController proxy + drain); strangler-fig complete; PR #580 + infra PR #595
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
