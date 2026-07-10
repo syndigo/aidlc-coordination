@@ -2276,9 +2276,9 @@ single_writer_files:
     until: "2026-05-19T00:27:01Z"
     reason: released via release.sh
   - file: settings.gradle.kts
-    held_by: GDI-2224
-    until: "2026-07-11T16:07:20Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-07-10T18:11:22Z"
+    reason: released via release.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
