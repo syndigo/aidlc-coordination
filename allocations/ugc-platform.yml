@@ -1713,6 +1713,12 @@ flyway:
       epic: GDI-1849
       release_tag: v0.174.0
       shipped_at: "2026-06-07T21:05:47Z"
+    - version: V9186
+      section: I
+      epic: GDI-2242
+      release_tag: v0.232.0
+      shipped_at: "2026-07-13T14:38:19Z"
+      note: dsr-service tenant GUC fix — tightens the 3 DSR RLS policies (fail-open -> strict NULLIF-guarded); owned by ugc-api since V110 owns the DSR tables' DDL, though the consuming service is dsr-service; DROP+unconditional CREATE (not V110's create-if-absent guard, which would silent-no-op); live-verified via direct pg_policy query on dev RDS post-deploy
     - version: V184
       section: F
       epic: GDI-1771
@@ -2644,6 +2650,14 @@ releases:
       shipped_tag: v0.231.0
       shipped_at: "2026-07-13T03:48:39Z"
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh (--bump minor, since next_per_section/--bump band is stale legacy data last updated ~v0.37.x); PR #689; placeholder GDI-PENDING-SHADOW-ACTIVATE reconciled to GDI-2282 post-Stage-1
+    - section: I
+      epic: GDI-2242
+      proposed_tag: v0.232.x
+      anchor_sha: fb10ff5166ff9b1ff5917583d57d21e8502104cc
+      status: shipped
+      shipped_tag: v0.232.0
+      shipped_at: "2026-07-13T14:38:19Z"
+      note: dsr-service tenant GUC + V110 fail-open RLS tighten (ugc-api migration V9186); PR #695; live-verified via direct pg_policy query on dev RDS post-deploy; sibling follow-ups GDI-2300 (qa-service, gated separately) / GDI-2294 (403 auth defect, must not land before this) / GDI-2295 epic (sampling/matching/syndication/dsa-ingestion, same GUC gap)
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
