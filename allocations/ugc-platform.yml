@@ -2639,8 +2639,11 @@ releases:
     - section: B
       epic: GDI-2282
       proposed_tag: v0.231.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh; placeholder GDI-PENDING-SHADOW-ACTIVATE reconciled to GDI-2282 post-Stage-1
+      anchor_sha: febca53d2ac9ac70c87a5a7eaf3ae593d1c6b223
+      status: shipped
+      shipped_tag: v0.231.0
+      shipped_at: "2026-07-13T03:48:39Z"
+      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh (--bump minor, since next_per_section/--bump band is stale legacy data last updated ~v0.37.x); PR #689; placeholder GDI-PENDING-SHADOW-ACTIVATE reconciled to GDI-2282 post-Stage-1
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
