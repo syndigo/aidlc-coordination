@@ -2664,6 +2664,22 @@ releases:
       shipped_tag: v0.232.0
       shipped_at: "2026-07-13T14:38:19Z"
       note: dsr-service tenant GUC + V110 fail-open RLS tighten (ugc-api migration V9186); PR #695; live-verified via direct pg_policy query on dev RDS post-deploy; sibling follow-ups GDI-2300 (qa-service, gated separately) / GDI-2294 (403 auth defect, must not land before this) / GDI-2295 epic (sampling/matching/syndication/dsa-ingestion, same GUC gap)
+    - section: D
+      epic: GDI-2300
+      proposed_tag: v0.233.x
+      anchor_sha: 870c2f27fcdf8fa0e598e70244edf9e51820489b
+      status: shipped
+      shipped_tag: v0.233.0
+      shipped_at: "2026-07-13T17:08:36Z"
+      note: qa-service tenant GUC + questions/answers RLS tighten (ugc-api V9187) + closed live cross-tenant vote existence oracle (app-level findByIdAndTenantId) + new /internal-scoped TenantHeaderFilter; PR #699; live-verified via pg_policy query. Follow-up GDI-2313 (qa_solicitations family never-bound-GUC)
+    - section: H
+      epic: GDI-2299
+      proposed_tag: v0.234.x
+      anchor_sha: 62ad2fbac70e200a96bf9e7b7ea7f3c778ae1c95
+      status: shipped
+      shipped_tag: v0.234.0
+      shipped_at: "2026-07-13T18:07:20Z"
+      note: dsa-ingestion tenant GUC — NO migration (all 4 tables already strict RLS); fix was deleting the service's LOCAL RlsContext + repointing 15 files to shared com.syndigo.ugc.db.RlsContext (TenantAwareDataSource reads the shared one, so a wrapper-only fix would silently no-op) + TenantAwareDataSource wrap; PR #702; live-verified: dsa_ingestion_role bound to real tenant now sees 17 rows (was 0). Follow-ups GDI-2314 (V168 no WITH CHECK) / GDI-2315 (V168 no missing_ok)
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
