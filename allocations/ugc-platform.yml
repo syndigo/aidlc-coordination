@@ -2680,6 +2680,14 @@ releases:
       shipped_tag: v0.234.0
       shipped_at: "2026-07-13T18:07:20Z"
       note: dsa-ingestion tenant GUC — NO migration (all 4 tables already strict RLS); fix was deleting the service's LOCAL RlsContext + repointing 15 files to shared com.syndigo.ugc.db.RlsContext (TenantAwareDataSource reads the shared one, so a wrapper-only fix would silently no-op) + TenantAwareDataSource wrap; PR #702; live-verified: dsa_ingestion_role bound to real tenant now sees 17 rows (was 0). Follow-ups GDI-2314 (V168 no WITH CHECK) / GDI-2315 (V168 no missing_ok)
+    - section: F
+      epic: GDI-2297+GDI-2298
+      proposed_tag: v0.235.x
+      anchor_sha: 8df2d8d0e9a0e8ad62c3d3fcb517d8231c3740ec
+      status: shipped
+      shipped_tag: v0.235.0
+      shipped_at: "2026-07-13T19:20:46Z"
+      note: matching-service (GDI-2297) + syndication-service (GDI-2298) tenant GUC — bundled one PR #705, NO migration (all consumed tables already strict RLS). Same local->shared RlsContext migration + TenantAwareDataSource wrap as GDI-2299. CI isolation ITs matching 10/10, syndication 20/20 (both w/ oldStyle/newStyle falsification). Live before/after N/A (dev tables empty). Pre-existing low unit coverage (matching 19.8%, syndication 38%, unchanged by PR) -> dedicated /coverage-push campaign
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
