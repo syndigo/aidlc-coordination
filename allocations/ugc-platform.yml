@@ -1725,6 +1725,12 @@ flyway:
       release_tag: v0.233.0
       shipped_at: "2026-07-13T17:08:36Z"
       note: qa-service tenant GUC fix — tightens questions(V26)+answers(V31) RLS fail-open -> strict NULLIF; NOT answer_votes(V66, already strict+trigger). Owned by ugc-api (owns the DDL). Also closed a live cross-tenant existence oracle on POST /v1/answers/{id}/votes via app-level findByIdAndTenantId. Live-verified via direct pg_policy query on dev RDS. PR #699
+    - version: V9188
+      section: H
+      epic: GDI-2296
+      release_tag: v0.236.0
+      shipped_at: "2026-07-13T21:12:00Z"
+      note: sampling-service tenant GUC fix — fixes V38 sampling_members policy which uniquely OMITTED the current_setting missing_ok (,true) arg (hard-errored 42704 on unbound GUC instead of zero rows); ALTER to strict NULLIF form. Owned by ugc-api. Plus NEW TenantHeaderFilter (sampling had none) + TenantAwareDataSource wrap. Live-verified: sampling_role unbound now returns clean 0 rows (was 42704). Coverage raised 76.7->82.1%. PR #714. Follow-up GDI-373 (no SecurityFilterChain at all)
     - version: V184
       section: F
       epic: GDI-1771
