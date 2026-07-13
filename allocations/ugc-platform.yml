@@ -1730,7 +1730,7 @@ flyway:
       epic: GDI-2296
       release_tag: v0.236.0
       shipped_at: "2026-07-13T21:12:00Z"
-      note: sampling-service tenant GUC fix — fixes V38 sampling_members policy which uniquely OMITTED the current_setting missing_ok (,true) arg (hard-errored 42704 on unbound GUC instead of zero rows); ALTER to strict NULLIF form. Owned by ugc-api. Plus NEW TenantHeaderFilter (sampling had none) + TenantAwareDataSource wrap. Live-verified: sampling_role unbound now returns clean 0 rows (was 42704). Coverage raised 76.7->82.1%. PR #714. Follow-up GDI-373 (no SecurityFilterChain at all)
+      note: "sampling-service tenant GUC fix — fixes V38 sampling_members policy which uniquely OMITTED the current_setting missing_ok (,true) arg (hard-errored 42704 on unbound GUC instead of zero rows); ALTER to strict NULLIF form. Owned by ugc-api. Plus NEW TenantHeaderFilter (sampling had none) + TenantAwareDataSource wrap. Live-verified: sampling_role unbound now returns clean 0 rows (was 42704). Coverage raised 76.7->82.1%. PR #714. Follow-up GDI-373 (no SecurityFilterChain at all)"
     - version: V184
       section: F
       epic: GDI-1771
@@ -2685,7 +2685,7 @@ releases:
       status: shipped
       shipped_tag: v0.234.0
       shipped_at: "2026-07-13T18:07:20Z"
-      note: dsa-ingestion tenant GUC — NO migration (all 4 tables already strict RLS); fix was deleting the service's LOCAL RlsContext + repointing 15 files to shared com.syndigo.ugc.db.RlsContext (TenantAwareDataSource reads the shared one, so a wrapper-only fix would silently no-op) + TenantAwareDataSource wrap; PR #702; live-verified: dsa_ingestion_role bound to real tenant now sees 17 rows (was 0). Follow-ups GDI-2314 (V168 no WITH CHECK) / GDI-2315 (V168 no missing_ok)
+      note: "dsa-ingestion tenant GUC — NO migration (all 4 tables already strict RLS); fix was deleting the service's LOCAL RlsContext + repointing 15 files to shared com.syndigo.ugc.db.RlsContext (TenantAwareDataSource reads the shared one, so a wrapper-only fix would silently no-op) + TenantAwareDataSource wrap; PR #702; live-verified: dsa_ingestion_role bound to real tenant now sees 17 rows (was 0). Follow-ups GDI-2314 (V168 no WITH CHECK) / GDI-2315 (V168 no missing_ok)"
     - section: F
       epic: GDI-2297+GDI-2298
       proposed_tag: v0.235.x
@@ -2701,7 +2701,7 @@ releases:
       status: shipped
       shipped_tag: v0.237.0
       shipped_at: "2026-07-13T22:12:02Z"
-      note: dsr-service Entra JWT auth — closes the total 403 bypass (had @EnableMethodSecurity + @PreAuthorize but no SecurityContext populator). NO migration (code-only). Mirrors matching/syndication JWT resource-server chain, private converter. Re-enabled 12 GDI-2242-disabled tests. Sequenced after GDI-2242 (RLS fixed first). Live-verified: no-token now 401 (was 403), no-tenant 400 (TenantHeaderFilter still first). Stage 7 PASS. PR #718. Note v0.236.0 (GDI-2296) shipped between the v0.235 and v0.237 F/I band tags on section H.
+      note: "dsr-service Entra JWT auth — closes the total 403 bypass (had @EnableMethodSecurity + @PreAuthorize but no SecurityContext populator). NO migration (code-only). Mirrors matching/syndication JWT resource-server chain, private converter. Re-enabled 12 GDI-2242-disabled tests. Sequenced after GDI-2242 (RLS fixed first). Live-verified: no-token now 401 (was 403), no-tenant 400 (TenantHeaderFilter still first). Stage 7 PASS. PR #718. Note v0.236.0 (GDI-2296) shipped between the v0.235 and v0.237 F/I band tags on section H."
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
