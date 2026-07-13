@@ -1719,6 +1719,12 @@ flyway:
       release_tag: v0.232.0
       shipped_at: "2026-07-13T14:38:19Z"
       note: dsr-service tenant GUC fix — tightens the 3 DSR RLS policies (fail-open -> strict NULLIF-guarded); owned by ugc-api since V110 owns the DSR tables' DDL, though the consuming service is dsr-service; DROP+unconditional CREATE (not V110's create-if-absent guard, which would silent-no-op); live-verified via direct pg_policy query on dev RDS post-deploy
+    - version: V9187
+      section: D
+      epic: GDI-2300
+      release_tag: v0.233.0
+      shipped_at: "2026-07-13T17:08:36Z"
+      note: qa-service tenant GUC fix — tightens questions(V26)+answers(V31) RLS fail-open -> strict NULLIF; NOT answer_votes(V66, already strict+trigger). Owned by ugc-api (owns the DDL). Also closed a live cross-tenant existence oracle on POST /v1/answers/{id}/votes via app-level findByIdAndTenantId. Live-verified via direct pg_policy query on dev RDS. PR #699
     - version: V184
       section: F
       epic: GDI-1771
