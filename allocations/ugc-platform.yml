@@ -2694,6 +2694,14 @@ releases:
       shipped_tag: v0.235.0
       shipped_at: "2026-07-13T19:20:46Z"
       note: matching-service (GDI-2297) + syndication-service (GDI-2298) tenant GUC — bundled one PR #705, NO migration (all consumed tables already strict RLS). Same local->shared RlsContext migration + TenantAwareDataSource wrap as GDI-2299. CI isolation ITs matching 10/10, syndication 20/20 (both w/ oldStyle/newStyle falsification). Live before/after N/A (dev tables empty). Pre-existing low unit coverage (matching 19.8%, syndication 38%, unchanged by PR) -> dedicated /coverage-push campaign
+    - section: I
+      epic: GDI-2294
+      proposed_tag: v0.237.x
+      anchor_sha: 9ae436d5f3969aec19bd6db10f721d9aa2eab352
+      status: shipped
+      shipped_tag: v0.237.0
+      shipped_at: "2026-07-13T22:12:02Z"
+      note: dsr-service Entra JWT auth — closes the total 403 bypass (had @EnableMethodSecurity + @PreAuthorize but no SecurityContext populator). NO migration (code-only). Mirrors matching/syndication JWT resource-server chain, private converter. Re-enabled 12 GDI-2242-disabled tests. Sequenced after GDI-2242 (RLS fixed first). Live-verified: no-token now 401 (was 403), no-tenant 400 (TenantHeaderFilter still first). Stage 7 PASS. PR #718. Note v0.236.0 (GDI-2296) shipped between the v0.235 and v0.237 F/I band tags on section H.
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
