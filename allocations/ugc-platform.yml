@@ -1730,7 +1730,13 @@ flyway:
       epic: GDI-2296
       release_tag: v0.236.0
       shipped_at: "2026-07-13T21:12:00Z"
-      note: "sampling-service tenant GUC fix — fixes V38 sampling_members policy which uniquely OMITTED the current_setting missing_ok (,true) arg (hard-errored 42704 on unbound GUC instead of zero rows); ALTER to strict NULLIF form. Owned by ugc-api. Plus NEW TenantHeaderFilter (sampling had none) + TenantAwareDataSource wrap. Live-verified: sampling_role unbound now returns clean 0 rows (was 42704). Coverage raised 76.7->82.1%. PR #714. Follow-up GDI-373 (no SecurityFilterChain at all)"
+      note: "sampling-service tenant GUC fix — fixes V38 sampling_members policy which uniquely OMITTED the current_setting missing_ok (,true) arg (hard-errored 42704 on unbound GUC instead of zero rows); ALTER to strict NULLIF form. Owned by ugc-api. Plus NEW TenantHeaderFilter (sampling had none) + TenantAwareDataSource wrap. Live-verified: sampling_role unbound now returns clean 0 rows (was 42704). Coverage raised 76.7->82.1%. PR #714. Follow-up GDI-2319 (no SecurityFilterChain at all -- corrected from an earlier mis-citation as GDI-373, which is an unrelated Entra/AWS federation ticket)"
+    - version: V9189
+      section: D
+      epic: GDI-2313
+      release_tag: v0.238.0
+      shipped_at: "2026-07-14T00:52:20Z"
+      note: "qa-service qa_solicitations family — first SECURITY DEFINER cross-tenant claim pattern of the RLS campaign (mirrors V9185's claim_pending_review_tag_outbox). Two functions (claim_pending_qa_solicitations, claim_overdue_question_sla) for QuestionSlaWorker/SolicitationDispatcher, both @Scheduled with no HTTP tenant to bind. SET search_path=public, REVOKE PUBLIC + qa_role-only EXECUTE, FOR UPDATE SKIP LOCKED, per-row RlsContext.set(tenantId) for the terminal write. Stage 7 caught+fixed a HIGH stuck-CLAIMED-row gap (missing reclaim window on the solicitations fn). Owned by ugc-api. Deploy incident: sync-lag squash-merge dropped a coverage commit + cross-service migration-ordering race crash-looped qa-service 8x (self-healed); recovered via PR #726 (re-landed coverage 29.1->82.94%, added qa-service-owned V102 Flyway guard so qa-service can't crash-loop on this again). Live-verified: functions confirmed SECURITY DEFINER, PUBLIC has zero execute, qa_role scoped + not bypassrls. PRs #721, #726"
     - version: V184
       section: F
       epic: GDI-1771
