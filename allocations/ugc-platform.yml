@@ -2778,6 +2778,22 @@ releases:
       shipped_tag: v0.247.0
       shipped_at: "2026-07-14T~17:40:00Z"
       note: "Deferred coverage-completion half of GDI-2323 (see v0.243.0 note) -- test-only, no production code. Raised collection-service LINE coverage 58.72%->88.95% (681 tests, 0 failures) across previously-thin packages (notifications, reminders, templates, order-feeds, security tokens, AI ordering/send-time-optimization, opensubmit, submission-assistant, email). The original coverage-push agent died mid-consolidation without committing/opening a PR (spawned 6 parallel batch sub-agents, all completed real work, but the coordinator never landed it) -- recovered by copying the 6 batches' untracked test files into a fresh worktree off current dev and landing manually. One real test bug found and fixed while re-verifying fresh (not just trusting the batch agents' self-reported pass): TokenSecretProviderTest asserted IllegalStateException for TokenSecretProvider.load()'s blank-arn/blank-secret guards; production uses Kotlin require(...), which throws IllegalArgumentException -- corrected. PR #738."
+    - section: D
+      epic: GDI-2324
+      proposed_tag: v0.248.x
+      anchor_sha: a0a7e7edf8683300587494c02dbbd453fd9c4eaa
+      status: shipped
+      shipped_tag: v0.248.0
+      shipped_at: "2026-07-14T18:26:53Z"
+      note: "ugc-api edge service-proxy gateway (GDI-2321 epic) -- restores 5 UI tabs that 404'd because their controllers were extracted to internal-only services (qa/sampling/collection/syndication) during the cutover with no proxy left behind. Shared @Component ServiceProxyGateway forwards BOTH the caller's Authorization bearer AND X-Tenant-Id (the existing dead-code ModerationProxyGateway forwards tenant only, so it was NOT reusable -- all 4 targets now enforce real Entra JWT per GDI-2322/2323/2319/pre-existing). 4 per-service @Configuration beans (@ConditionalOnExpression on <SVC>_SERVICE_BASE_URL) + 4 thin path-passthrough proxy controllers. Beans DORMANT until GDI-2326 wires the env vars -- ZERO behavior change on merge; proxies return 503 until then. NO NetworkPolicy needed (ugc-api already in VPC CIDR, targets' ingress allows whole CIDR, egress open). SecurityConfig gated 3 previously-permitAll-but-dead prefixes. Ports: qa 8092, sampling 8093, collection 8091, syndication 8086. PR #739. Stage 7: APPROVE_WITH_FOLLOWUPS -- caught a real multipart data-loss bug (fixed, v0.249.0) and a HIGH systemic tenant-header trust gap (GDI-2331, MUST fix before activating the proxy anywhere beyond dev). Un-proxied CampaignReportController tracked as GDI-2332."
+    - section: D
+      epic: GDI-2324-multipart
+      proposed_tag: v0.249.x
+      anchor_sha: 4e3db06a1a46c4c2c967830c574d292bcb063201
+      status: shipped
+      shipped_tag: v0.249.0
+      shipped_at: "2026-07-14T18:41:57Z"
+      note: "Fix a CONFIRMED (not speculative) data-loss bug Stage-7 found in GDI-2324's collection-service order-feed multipart proxy: ugc-api has spring.servlet.multipart.enabled=true (default resolveLazily=false), so DispatcherServlet eagerly parses multipart requests into Parts BEFORE the proxy controller runs, exhausting the servlet input stream -- request.inputStream.readBytes() then forwarded an EMPTY body for CSV order-feed uploads. Same blind-spot class as the /error masking bug (direct-controller-invocation/@WebMvcTest tests can't see real DispatcherServlet behavior). Fix (approach c -- work WITH eager parsing, don't fight it): reconstruct a MultiValueMap from request.parts (file parts -> NamedByteArrayResource preserving part.name+filename so the target parses them as file parts; plain fields -> UTF-8 strings), forwarded via a new ServiceProxyGateway.forwardMultipart(). Rejected resolve-lazily=true (VisualUgcController relies on eager @RequestPart resolution + CSRF-bypass concern). New MockMvc real-dispatch regression test (CollectionOrderFeedProxyControllerMockMvcTest); RED/GREEN falsification confirmed. Part-name reconstruction verified against collection-service OrderFeedController's @RequestParam(\"file\"). PR #739 had already merged mid-work so this landed as PR #741 cherry-picked onto dev. requires_human_review=false."
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
