@@ -2730,6 +2730,54 @@ releases:
       shipped_tag: v0.241.0
       shipped_at: "2026-07-14T04:32:55Z"
       note: "collection-service OrderFeed permanent-strand fix — GDI-2316's @EnableScheduling activation woke OrderFeedDispatcher (dead since the Sprint 16 extraction), exposing a transactional bug: a mid-processing DB error aborted the outer REQUIRES_NEW tx, discarding the markProcessing write, so the recovery terminal UPDATE (WHERE status='PROCESSING') never matched -- feeds stayed PENDING forever, re-attempted every 30s indefinitely. Fix: broadened OrderFeedRepository.MARK_TERMINAL_SQL's WHERE to status IN ('PENDING','PROCESSING'). NO migration (SQL-string change only). A BLOCK-severity adversarial review raised a self-deadlock concern (recovery UPDATE blocking on the aborted outer tx's row lock); independently and empirically DISPROVEN via direct pg_locks/pg_stat_activity inspection against Postgres 17 (statement-abort releases locks synchronously, before the client ROLLBACK) -- two independent minimal repros + the real Gradle IT all converged on no lock contention. Falsification test (RED pre-fix/GREEN post-fix) included. Live-verified on ugc-platform-dev-eks: seeded a real order_feeds+order_feed_rows pair (orphan sentinel tenant, guaranteed collection_orders_tenant_id_fkey violation) and observed FAILED in one dispatcher cycle (~20-40s), not stranded PENDING; error_report correctly populated; stable after 40s. PR #732. Sibling tickets GDI-2316 (the @EnableScheduling campaign itself) and GDI-2219 (moderation retention DML) both verified already-resolved/premise-corrected and closed, no code needed."
+    - section: D
+      epic: GDI-2322
+      proposed_tag: v0.242.x
+      anchor_sha: 54b558219db6ce90ec245b97ad60c83f01ce3238
+      status: shipped
+      shipped_tag: v0.242.0
+      shipped_at: "2026-07-14T15:57:55Z"
+      note: "qa-service Entra JWT resource-server auth — same latent bug as GDI-2242/GDI-2294 (dsr-service) and GDI-2319 (sampling-service): @PreAuthorize gates present on /internal/** admin controllers but anyRequest().permitAll() + no oauth2ResourceServer meant they could never see a real principal. Mirrors the proven template exactly; genuine deviation handled correctly: an explicit permitAll(\"/v1/**\") carve-out preserves the pre-existing site-key consumer surface (QuestionController/AnswerController/AnswerVoteController, none @PreAuthorize-gated) so it isn't pulled behind the new JWT gate. Coverage 82.9%->83.6%. PR #733. Stage 7: APPROVE. NOTE: live-verification of the /v1/** carve-out initially looked correct (401 for no-site-key) but was LATER FOUND to be a separate masking bug (see GDI-2328/v0.245.0) -- corrected in GDI-2322's Jira record."
+    - section: B
+      epic: GDI-2323
+      proposed_tag: v0.243.x
+      anchor_sha: db9b58b9423c29ea977830b09b21030d47fec0d6
+      status: shipped
+      shipped_tag: v0.243.0
+      shipped_at: "2026-07-14T15:58:10Z"
+      note: "collection-service Entra JWT resource-server auth — same bug class as GDI-2322/GDI-2294/GDI-2319. OrderFeedController (the GDI-2321 proxy target) and 7 other admin controllers gated; 4 genuinely-public carve-outs preserved (/v1/collection/**, /v1/submission-assistant, /v1/reviewer-profile/**, /v1/collection-triggers -- each verified to have its own real auth mechanism: HMAC token, site-key, or tenant-header filter, none newly exposed). PR #734. Stage 7: APPROVE. Coverage was 58.72% at merge (no gate in this service's own CI) -- user explicitly directed bringing it to the 80% project standard; landed separately as PR #738/v0.247.0 (58.72%->88.95%) since #734 merged before the coverage work finished. LIVE REGRESSION caught during verification: see GDI-2323-hotfix/v0.244.0."
+    - section: B
+      epic: GDI-2323-hotfix
+      proposed_tag: v0.244.x
+      anchor_sha: 50bc581e7615699b38616b43fa36a0a81c51e337
+      status: shipped
+      shipped_tag: v0.244.0
+      shipped_at: "2026-07-14T16:42:47Z"
+      note: "HOTFIX, same-session same-day as GDI-2323/v0.243.0. Root cause: Spring Boot's SecurityFilterAutoConfiguration re-secures the servlet container's internal /error forward with the SAME SecurityFilterChain as real requests. On a permitAll consumer path, if the handler throws, the /error dispatch matches no carve-out, falls to anyRequest().authenticated(), and the resource-server masks the REAL error status as a fake 401+WWW-Authenticate:Bearer -- found live: GET /v1/collection/form-schema returned 401 instead of reaching the controller. Fix: one line, .requestMatchers(\"/error\").permitAll(). New full @SpringBootTest(RANDOM_PORT) regression test (CollectionSecurityConfigErrorDispatchIT) -- @WebMvcTest slices structurally cannot catch this class of bug (no real container error-dispatch). Confirmed via local full-context repro with Spring Security debug logging. Stage 7: APPROVE_WITH_FOLLOWUPS (no leak risk, no route collision, admin gate unweakened). Live-verified post-deploy: form-schema now surfaces its REAL status (500, a separate pre-existing bug -- FormSchemaController references a non-existent CollectionPathExclusionConfig, tracked as GDI-2329) instead of the masked 401; admin path (/v1/internal/order-feeds) still correctly 401s. PR #735. Surfaced this as a SYSTEMIC gap -- see GDI-2328."
+    - section: D
+      epic: GDI-2328-qa
+      proposed_tag: v0.245.x
+      anchor_sha: e784f41c385864fdfd63ff9e6b8731423a9df439
+      status: shipped
+      shipped_tag: v0.245.0
+      shipped_at: "2026-07-14T16:57:52Z"
+      note: "Sweep of the GDI-2323-hotfix /error-masking bug class to qa-service (highest-priority sibling: broadest public carve-out, /v1/** covering the demo-critical Q&A consumer surface). Same one-line fix + full-context regression test (QaSecurityConfigErrorDispatchIT). Stage 7: APPROVE, and CONFIRMED the masking-bug theory: the live 401 previously observed on GET /v1/questions (no site key) for GDI-2322 was NOT correct fail-closed design as originally assessed -- source trace shows an unhandled IllegalStateException (RlsContext.get() on an unbound context, no matching QuestionExceptionHandler, no GlobalExceptionHandler fallback in qa-service) falling through to a masked 401. Post-fix, live-verified: real status now surfaces (400). Correction posted to GDI-2322's Jira record. Follow-up GDI-2330 filed (qa-service needs a catch-all exception handler; the now-unmasked raw 500/400 on this path is itself a smaller pre-existing gap). PR #736. dsr-service and sampling-service checked and confirmed NOT AFFECTED (actuator-only permitAll, no public consumer surface) -- no PR needed for either."
+    - section: F
+      epic: GDI-2328-syndication
+      proposed_tag: v0.246.x
+      anchor_sha: 586e19486e15da0b79dfe36150371487fd2c1526
+      status: shipped
+      shipped_tag: v0.246.0
+      shipped_at: "2026-07-14T17:01:56Z"
+      note: "Sweep of the /error-masking bug class to syndication-service (2 genuine permitAll carve-outs: GET /v1/feeds/** partner-crawler routes, POST /internal/v1/review-tags* GDI-2251 reverse-bridge, both no-JWT by design). Same one-line fix + full-context regression test (SyndicationSecurityConfigErrorDispatchIT), repro'd via a cross-tenant-parity-trigger exception on review-tags (Stage 7 traced the exact Postgres trigger mechanism, corrected the test's doc-comment from 'FK violation' to the actual firing trigger -- non-blocking). Stage 7: APPROVE_WITH_FOLLOWUPS. Fix is architecturally global (protects both carve-outs) though only review-tags is empirically exercised. PR #737."
+    - section: B
+      epic: GDI-2323-coverage
+      proposed_tag: v0.247.x
+      anchor_sha: 7732c52c3c20c71b78b639fd8a7a733a0d3d235d
+      status: shipped
+      shipped_tag: v0.247.0
+      shipped_at: "2026-07-14T~17:40:00Z"
+      note: "Deferred coverage-completion half of GDI-2323 (see v0.243.0 note) -- test-only, no production code. Raised collection-service LINE coverage 58.72%->88.95% (681 tests, 0 failures) across previously-thin packages (notifications, reminders, templates, order-feeds, security tokens, AI ordering/send-time-optimization, opensubmit, submission-assistant, email). The original coverage-push agent died mid-consolidation without committing/opening a PR (spawned 6 parallel batch sub-agents, all completed real work, but the coordinator never landed it) -- recovered by copying the 6 batches' untracked test files into a fresh worktree off current dev and landing manually. One real test bug found and fixed while re-verifying fresh (not just trusting the batch agents' self-reported pass): TokenSecretProviderTest asserted IllegalStateException for TokenSecretProvider.load()'s blank-arn/blank-secret guards; production uses Kotlin require(...), which throws IllegalArgumentException -- corrected. PR #738."
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
