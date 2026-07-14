@@ -1737,6 +1737,12 @@ flyway:
       release_tag: v0.238.0
       shipped_at: "2026-07-14T00:52:20Z"
       note: "qa-service qa_solicitations family — first SECURITY DEFINER cross-tenant claim pattern of the RLS campaign (mirrors V9185's claim_pending_review_tag_outbox). Two functions (claim_pending_qa_solicitations, claim_overdue_question_sla) for QuestionSlaWorker/SolicitationDispatcher, both @Scheduled with no HTTP tenant to bind. SET search_path=public, REVOKE PUBLIC + qa_role-only EXECUTE, FOR UPDATE SKIP LOCKED, per-row RlsContext.set(tenantId) for the terminal write. Stage 7 caught+fixed a HIGH stuck-CLAIMED-row gap (missing reclaim window on the solicitations fn). Owned by ugc-api. Deploy incident: sync-lag squash-merge dropped a coverage commit + cross-service migration-ordering race crash-looped qa-service 8x (self-healed); recovered via PR #726 (re-landed coverage 29.1->82.94%, added qa-service-owned V102 Flyway guard so qa-service can't crash-loop on this again). Live-verified: functions confirmed SECURITY DEFINER, PUBLIC has zero execute, qa_role scoped + not bypassrls. PRs #721, #726"
+    - version: V9190
+      section: H
+      epic: GDI-2314+GDI-2315
+      release_tag: v0.239.0
+      shipped_at: "2026-07-14T01:00:35Z"
+      note: "V168 import-pipeline RLS hardening (ugc_import_jobs/ugc_import_row_errors/imported_reviews). GDI-2315 (real bug, fixed): missing_ok arg added, unbound reads now return clean 0 rows instead of 42704. GDI-2314 (premise corrected, not a live vuln): empirically verified against postgres:17-alpine that FOR ALL/USING-only policies already used USING as implicit WITH CHECK -- cross-tenant writes were already blocked (42501) under the pre-fix shape; explicit WITH CHECK added anyway as introspectability hardening, Jira priority dropped to Low. Owned by ugc-api; consumed by both dsa_ingestion_role AND ugc_app_role (ImportReclassifyController) -- second consumer not in the original ticket premise, no code change needed since both bind tenant correctly. Live-verified: pg_policy shows missing_ok + explicit with_check on all 3; unbound dsa_ingestion_role read returns clean 0 rows on all 3. PR #729"
     - version: V184
       section: F
       epic: GDI-1771
