@@ -2714,6 +2714,14 @@ releases:
       shipped_tag: v0.237.0
       shipped_at: "2026-07-13T22:12:02Z"
       note: "dsr-service Entra JWT auth — closes the total 403 bypass (had @EnableMethodSecurity + @PreAuthorize but no SecurityContext populator). NO migration (code-only). Mirrors matching/syndication JWT resource-server chain, private converter. Re-enabled 12 GDI-2242-disabled tests. Sequenced after GDI-2242 (RLS fixed first). Live-verified: no-token now 401 (was 403), no-tenant 400 (TenantHeaderFilter still first). Stage 7 PASS. PR #718. Note v0.236.0 (GDI-2296) shipped between the v0.235 and v0.237 F/I band tags on section H."
+    - section: H
+      epic: GDI-2319
+      proposed_tag: v0.240.x
+      anchor_sha: 1fae81af0d1aa60112980aa678af6f98564f8bdd
+      status: shipped
+      shipped_tag: v0.240.0
+      shipped_at: "2026-07-14T02:44:06Z"
+      note: "sampling-service Entra JWT resource-server auth — closes the no-SecurityFilterChain gap flagged by GDI-2296's follow-up (admin endpoints previously relied on Spring Boot's default HTTP Basic, unreachable to any real caller, which was masking GDI-2296's tenant-GUC fix from ever executing on a real request). NO migration (code-only). Mirrors dsr-service GDI-2294 pattern exactly (byte-identical private roles/scp->authorities converter, verified by diff). TenantHeaderFilter ordering preserved. Stage 7 QA: APPROVE_WITH_FOLLOWUPS, converter parity confirmed vs dsr-service. Live-verified on ugc-platform-dev-eks: no-token+tenant-header now 401 with WWW-Authenticate: Bearer (was Basic); missing-tenant-header still 400 (TenantHeaderFilter still runs first); actuator/health stays 200. Coverage 82.41%, no regression. PR #730. Follow-up GDI-2320 (CampaignReportController has no explicit role gate — not a regression, was previously 401 to everyone)."
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
