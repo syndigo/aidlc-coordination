@@ -2420,7 +2420,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.256.1 # updated 2026-06-18 — extraction / GDI-2118 / Sprint 9 — ai-insights read cutover + monolith drain.
+  current_main: v0.257.0 # updated 2026-06-18 — extraction / GDI-2118 / Sprint 9 — ai-insights read cutover + monolith drain.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -2808,11 +2808,6 @@ releases:
       shipped_tag: v0.249.0
       shipped_at: "2026-07-14T18:41:57Z"
       note: "Fix a CONFIRMED (not speculative) data-loss bug Stage-7 found in GDI-2324's collection-service order-feed multipart proxy: ugc-api has spring.servlet.multipart.enabled=true (default resolveLazily=false), so DispatcherServlet eagerly parses multipart requests into Parts BEFORE the proxy controller runs, exhausting the servlet input stream -- request.inputStream.readBytes() then forwarded an EMPTY body for CSV order-feed uploads. Same blind-spot class as the /error masking bug (direct-controller-invocation/@WebMvcTest tests can't see real DispatcherServlet behavior). Fix (approach c -- work WITH eager parsing, don't fight it): reconstruct a MultiValueMap from request.parts (file parts -> NamedByteArrayResource preserving part.name+filename so the target parses them as file parts; plain fields -> UTF-8 strings), forwarded via a new ServiceProxyGateway.forwardMultipart(). Rejected resolve-lazily=true (VisualUgcController relies on eager @RequestPart resolution + CSRF-bypass concern). New MockMvc real-dispatch regression test (CollectionOrderFeedProxyControllerMockMvcTest); RED/GREEN falsification confirmed. Part-name reconstruction verified against collection-service OrderFeedController's @RequestParam(\"file\"). PR #739 had already merged mid-work so this landed as PR #741 cherry-picked onto dev. requires_human_review=false."
-    - section: G
-      epic: GDI-2359
-      proposed_tag: v0.25.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
   # Cross-section blocking relationships. A "single-anchor surface" is a piece
   # of behavior that must be implemented ONCE and reused; downstream consumers
