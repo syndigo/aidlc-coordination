@@ -2156,13 +2156,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-16T04:31:55Z"
       expires_at: "2026-07-17T04:31:55Z"
-    - version: V105
-      section: G
-      epic: GDI-2375
-      fr: FR-G.2.6
-      status: reserved
-      reserved_at: "2026-07-16T07:26:48Z"
-      expires_at: "2026-07-17T07:26:48Z"
     - version: V1000
       section: G
       epic: GDI-2375
