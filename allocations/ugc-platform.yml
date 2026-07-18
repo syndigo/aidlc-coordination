@@ -1860,6 +1860,11 @@ flyway:
       epic: GDI-2396
       release_tag: v0.261.0
       shipped_at: "2026-07-18T01:41:22Z"
+    - version: V203
+      section: G
+      epic: GDI-2399
+      release_tag: v0.262.0
+      shipped_at: "2026-07-18T01:48:43Z"
   reserved:
     - version: V43
       section: B
@@ -2193,13 +2198,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-15T17:58:46Z"
       expires_at: "2026-07-16T17:58:46Z"
-    - version: V203
-      section: G
-      epic: GDI-2399
-      fr: FR-G.2.9
-      status: reserved
-      reserved_at: "2026-07-17T19:42:16Z"
-      expires_at: "2026-07-18T19:42:16Z"
     - version: V204
       section: G
       epic: GDI-2399
@@ -3199,6 +3197,7 @@ pillars:
       - FR-G.2.3
       - FR-G.2.6
       - FR-G.2.4
+      - FR-G.2.9
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
