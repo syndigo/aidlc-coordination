@@ -1935,6 +1935,11 @@ flyway:
       epic: GDI-2420
       release_tag: v0.265.0
       shipped_at: "2026-07-20T22:02:59Z"
+    - version: V1047
+      section: G
+      epic: GDI-2420
+      release_tag: v0.265.0
+      shipped_at: "2026-07-20T22:03:01Z"
   reserved:
     - version: V43
       section: B
@@ -2275,13 +2280,6 @@ flyway:
       status: shipped
       release_tag: v0.263.0
       shipped_at: "2026-07-20T11:31:13Z"
-    - version: V1047
-      section: G
-      epic: GDI-2420
-      fr: FR-G.1.13
-      status: reserved
-      reserved_at: "2026-07-20T15:24:48Z"
-      expires_at: "2026-07-21T15:24:48Z"
     - version: V9201
       section: F
       epic: GDI-2430
