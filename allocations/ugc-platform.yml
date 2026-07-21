@@ -2539,6 +2539,10 @@ single_writer_files:
     held_by: NEW-GDI-FR-G.1.12
     until: "2026-07-22T18:53:01Z"
     reason: reserved via reserve.sh
+  - file: aws/global-devops/ugc-platform-eks/routing/main.tf
+    held_by: GDI-2476
+    until: "2026-07-22T22:14:58Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
