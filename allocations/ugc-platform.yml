@@ -1945,6 +1945,11 @@ flyway:
       epic: NEW-GDI-FR-G.2.5
       release_tag: v0.267.0
       shipped_at: "2026-07-21T03:12:54Z"
+    - version: V9208
+      section: G
+      epic: NEW-GDI-FR-G.2.8
+      release_tag: v0.270.0
+      shipped_at: "2026-07-21T18:12:22Z"
   reserved:
     - version: V43
       section: B
@@ -2306,13 +2311,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-20T18:43:19Z"
       expires_at: "2026-07-21T18:43:19Z"
-    - version: V9208
-      section: G
-      epic: NEW-GDI-FR-G.2.8
-      fr: ""
-      status: reserved
-      reserved_at: "2026-07-21T03:59:18Z"
-      expires_at: "2026-07-22T03:59:18Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
@@ -3279,6 +3277,7 @@ pillars:
       - FR-G.2.4
       - FR-G.2.9
       - FR-G.1.13
+      - FR-G.2.8
     blocked_on: []
     ship_frequency: unlimited
     max_in_flight_frs: 8
