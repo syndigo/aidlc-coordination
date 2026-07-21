@@ -3029,11 +3029,6 @@ releases:
       proposed_tag: v0.25.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: F
-      epic: GDI-2468
-      proposed_tag: v0.269.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
     - section: G
       epic: NEW-GDI-FR-G.1.12
       proposed_tag: v0.27.x
