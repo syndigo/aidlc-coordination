@@ -2506,9 +2506,9 @@ single_writer_files:
     until: "2026-07-21T03:12:56Z"
     reason: released via release.sh
   - file: services/sampling-service/src/main/kotlin/com/syndigo/sampling/creator/service/ContentSubmissionService.kt
-    held_by: NEW-GDI-FR-G.2.5
-    until: "2026-07-21T22:36:28Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-07-21T03:12:58Z"
+    reason: released via release.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
