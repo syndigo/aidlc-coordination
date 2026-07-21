@@ -1965,6 +1965,11 @@ flyway:
       epic: GDI-2470
       release_tag: v0.272.0
       shipped_at: "2026-07-21T22:29:39Z"
+    - version: V1051
+      section: G
+      epic: GDI-2470
+      release_tag: v0.272.0
+      shipped_at: "2026-07-21T22:29:41Z"
   reserved:
     - version: V43
       section: B
