@@ -1955,6 +1955,11 @@ flyway:
       epic: GDI-2468
       release_tag: v0.271.0
       shipped_at: "2026-07-21T21:29:09Z"
+    - version: V9213
+      section: F
+      epic: GDI-2468
+      release_tag: v0.271.0
+      shipped_at: "2026-07-21T21:29:11Z"
   reserved:
     - version: V43
       section: B
@@ -2323,13 +2328,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-21T18:52:54Z"
       expires_at: "2026-07-22T18:52:54Z"
-    - version: V9213
-      section: F
-      epic: GDI-2468
-      fr: ""
-      status: reserved
-      reserved_at: "2026-07-21T19:06:43Z"
-      expires_at: "2026-07-22T19:06:43Z"
   next_free: V24
   # Test fixture migrations live in their own range so they don't collide
   # with production schema versions.
