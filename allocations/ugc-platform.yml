@@ -2516,6 +2516,10 @@ single_writer_files:
     held_by: none
     until: "2026-07-21T03:12:58Z"
     reason: released via release.sh
+  - file: packages/shared-kotlin/ai/src/main/kotlin/com/syndigo/ugc/ai/governance/ModelRegistry.kt
+    held_by: NEW-GDI-FR-G.2.8
+    until: "2026-07-22T03:59:22Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
