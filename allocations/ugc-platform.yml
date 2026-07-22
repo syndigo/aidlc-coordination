@@ -2575,9 +2575,9 @@ single_writer_files:
     until: "2026-07-22T02:00:31Z"
     reason: released via release.sh --all-for-epic
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/auth/SecurityConfig.kt
-    held_by: GDI-2500
-    until: "2026-07-23T02:36:11Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-07-22T03:31:35Z"
+    reason: released via release.sh --all-for-epic
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
