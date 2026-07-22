@@ -1975,6 +1975,11 @@ flyway:
       epic: GDI-2486
       release_tag: v0.274.0
       shipped_at: "2026-07-22T02:33:00Z"
+    - version: V208
+      section: G
+      epic: GDI-2486
+      release_tag: v0.274.0
+      shipped_at: "2026-07-22T02:33:04Z"
   reserved:
     - version: V43
       section: B
@@ -2336,13 +2341,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-20T18:43:19Z"
       expires_at: "2026-07-21T18:43:19Z"
-    - version: V208
-      section: G
-      epic: GDI-2486
-      fr: ""
-      status: reserved
-      reserved_at: "2026-07-22T00:28:20Z"
-      expires_at: "2026-07-23T00:28:20Z"
     - version: V209
       section: G
       epic: GDI-2486
