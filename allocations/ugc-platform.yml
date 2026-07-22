@@ -2578,6 +2578,10 @@ single_writer_files:
     held_by: GDI-2497
     until: "2026-07-23T17:18:58Z"
     reason: reserved via reserve.sh
+  - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/auth/SecurityConfigTest.kt
+    held_by: GDI-2497
+    until: "2026-07-23T17:19:00Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
