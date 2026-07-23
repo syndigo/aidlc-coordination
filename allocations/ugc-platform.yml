@@ -2593,6 +2593,10 @@ single_writer_files:
     held_by: GDI-2457
     until: "2026-07-24T00:36:37Z"
     reason: reserved via reserve.sh
+  - file: services/syndication-service/src/main/resources/db/migration/V6__revoke_syndication_role_outbound_jobs_write.sql
+    held_by: GDI-2457
+    until: "2026-07-24T00:36:39Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
