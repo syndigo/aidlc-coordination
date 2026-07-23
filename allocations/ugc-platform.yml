@@ -1990,6 +1990,11 @@ flyway:
       epic: GDI-2486
       release_tag: v0.274.0
       shipped_at: "2026-07-22T02:33:09Z"
+    - version: V9215
+      section: F
+      epic: GDI-2457
+      release_tag: v0.278.0
+      shipped_at: "2026-07-23T16:04:07Z"
   reserved:
     - version: V43
       section: B
