@@ -242,6 +242,14 @@ git_pull_rebase() {
   stash_sha=""
   if ! git diff-index --quiet HEAD -- 2>/dev/null \
        || [ -n "$(git ls-files --others --exclude-standard 2>/dev/null)" ]; then
+    # 2026-07-24 concurrency-load-test finding: this `if ... ; then ... fi`
+    # had no `else` -- if `git stash push` itself failed (e.g. index.lock
+    # contention from another process sharing this SAME clone/working
+    # directory, not a worktree), the failure was silently swallowed and
+    # execution fell through to `git pull --rebase` with local changes
+    # still present, which then fails loudly with "cannot pull with
+    # rebase: You have unstaged changes" -- a confusing error pointing at
+    # the wrong step. Surface the real failure instead.
     if git stash push --include-untracked --quiet \
          --message "aidlc-coordination/git_pull_rebase auto-stash" 2>/dev/null; then
       stash_sha="$(git rev-parse 'stash@{0}' 2>/dev/null || true)"
@@ -249,6 +257,13 @@ git_pull_rebase() {
         log_err "git_pull_rebase: stash push appeared to succeed but rev-parse returned empty SHA"
         return 1
       fi
+    else
+      log_err "git_pull_rebase: git stash push itself failed (see git's own error above)."
+      log_err "  This usually means another process is concurrently operating on"
+      log_err "  this SAME clone (e.g. .git/index.lock contention) -- concurrent"
+      log_err "  writers must each use their own worktree (./scripts/worktree.sh),"
+      log_err "  not share one clone's working directory. See D-021 / GDI-728."
+      return 1
     fi
   fi
 
