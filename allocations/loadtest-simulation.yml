@@ -14,31 +14,32 @@
 # this supports.
 
 profile_ref: loadtest-simulation
-
 product:
   name: loadtest-simulation
   repo: syndigo/none-throwaway-loadtest
   sections: [A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T]
-
 flyway:
   shipped: []
   reserved: []
   next_free: V1
-
 model_registry:
   shipped: []
   pending: []
-
 single_writer_files:
   - file: loadtest/placeholder.txt
     held_by: none
-
+  - file: loadtest/file-1.txt
+    held_by: LOADTEST-1
+    until: "2026-07-24T21:39:32Z"
+    reason: reserved via reserve.sh
+  - file: loadtest/file-5.txt
+    held_by: LOADTEST-5
+    until: "2026-07-24T21:39:32Z"
+    reason: reserved via reserve.sh
 releases:
   current_main: v0.0.0
   next_per_section: {}
-
 anchor_dependencies: []
-
 tfc_deploy_queue:
   current_deployed_sha: "0000000000000000000000000000000000000000"
   current_desired_sha: "0000000000000000000000000000000000000000"
