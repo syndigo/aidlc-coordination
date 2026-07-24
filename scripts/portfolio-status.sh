@@ -178,9 +178,12 @@ if [ "$UPDATE_STATS" = "1" ]; then
 
   # Commit + push if we're in a git repo (best-effort).
   if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
-    git_pull_rebase || log_warn "rebase skipped"
-    git_commit_and_push "chore(stats): refresh portfolio stats for $PRODUCT" "$YML" || \
-      log_warn "stats commit/push failed (continuing)"
+    if pull_rebase_or_abort; then
+      git_commit_and_push "chore(stats): refresh portfolio stats for $PRODUCT" "$YML" || \
+        log_warn "stats commit/push failed (continuing)"
+    else
+      log_warn "stats refresh skipped: rebase conflict before commit (continuing)"
+    fi
   fi
 fi
 

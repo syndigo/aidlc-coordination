@@ -270,6 +270,16 @@ git_pull_rebase() {
   rebase_rc=0
   if ! git pull --rebase --quiet; then
     rebase_rc=1
+    # 2026-07-24 concurrency-load-test finding: a REAL rebase conflict here
+    # (replaying an already-made local commit -- e.g. git_commit_and_push's
+    # own post-commit retry loop -- on top of a sibling process's freshly-
+    # pushed commit to the same YAML region) leaves the repo mid-rebase:
+    # detached HEAD, unmerged index, conflict markers in the working tree.
+    # Confirmed empirically: a 10-way real multi-clone concurrency test left
+    # 7/10 clones stuck exactly like this. rebase_rc=1 already correctly
+    # propagates failure to every caller (no false-positive success), but
+    # without this abort the clone stays broken for the NEXT invocation.
+    git rebase --abort >/dev/null 2>&1 || true
   fi
 
   if [ -n "$stash_sha" ]; then

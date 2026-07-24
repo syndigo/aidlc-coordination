@@ -1823,3 +1823,32 @@ this untouched, so the "your work is safe in stash `<SHA>`" recovery hint
 - `coordination-scaling-roadmap.md` (`dlc2.0` repo) — the "100 concurrent operators"
   investigation this load test was run for
 - Corruption evidence: commit `21b9fda` on `origin/main` (fixed forward in `9b3ca62`)
+
+---
+
+## D-030 addendum (2026-07-24) — `git_pull_rebase` now self-heals a real rebase conflict, not just a stash-pop conflict
+
+A real 10-clone concurrency test (10 independent local clones, each pushing to the
+same shared `origin/main` — the actual target scenario D-030 was fixing for) found a
+second instance of the same class of gap, on the *other* failure path inside
+`git_pull_rebase()`: when `git pull --rebase --quiet` itself conflicts (replaying an
+already-committed local change on top of a sibling's freshly-pushed commit to the
+same YAML region — this happens inside `git_commit_and_push`'s own post-commit
+push-retry loop, not the pre-commit path D-030 wraps with `pull_rebase_or_abort`),
+`rebase_rc=1` was set and correctly propagated (no false-positive success — every
+caller already treats this as failure), but `git rebase --abort` was never called.
+7 of 10 clones in the test were left in a genuinely broken state (detached HEAD,
+unmerged index, conflict markers on disk) after the run.
+
+Fix: `git_pull_rebase()` now calls `git rebase --abort` immediately on this failure,
+before returning 1 — self-healing regardless of which caller invoked it (including
+`git_commit_and_push`'s internal retry call, which none of the caller-side
+`pull_rebase_or_abort` wrapping could reach). Also applied `pull_rebase_or_abort` to
+the two remaining pre-commit call sites this pass had missed
+(`bootstrap-from-profile.sh`, `portfolio-status.sh`) — `portfolio-status.sh`'s stats
+refresh keeps its existing best-effort/non-fatal posture (warn + continue) rather
+than becoming a hard failure, since the base state loses nothing but the refresh.
+
+Note: `git rebase --abort --quiet` is not a valid flag combination in this git
+version (usage error, exit 129) — confirmed via direct test before shipping; the
+fix uses plain `git rebase --abort` with output redirected to `/dev/null` instead.
