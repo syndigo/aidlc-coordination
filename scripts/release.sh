@@ -327,7 +327,12 @@ if [ -n "$ALL_FOR_EPIC" ]; then
   log_info "Swept $total reservation(s) for epic=$ALL_FOR_EPIC"
 
   if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
-    git_pull_rebase || log_warn "rebase skipped"
+    pull_rebase_or_abort || {
+      if [ "$EMIT_JSON" = "1" ]; then
+        emit_json "error" "rebase conflict before commit -- sweep NOT persisted, retry"
+      fi
+      exit 1
+    }
     commit_msg="chore(release): sweep $total orphan reservation(s) for $ALL_FOR_EPIC
 
 Reason: $REASON
@@ -425,7 +430,12 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
   log_info "Swept $total expired reservation(s)"
 
   if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
-    git_pull_rebase || log_warn "rebase skipped"
+    pull_rebase_or_abort || {
+      if [ "$EMIT_JSON" = "1" ]; then
+        emit_json "error" "rebase conflict before commit -- sweep NOT persisted, retry"
+      fi
+      exit 1
+    }
     summary=""
     [ "$n_flyway" -gt 0 ] && summary="${summary}flyway: $(printf '%s' "$flyway_expired" | tr '\n' ',' | sed 's/,$//')\n"
     [ "$n_fixture" -gt 0 ] && summary="${summary}fixture: $(printf '%s' "$fixture_expired" | tr '\n' ',' | sed 's/,$//')\n"
@@ -738,7 +748,12 @@ if [ "$STATUS" = "shipped" ]; then
 fi
 
 if ( cd "$REPO_ROOT" && git rev-parse --git-dir >/dev/null 2>&1 ); then
-  git_pull_rebase || log_warn "rebase skipped"
+  pull_rebase_or_abort || {
+    if [ "$EMIT_JSON" = "1" ]; then
+      emit_json "error" "rebase conflict before commit -- release NOT persisted, retry"
+    fi
+    exit 1
+  }
   commit_msg="chore(release): $EPIC releases $RESOURCE/$ID as $STATUS"
   if [ "$STATUS" = "abandoned" ] && [ -n "$REASON" ]; then
     commit_msg="$commit_msg

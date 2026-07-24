@@ -463,3 +463,11 @@ $ ./scripts/reserve.sh --resource flyway --section C \
 
 - **Reservations expire on TTL.** If your work runs past the TTL, re-run `reserve.sh`
   with the same args to extend.
+
+- **A `reserve.sh`/`release.sh` failure with exit 1 and `status: error` under real
+  concurrent load means the write was NOT persisted — just retry it.** (D-030) Two or
+  more sections/epics hitting the same registry file at nearly the same instant can
+  hit a rebase conflict; the script now aborts loudly and resets the clone to the
+  last clean commit rather than risk a false-positive success or a corrupted commit.
+  This is expected under contention, not a bug to work around — re-running the exact
+  same command against the now-current state is the correct recovery.

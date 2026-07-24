@@ -1742,3 +1742,84 @@ git push
 Single-writer-files entry for `decisions.md` is `held_by: none` because the file is
 append-safe at the section boundary. If two sections add ADR-006 simultaneously, the
 second push gets rejected and the operator runs `git pull --rebase` + renumbers.
+
+---
+
+## D-030 (2026-07-24) — pre-commit `git_pull_rebase` failures now abort instead of `log_warn` + continue
+
+### Decision
+
+`reserve.sh` and `release.sh` all wrote their edit to the registry YAML on disk, then
+called `git_pull_rebase` to sync with origin *before* committing, and swallowed its
+failure with `git_pull_rebase || log_warn "rebase skipped"` — falling straight into
+`git_commit_and_push` regardless. Replaced all four call sites with a new shared
+helper, `pull_rebase_or_abort()` (`_lib.sh`), that treats a `git_pull_rebase` failure
+as fatal: it resets the clone to the last clean commit and returns non-zero, and every
+caller now exits 1 (emitting a `status: error` JSON line) instead of proceeding.
+
+### Context
+
+A deliberate concurrency load test (10-20 simultaneous `reserve.sh` invocations
+against a throwaway product, see `coordination-scaling-roadmap.md` in the `dlc2.0`
+repo) found that under real contention:
+
+1. Only 2 of 10 concurrent reservations actually landed as durable commits on
+   `origin/main`. The other 8 reported `{"status":"reserved"}` success anyway — the
+   underlying write was silently lost during a `git stash pop` conflict.
+2. One collision resolved so badly that literal unresolved `<<<<<<</=======/>>>>>>>`
+   conflict markers got committed and pushed straight to shared `main`
+   (`allocations/loadtest-simulation.yml`, commit `21b9fda`), breaking YAML parsing
+   for every subsequent reader of that file.
+
+Root cause: `git_pull_rebase`'s internal stash/pop wraps whatever is on disk in
+`$YML` at call time. Because the caller writes its edit to `$YML` (`cp "$TMP"
+"$YML"`) *before* calling `git_pull_rebase`, the thing being stashed and popped is
+this invocation's own not-yet-committed change — and a `git stash pop` conflict
+against a concurrently-pushed sibling commit leaves conflict markers in that file on
+disk. `git_pull_rebase` itself already returns non-zero and logs full recovery
+detail on this failure (its own D-019 hardening) — the bug was purely that every
+caller ignored that return value.
+
+A first fix attempt (restoring only the target file via `git checkout -- "$target"`)
+was insufficient: a failed `git stash pop` leaves a conflicted (unmerged) *index*
+entry, which plain `checkout --` does not clear, so the corruption persisted in the
+local clone across a full re-test even after that narrower fix. `pull_rebase_or_abort`
+now runs `git reset --hard HEAD` — the stash itself is a separate ref and survives
+this untouched, so the "your work is safe in stash `<SHA>`" recovery hint
+`git_pull_rebase` already logs remains valid.
+
+### Alternatives considered
+
+- **Reorder: pull+rebase before writing `$TMP`/`$YML` at all**, so there is never a
+  local uncommitted diff to stash around a network round-trip in the first place.
+  This is a more thorough fix (shrinks the contention window instead of just failing
+  safely inside it) but touches more call sites and the read-then-check-then-write
+  flow each script already has (`already_held_same_epic`, `held_by_other_epic`, the
+  flyway-collision gate all read `$YML` before the write). Deferred — the abort-and-
+  retry fix directly closes the confirmed false-positive-success and corrupted-commit
+  failure modes; a deeper reordering can follow if contention numbers justify it.
+- **Auto-resolve the conflict** (e.g., re-run the yq transform against the freshly-
+  rebased `$YML` instead of aborting). Rejected — silently picking a resolution for a
+  concurrent-write conflict on a single-writer-locking mechanism is exactly the kind
+  of correctness risk this repo exists to prevent; fail loud and let the caller retry.
+
+### Consequences
+
+- A pre-commit rebase conflict under concurrent writers is now a hard, loud failure
+  (`exit 1`, JSON `status: error`) instead of a false-positive success — callers (or
+  `/dlc`'s own orchestrator) must retry, not assume the reservation stuck.
+- The local clone self-heals (`git reset --hard HEAD`) after this failure instead of
+  staying broken for every subsequent invocation.
+- Does not eliminate the underlying contention window (see "reorder" alternative,
+  above) — a caller that retries immediately without backoff could still collide
+  again under sustained concurrent load. Not a redesign of the locking mechanism
+  itself, just a correctness fix for how failures inside it are handled.
+
+### References
+
+- `scripts/_lib.sh` (`pull_rebase_or_abort()`, alongside the existing
+  `git_pull_rebase()`/`git_commit_and_push()` it wraps)
+- `scripts/reserve.sh`, `scripts/release.sh` (all four call sites updated)
+- `coordination-scaling-roadmap.md` (`dlc2.0` repo) — the "100 concurrent operators"
+  investigation this load test was run for
+- Corruption evidence: commit `21b9fda` on `origin/main` (fixed forward in `9b3ca62`)

@@ -277,6 +277,39 @@ git_pull_rebase() {
   return "$rebase_rc"
 }
 
+# 2026-07-24 concurrency-load-test finding: reserve.sh/release.sh all write
+# their edit to $YML on disk BEFORE committing, then call git_pull_rebase to
+# sync with origin pre-commit. That means git_pull_rebase's internal
+# stash/pop wraps the CALLER's own not-yet-committed change -- under real
+# concurrent writers, a `git stash pop` conflict here leaves literal
+# <<<<<<</=======/>>>>>>> markers baked into $YML on disk. Every call site
+# used to swallow that with `|| log_warn "rebase skipped"` and fall straight
+# into git_commit_and_push, which happily committed and pushed the
+# corrupted file as a false-positive success (confirmed: corrupted
+# allocations/loadtest-simulation.yml on shared main, commit 21b9fda).
+# git_pull_rebase's own contract is to return non-zero specifically so the
+# caller aborts instead of committing a half-merged tree -- this helper
+# honors that: on failure, reset the whole clone back to the last clean
+# commit (a plain `checkout -- <file>` is not enough -- it restores
+# working-tree content but does not clear a conflicted/unmerged INDEX
+# entry left by a failed stash pop, confirmed 2026-07-24: corruption
+# persisted across a full 20-way concurrent re-test even after that
+# narrower fix) and return 1 for the caller to treat as a hard failure,
+# not a warning. The stash itself is a separate ref and survives this
+# untouched -- the "your work is safe in stash <SHA>" recovery hint
+# git_pull_rebase already logs on failure remains valid.
+pull_rebase_or_abort() {
+  if git_pull_rebase; then
+    return 0
+  fi
+  log_err "Aborting: rebase failed before commit (see stash-recovery hints above)."
+  log_err "  This write was NOT persisted. Resetting this clone's working tree"
+  log_err "  and index to the last clean commit so it stays usable for the"
+  log_err "  next attempt -- re-run to retry against the latest upstream state."
+  ( cd "$REPO_ROOT" && git reset --hard HEAD --quiet ) 2>/dev/null || true
+  return 1
+}
+
 git_commit_and_push() {
   msg="$1"
   # D-018 (P1.1): callers SHOULD pass the explicit path of the file they
