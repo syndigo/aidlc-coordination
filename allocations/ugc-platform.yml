@@ -2572,6 +2572,10 @@ single_writer_files:
     held_by: none
     until: "2026-07-23T16:03:56Z"
     reason: released via release.sh --all-for-epic
+  - file: gitops/aws/global-devops/ugc-platform-dev-eks-dev/catalog-service/values.yaml
+    held_by: GDI-2721
+    until: "2026-07-31T21:41:49Z"
+    reason: reserved via reserve.sh
 releases:
   # 2026-05-14 cross-check (Phase 4 audit, see reports/contention-audit-2026-05-14.md
   # and the audit-registry-drift.sh script): GitHub releases that aren't in
