@@ -121,6 +121,31 @@
         }
       }
     },
+    "known_issues": {
+      "type": "array",
+      "description": "Retro-discovered gotchas for sessions running against this product, surfaced by the orchestrator at the named stage. Added GDI-1335; the schema had never been updated to allow it (D-031 follow-up).",
+      "items": {
+        "type": "object",
+        "required": ["id", "stage", "severity", "summary"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "stage": {
+            "type": "string",
+            "description": "SDLC stage number this issue is relevant to, as a string (e.g. \"4\") to match Stage Status's own labeling in the pipeline state tracker."
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "summary": { "type": "string" },
+          "discovered_in": {
+            "type": "string",
+            "description": "The epic/ticket this issue was first found in."
+          }
+        }
+      }
+    },
     "orchestration": {
       "type": "object",
       "additionalProperties": false,
