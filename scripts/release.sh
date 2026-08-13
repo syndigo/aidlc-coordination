@@ -67,6 +67,12 @@ DRY_RUN=0
 # is in the past and abandons each (drops from reserved arrays; no shipped
 # append). Mutually exclusive with --resource and --all-for-epic modes.
 # Audit finding 6 in reports/contention-audit-2026-05-14.md.
+# D-031 (2026-08-13): also sweeps single_writer_files held_by whose until
+# has elapsed -- the original design here assumed a stale lock would be
+# "cleared by the file's next reservation," but conflict-check.sh never
+# actually implemented that (it only checked held_by, never until), so a
+# lock whose holder's release.sh call silently never ran (e.g. an orphaned
+# hosted-Build-persona job) blocked that file forever. See GDI-2834.
 SWEEP_EXPIRED=0
 # D-016 Day-2 (default-on as of 2026-05-19, gameplan §8.17): pillar-block
 # update fires three hooks that bring pillars[]/anchor_dependencies/
@@ -110,16 +116,17 @@ Sweep mode (GDI-798):
                               reservations left behind by the canonical ship.
                               Idempotent — zero matches exits 0.
 
-Sweep mode (D-020 / P1.3):
+Sweep mode (D-020 / P1.3, extended D-031):
   --sweep-expired             Mutually exclusive with --resource and
-                              --all-for-epic. Drops every reservation whose
-                              expires_at is in the past:
+                              --all-for-epic. Drops/clears every reservation
+                              whose TTL is in the past:
                                 * flyway.reserved        -> dropped
                                 * flyway.test_fixture... -> dropped
                                 * model_registry.pending -> dropped
-                              Does NOT touch single_writer_files (those have
-                              their own .until field, cleared by the file's
-                              next reservation, not on a wall-clock sweep).
+                                * single_writer_files    -> held_by=none
+                                  (D-031: past .until, not .expires_at --
+                                  a different field name for this resource
+                                  type, same TTL semantics)
                               Does NOT touch releases.in_flight (those are
                               pruned by P0 hooks at ship time).
                               Use --dry-run to preview the sweep first.
@@ -378,6 +385,16 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
   model_expired="$(yq -r "
     .model_registry.pending // [] | map(select(.expires_at != null and .expires_at < strenv(H_NOW))) | .[].surface
   " "$YML")"
+  # single_writer_files uses held_by/until, not epic/expires_at like the
+  # three resource types above -- a different field naming convention that
+  # is exactly why this category was missing here in the first place (found
+  # via GDI-2834's real Sprint 5 verification, 2026-08-13: a 14-day-expired
+  # single_writer_files lock blocked a real hosted job indefinitely, with no
+  # sweep mechanism able to clear it short of a manual --all-for-epic call
+  # naming the specific stale epic).
+  file_expired="$(yq -r "
+    .single_writer_files // [] | map(select(.held_by != null and .held_by != \"none\" and .until != null and .until < strenv(H_NOW))) | .[].file
+  " "$YML")"
 
   count_lines() {
     if [ -z "$1" ]; then
@@ -389,12 +406,14 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
   n_flyway="$(count_lines "$flyway_expired")"
   n_fixture="$(count_lines "$fixture_expired")"
   n_model="$(count_lines "$model_expired")"
-  total=$((n_flyway + n_fixture + n_model))
+  n_file="$(count_lines "$file_expired")"
+  total=$((n_flyway + n_fixture + n_model + n_file))
 
   log_info "Sweep-expired plan for $PRODUCT (cutoff=$NOW):"
   log_info "  flyway.reserved              : $n_flyway"
   log_info "  flyway.test_fixture_range    : $n_fixture"
   log_info "  model_registry.pending       : $n_model"
+  log_info "  single_writer_files held_by  : $n_file"
   log_info "  total                        : $total"
 
   if [ "$total" -eq 0 ]; then
@@ -410,6 +429,7 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
     [ -n "$flyway_expired" ] && printf '  flyway: %s\n' "$flyway_expired" | tr '\n' ' '
     [ -n "$fixture_expired" ] && printf '  fixture: %s\n' "$fixture_expired" | tr '\n' ' '
     [ -n "$model_expired" ] && printf '  model: %s\n' "$model_expired" | tr '\n' ' '
+    [ -n "$file_expired" ] && printf '  file-lock: %s\n' "$file_expired" | tr '\n' ' '
     printf '\n'
     if [ "$EMIT_JSON" = "1" ]; then
       emit_json "released" "dry-run: $total expired reservations"
@@ -423,7 +443,10 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
   yq "
     .flyway.reserved |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW)))) |
     .flyway.test_fixture_range.reserved |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW)))) |
-    .model_registry.pending |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW))))
+    .model_registry.pending |= ((. // []) | map(select(.expires_at == null or .expires_at >= strenv(H_NOW)))) |
+    (.single_writer_files[]? | select(.held_by != null and .held_by != \"none\" and .until != null and .until < strenv(H_NOW))) |= (
+      .held_by = \"none\" | .until = strenv(H_NOW) | .reason = \"released via release.sh --sweep-expired\"
+    )
   " "$YML" > "$TMP"
   cp "$TMP" "$YML"
 
@@ -440,6 +463,7 @@ if [ "$SWEEP_EXPIRED" = "1" ]; then
     [ "$n_flyway" -gt 0 ] && summary="${summary}flyway: $(printf '%s' "$flyway_expired" | tr '\n' ',' | sed 's/,$//')\n"
     [ "$n_fixture" -gt 0 ] && summary="${summary}fixture: $(printf '%s' "$fixture_expired" | tr '\n' ',' | sed 's/,$//')\n"
     [ "$n_model" -gt 0 ] && summary="${summary}model-registry: $(printf '%s' "$model_expired" | tr '\n' ',' | sed 's/,$//')\n"
+    [ "$n_file" -gt 0 ] && summary="${summary}file-lock: $(printf '%s' "$file_expired" | tr '\n' ',' | sed 's/,$//')\n"
     commit_msg="chore(release): sweep $total expired reservation(s)
 
 Cutoff: $NOW

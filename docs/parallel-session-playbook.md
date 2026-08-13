@@ -345,6 +345,26 @@ unblocked sections.
 > ./scripts/release.sh --all-for-epic GDI-800 \
 >   --reason "Stage 10 of GDI-800 shipped V32/V932; sweeping older V22/V923 orphans"
 > ```
+>
+> **D-020/D-031 — scheduled TTL sweep, not tied to a specific epic.**
+> `--sweep-expired` is the wall-clock counterpart to `--all-for-epic` above —
+> instead of naming one epic, it drops/clears every reservation across the
+> whole registry whose TTL has already elapsed (`flyway.reserved`,
+> `flyway.test_fixture_range`, `model_registry.pending`, and — as of D-031 —
+> `single_writer_files`, matched on `.until` rather than `.expires_at`, a
+> different field name for the same TTL concept). Intended to run on a
+> schedule (cron/CI), not ad hoc, so orphaned locks from a session or hosted
+> job whose `release.sh` call never ran (crashed, killed, silently
+> restarted) self-heal without a human noticing and running `--all-for-epic`
+> by hand. Idempotent — zero expired entries exits 0.
+>
+> ```sh
+> # Preview:
+> ./scripts/release.sh --sweep-expired --product ugc-platform --dry-run
+>
+> # Execute:
+> ./scripts/release.sh --sweep-expired --product ugc-platform
+> ```
 
 ---
 

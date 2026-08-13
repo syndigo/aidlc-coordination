@@ -1852,3 +1852,72 @@ than becoming a hard failure, since the base state loses nothing but the refresh
 Note: `git rebase --abort --quiet` is not a valid flag combination in this git
 version (usage error, exit 129) — confirmed via direct test before shipping; the
 fix uses plain `git rebase --abort` with output redirected to `/dev/null` instead.
+
+---
+
+## D-031 (2026-08-13) — `single_writer_files` locks never expired: `conflict-check.sh` ignored `until` entirely, and `--sweep-expired` deliberately skipped the category
+
+A real end-to-end verification of `dlc2.0`'s Build persona Sprint 5 (a hosted
+AgentCore job dispatched for `GDI-2834`, targeting `ugc-platform`) hit a real,
+production-blocking bug: `conflict-check.sh` returned `WAIT` for
+`Prompts.kt`, held by `GDI-2709` — an epic confirmed dead in Jira (status
+`To Do`, never started, last touched 2026-07-29) whose reservation's `until`
+had elapsed **14 days** earlier. The hosted job correctly treated `WAIT` as a
+hard block and did not proceed — that part worked exactly as designed — but
+nothing in this repo's own tooling could have cleared the block short of a
+human running `--all-for-epic GDI-2709` by hand, because:
+
+1. `conflict-check.sh`'s `single_writer_files` check only ever read
+   `held_by` — it never compared `until` against the current time, unlike
+   every other resource type it checks (flyway, model-registry, release-tag
+   all gate on section mismatch, and `reserve.sh`'s own `max_concurrent_holders`
+   cap check already has the correct TTL-comparison pattern to copy from).
+2. `release.sh --sweep-expired` **deliberately excluded** `single_writer_files`
+   — its own header comment said these locks are "cleared by the file's next
+   reservation, not on a wall-clock sweep." That assumption was never actually
+   true: nothing in `conflict-check.sh` implements "next reservation clears a
+   stale prior one." The two gaps compounded: neither the read path nor the
+   cleanup path honored the TTL this resource type's own schema already
+   carries.
+
+Root cause for how GDI-2709's lock went stale in the first place: almost
+certainly the same class of bug `dlc2.0`'s D78/D79 already documented on the
+Build-persona side — a hosted job (or an interactive session) reserved the
+file and then never reached its own Stage 10 `release.sh` call (silent
+AgentCore restart, session abandoned, etc.), leaving `held_by` set with no
+corresponding release. This repo's locking model already has the answer for
+that (TTL expiry) — the bug was that nothing actually enforced it for this
+one resource type.
+
+**Fix (both sides, same session):**
+- `conflict-check.sh`: a `held_by` entry whose `until` has already elapsed is
+  now treated as unheld (logged as "stale lock ignored," not added to
+  conflicts) — same string-comparison technique (`until_ts \< NOW`, ISO-8601
+  timestamps sort correctly as strings) `reserve.sh`'s own Rule 2 cap check
+  and `release.sh --sweep-expired`'s other three categories already use. An
+  absent/null `until` is NOT treated as expired (matches the "absent means
+  active" convention already established elsewhere).
+- `release.sh --sweep-expired`: now also clears `single_writer_files` entries
+  past their `until`, mirroring exactly the field-setting `--all-for-epic`
+  already uses (`held_by = none`, `until = now`, `reason = "released via
+  release.sh --sweep-expired"`) — proactive cleanup, not just a read-path
+  workaround, so future stale locks self-heal on the next scheduled sweep
+  instead of requiring a human to notice and run `--all-for-epic` by hand.
+
+The specific stale GDI-2709 locks (`ModelRegistry.kt` + `Prompts.kt`) were
+cleared manually via `--all-for-epic GDI-2709` before this fix shipped, to
+unblock the verification run itself — confirmed genuinely dead in Jira first,
+not released speculatively. This is exactly the "orphan-sweep after Stage 10"
+`--all-for-epic` already documents itself for, applied to an epic that will
+never reach Stage 10.
+
+### References
+
+- `scripts/conflict-check.sh` (single_writer_files check block)
+- `scripts/release.sh` (`--sweep-expired` branch)
+- `scripts/reserve.sh` (Rule 2 `max_concurrent_holders` — the pre-existing
+  correct TTL-comparison pattern this fix copies)
+- `dlc2.0` `build-persona-roadmap.md` Sprint 5, D76/D80/D81 — the real
+  end-to-end verification run (GDI-2834) that surfaced this
+- `dlc2.0` DECISIONS.md D78/D79 — the AgentCore silent-restart pattern this
+  bug's stale lock is presumed to trace back to
