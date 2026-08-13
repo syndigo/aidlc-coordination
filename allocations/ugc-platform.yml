@@ -2000,6 +2000,56 @@ flyway:
       epic: GDI-2507
       release_tag: v0.279.0
       shipped_at: "2026-07-23T18:55:00Z"
+    - version: V1030
+      section: G
+      epic: GDI-1575
+      fr: FR-G.1.5
+      status: shipped
+      shipped_at: "2026-05-20T23:23:25Z"
+      note: reservation-only; actual migration shipped as V132
+    - version: V135
+      section: G
+      epic: GDI-1575
+      fr: FR-G.1.5
+      status: shipped
+      shipped_at: "2026-05-20T23:23:25Z"
+      note: reservation-only; actual migration shipped as V132
+    - version: V176
+      section: F
+      epic: GDI-1945
+      fr: FR-F.4.2
+      status: shipped
+      shipped_at: "2026-06-13T19:32:00Z"
+      release_tag: v0.181.6
+    - version: V189
+      section: J
+      epic: GDI-1911
+      fr: FR-J.1.8
+      status: shipped
+      shipped_at: "2026-06-11T23:06:11Z"
+      release_tag: v0.180.0
+    - version: V1189
+      section: J
+      epic: GDI-1911
+      fr: FR-J.1.8
+      status: shipped
+      shipped_at: "2026-06-11T23:06:11Z"
+      release_tag: v0.180.0
+    - version: V9177
+      section: A
+      epic: GDI-2110
+      fr: ""
+      note: ai-insights role-grant migration (GRANT USAGE ON SCHEMA public TO insights_role) — follows V9176 dsa_ingestion pattern
+      status: shipped
+      shipped_at: "2026-06-18T19:03:10Z"
+      release_tag: v0.195.0
+    - version: V9200
+      section: F
+      epic: GDI-2410
+      fr: FR-NONE
+      status: shipped
+      release_tag: v0.263.0
+      shipped_at: "2026-07-20T11:31:13Z"
   reserved:
     - version: V43
       section: B
@@ -2034,24 +2084,6 @@ flyway:
       # disclosure_phrasings (v0.127.0); GDI-1498/FR-F.1.10 shipped as V118
       # syndication_network_status (v0.128.0). V113 + V114 on disk belong to
       # GDI-1439 + GDI-1479. The exact wrong-slot pattern D-029 now blocks.
-    - version: V1030
-      section: G
-      epic: GDI-1575
-      fr: FR-G.1.5
-      status: shipped
-      reserved_at: "2026-05-20T22:43:19Z"
-      shipped_at: "2026-05-20T23:23:25Z"
-      release: v0.144.0
-      note: reservation-only; actual migration shipped as V132
-    - version: V135
-      section: G
-      epic: GDI-1575
-      fr: FR-G.1.5
-      status: shipped
-      reserved_at: "2026-05-20T22:43:41Z"
-      shipped_at: "2026-05-20T23:23:25Z"
-      release: v0.144.0
-      note: reservation-only; actual migration shipped as V132
     - version: V154
       section: G
       epic: GDI-1607
@@ -2122,14 +2154,6 @@ flyway:
       status: reserved
       reserved_at: "2026-05-31T03:28:29Z"
       expires_at: "2026-06-01T03:28:29Z"
-    - version: V176
-      section: F
-      epic: GDI-1945
-      fr: FR-F.4.2
-      status: shipped
-      reserved_at: "2026-05-31T21:38:21Z"
-      shipped_at: "2026-06-13T19:32:00Z"
-      release_tag: v0.181.6
     - version: V177
       section: F
       epic: F5.1-pending
@@ -2221,24 +2245,6 @@ flyway:
       status: reserved
       reserved_at: "2026-06-11T16:05:34Z"
       expires_at: "2026-06-12T16:05:34Z"
-    - version: V189
-      section: J
-      epic: GDI-1911
-      fr: FR-J.1.8
-      status: shipped
-      reserved_at: "2026-06-11T16:09:18Z"
-      expires_at: "2026-06-13T16:09:18Z"
-      shipped_at: "2026-06-11T23:06:11Z"
-      release_tag: v0.180.0
-    - version: V1189
-      section: J
-      epic: GDI-1911
-      fr: FR-J.1.8
-      status: shipped
-      reserved_at: "2026-06-11T16:09:21Z"
-      expires_at: "2026-06-13T16:09:21Z"
-      shipped_at: "2026-06-11T23:06:11Z"
-      release_tag: v0.180.0
     - version: V1190
       section: I
       epic: GDI-1910
@@ -2260,17 +2266,8 @@ flyway:
       status: reserved
       reserved_at: "2026-06-15T18:25:48Z"
       expires_at: "2026-06-16T18:25:48Z"
-    - version: V9177
-      section: A
-      epic: GDI-2110
-      fr: ""
-      note: ai-insights role-grant migration (GRANT USAGE ON SCHEMA public TO insights_role) — follows V9176 dsa_ingestion pattern
-      status: shipped
-      reserved_at: "2026-06-18T00:00:00Z"
-      shipped_at: "2026-06-18T19:03:10Z"
-      release_tag: v0.195.0
     - version: V9178
-      section: extraction
+      section: I
       epic: GDI-2115
       fr: ""
       note: ai-insights Sprint 8 — GRANT SELECT/INSERT/UPDATE/DELETE on review_sentiment, review_aspect_scores TO insights_role
@@ -2305,13 +2302,6 @@ flyway:
       status: reserved
       reserved_at: "2026-07-15T17:58:46Z"
       expires_at: "2026-07-16T17:58:46Z"
-    - version: V9200
-      section: F
-      epic: GDI-2410
-      fr: FR-NONE
-      status: shipped
-      release_tag: v0.263.0
-      shipped_at: "2026-07-20T11:31:13Z"
     - version: V9201
       section: F
       epic: GDI-2430
@@ -2887,7 +2877,7 @@ releases:
       proposed_tag: v0.19.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: extraction
+    - section: I
       epic: GDI-2115
       proposed_tag: v0.196.x
       anchor_sha: pending
@@ -2895,7 +2885,7 @@ releases:
       shipped_tag: v0.196.0
       shipped_at: "2026-06-18T00:00:00Z"
       note: ai-insights Sprint 8 — EventBridge-driven sentiment/aspect scoring (shadow mode); tag cut after PR #579 (ugc-platform) + #594 (global-devops-infra) merge + CI + tofu apply
-    - section: extraction
+    - section: I
       epic: GDI-2118
       proposed_tag: v0.197.x
       anchor_sha: c868c1ba
@@ -3038,7 +3028,7 @@ releases:
       anchor_sha: 7732c52c3c20c71b78b639fd8a7a733a0d3d235d
       status: shipped
       shipped_tag: v0.247.0
-      shipped_at: "2026-07-14T~17:40:00Z"
+      shipped_at: "2026-07-14T17:40:00Z"
       note: "Deferred coverage-completion half of GDI-2323 (see v0.243.0 note) -- test-only, no production code. Raised collection-service LINE coverage 58.72%->88.95% (681 tests, 0 failures) across previously-thin packages (notifications, reminders, templates, order-feeds, security tokens, AI ordering/send-time-optimization, opensubmit, submission-assistant, email). The original coverage-push agent died mid-consolidation without committing/opening a PR (spawned 6 parallel batch sub-agents, all completed real work, but the coordinator never landed it) -- recovered by copying the 6 batches' untracked test files into a fresh worktree off current dev and landing manually. One real test bug found and fixed while re-verifying fresh (not just trusting the batch agents' self-reported pass): TokenSecretProviderTest asserted IllegalStateException for TokenSecretProvider.load()'s blank-arn/blank-secret guards; production uses Kotlin require(...), which throws IllegalArgumentException -- corrected. PR #738."
     - section: D
       epic: GDI-2324
