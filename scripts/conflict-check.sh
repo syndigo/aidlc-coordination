@@ -98,6 +98,10 @@ if [ "$CLAIM" = "1" ] && [ -z "$EPIC" ]; then
 fi
 
 YML="$(resolve_yml_path "$PRODUCT")"
+# ISO-8601 timestamps are sortable as strings (same technique reserve.sh's
+# own max_concurrent_holders check and release.sh's --sweep-expired already
+# use) -- avoids needing to parse into epoch on both macOS and Linux `date`.
+NOW="$(iso_now)"
 
 # ----- collect conflicts ----------------------------------------------------
 #
@@ -133,11 +137,21 @@ if [ -n "$FILES" ]; then
     # Match either full path or just the basename (basename is the common form).
     held="$(yq -r ".single_writer_files[] | select(.file == \"$f\" or (.file | test(\"/$f\$\"))) | .held_by // \"\"" "$YML")"
     if [ -n "$held" ] && [ "$held" != "none" ] && [ "$held" != "null" ]; then
+      until_ts="$(yq -r ".single_writer_files[] | select(.file == \"$f\" or (.file | test(\"/$f\$\"))) | .until // \"\"" "$YML")"
+      # A held_by whose TTL has already elapsed is a stale/orphaned lock --
+      # e.g. a prior epic's release.sh call never ran (silent Stage 10
+      # failure, an abandoned run). Treat it the same as held_by=none rather
+      # than blocking forever until a human manually clears it (found via
+      # GDI-2834's real verification run, 2026-08-13: a 14-day-expired lock
+      # from GDI-2709 blocked a real hosted job indefinitely). Empty/missing
+      # until is NOT treated as expired -- same "absent means active"
+      # convention reserve.sh's own Rule 2 cap check already uses.
+      if [ -n "$until_ts" ] && [ "$until_ts" != "null" ] && [ "$until_ts" \< "$NOW" ]; then
+        log_info "stale lock ignored: file=$f held_by=$held until=$until_ts (expired)"
       # Check whether this section already owns it (via the epic prefix).
-      if printf '%s' "$held" | grep -q "section-${SECTION}-"; then
+      elif printf '%s' "$held" | grep -q "section-${SECTION}-"; then
         log_info "self-hold OK: file=$f held_by_self=$held"
       else
-        until_ts="$(yq -r ".single_writer_files[] | select(.file == \"$f\" or (.file | test(\"/$f\$\"))) | .until // \"\"" "$YML")"
         add_conflict "WAIT file=$f held_by=$held until=$until_ts"
       fi
     fi
