@@ -26,6 +26,34 @@
     "session_doc": "docs/aidlc-session-GDI-669-bootstrap.md"
   },
   {
+    "ticket": "GDI-2834",
+    "profile": "ugc-platform",
+    "repo": "syndigo/ugc-platform",
+    "date": "2026-08-14",
+    "size": "XS",
+    "verdict": "SHIPPED_WITH_WARNINGS",
+    "duration_s": 1467,
+    "run_id": "225faa22-6ef2-433a-a43e-53ce2e536305",
+    "execution_source": "hosted (Build persona, job BJOB-2026-08-14-7c8)",
+    "coverage_pct": null,
+    "cost_usd": null,
+    "pentest_criticals": 0,
+    "pentest_skip_reason": "Comment-only change — no attack surface introduced",
+    "regression_failures": 0,
+    "observe_gaps": 0,
+    "release_tag": "v0.279.8",
+    "pr_url": "https://github.com/syndigo/ugc-platform/pull/881",
+    "coordination_reserve_pr": "https://github.com/syndigo/aidlc-coordination/pull/19",
+    "coordination_release_pr": "https://github.com/syndigo/aidlc-coordination/pull/20",
+    "session_doc": "sessions/GDI-2834-coordination-verification.md",
+    "retro_followup_tickets": ["GDI-2835"],
+    "retro_auto_fix_prs": ["https://github.com/syndigo/aidlc-coordination/pull/22"],
+    "warnings": [
+      "Stage 4: ai_surface_files[prompts].path mismatch — coordination profile uses services/ugc-api path, canonical repo path is packages/shared-kotlin/ai"
+    ],
+    "notes": "Coordination Phase 0.6 verification run. Confirmed Phase 0.6 reserve/release round-trip on first hosted Build persona job post aidlc#416 fix. Profile path mismatch fixed in retro PR #22."
+  },
+  {
     "ticket": "GDI-677",
     "profile": "generic",
     "repos": [
