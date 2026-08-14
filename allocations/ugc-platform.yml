@@ -2441,9 +2441,9 @@ single_writer_files:
     reason: released via release.sh --all-for-epic
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
-    held_by: GDI-2834
-    until: "2026-08-15T00:11:31Z"
-    reason: reserved via reserve.sh
+    held_by: none
+    until: "2026-08-14T00:31:30Z"
+    reason: released via release.sh
     append_list_conflict_class: true # GDI-692 retro: locks are LOAD-BEARING here
   - file: services/ugc-api/src/test/kotlin/com/syndigo/ugc/ai/governance/ModelRegistryTest.kt
     held_by: none
@@ -2663,7 +2663,7 @@ releases:
   #   - V85__review_pros_cons.sql (renumbered duplicate of V83's content)
   # Flyway resolves these alphabetically at runtime; the registry attributes each
   # file to its canonical-trunk first-tag (which may differ from the lexical order).
-  current_main: v0.272.0 # updated 2026-06-18 — extraction / GDI-2118 / Sprint 9 — ai-insights read cutover + monolith drain.
+  current_main: v0.279.8 # updated 2026-06-18 — extraction / GDI-2118 / Sprint 9 — ai-insights read cutover + monolith drain.
   # Twelfth-pass (drift sweep, 2026-05-20 evening, post v0.141.0):
   #   - v0.130.0 (2026-05-20) — E / GDI-1515 / FR-E.3.3 — Omnibus Directive
   #     re-cut (E.3.3 already shipped via V99/v0.111.1; no new migration).
@@ -3054,11 +3054,6 @@ releases:
     - section: G
       epic: NEW-GDI-FR-G.1.12
       proposed_tag: v0.27.x
-      anchor_sha: pending
-      note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
-    - section: C
-      epic: GDI-2834
-      proposed_tag: v0.272.x
       anchor_sha: pending
       note: band-intent (GDI-778); concrete tag computed at Stage 9 by next-tag.sh
 anchor_dependencies:
