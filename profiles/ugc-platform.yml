@@ -29,7 +29,7 @@ ai_surface_files:
     role: model_registry
     append_list_conflict_class: true
     max_concurrent_holders: 1
-  - path: services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
+  - path: packages/shared-kotlin/ai/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
     role: prompts
     append_list_conflict_class: true
     max_concurrent_holders: 1
@@ -147,3 +147,22 @@ known_issues:
       markers from partially resolved rebases. Add this as a pre-push check
       in Stage 5.
     discovered_in: GDI-1335
+
+  # GDI-2834 retro — ai_surface_files[prompts].path declared stale services/
+  # path instead of canonical packages/shared-kotlin/ path, creating a gap
+  # where file-lock conflict-checks would not fire for real edits to Prompts.kt.
+  # FIXED in this retro run: path updated to packages/shared-kotlin/ai/... above.
+  - id: ai-surface-files-prompts-path-mismatch
+    stage: "0"
+    severity: medium
+    summary: >
+      Profile declared ai_surface_files[prompts].path as
+      services/ugc-api/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt
+      but the canonical file lives at
+      packages/shared-kotlin/ai/src/main/kotlin/com/syndigo/ugc/ai/prompt/Prompts.kt.
+      The file-lock reservation used the profile path, so conflict-checks on
+      the canonical file would silently miss real concurrent edits.
+      Fixed in Phase 13 retro (GDI-2834) by updating the path in this file.
+      Follow-up tracked in GDI-2835.
+    discovered_in: GDI-2834
+    fixed_in: GDI-2834-retro
