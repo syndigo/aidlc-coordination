@@ -142,6 +142,10 @@
           "discovered_in": {
             "type": "string",
             "description": "The epic/ticket this issue was first found in."
+          },
+          "fixed_in": {
+            "type": "string",
+            "description": "The epic/retro run that resolved this issue, if fixed (e.g. a Phase 13 retro fixing the gap it just found in the same run). Entries without this field are still open."
           }
         }
       }
